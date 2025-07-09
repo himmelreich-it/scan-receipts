@@ -31,3 +31,10 @@ When creating C4-like diagrams, follow the DDD guidelines in `design/rules/ddd_a
 - Run linting: `uv run ruff check`
 - Run formatting: `uv run ruff format`
 - Run type checking: `uv run mypy src/`
+
+## Feature Extraction
+When asked to extract high-level features:
+- Use `design/prompts/feature_extraction_prompt.md` as the prompt/context for analysis
+- Use `design/rules/ddd_agent_instructions.md` as design principles
+- The user should provide the input PRD (Product Requirements Document)
+- Write all extracted features to the file specified in the user's instruction
