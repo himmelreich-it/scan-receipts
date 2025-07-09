@@ -3,6 +3,7 @@
 ## Feature: Receipt Document Processing
 **Description**: Core bounded context for managing receipt documents through their lifecycle from input to processed state. Handles document validation, format support (PDF, JPG, PNG), and maintains document integrity throughout processing workflow.
 **Dependencies**: None
+**User Stories**: [receipt_document_processing_user_stories.md](receipt_document_processing_user_stories.md)
 
 ## Feature: Financial Data Extraction
 **Description**: AI-powered extraction service that transforms receipt documents into structured financial data. Encapsulates integration with external AI services and maintains data quality through confidence scoring and validation rules.
@@ -31,6 +32,10 @@
 ## Feature: Processing Progress Monitoring
 **Description**: Application service providing real-time visibility into processing operations through console output and summary reporting. Supports operational monitoring and user feedback during batch processing operations.
 **Dependencies**: Soft - Processing Workflow Orchestration, Processing Error Handling
+
+## Feature: Command Line Interface and Script Execution
+**Description**: User interface layer that provides script execution capabilities for initiating receipt processing workflows. Enables users to run processing commands, configure input/output directories, and view processing results through a command-line interface. Serves as the primary entry point for all system operations.
+**Dependencies**: Hard - Processing Workflow Orchestration; Soft - Processing Progress Monitoring
 
 ---
 

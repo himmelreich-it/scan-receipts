@@ -40,9 +40,10 @@ The system extracts the following information from each receipt:
 
 ### Output Specification
 - **Format**: CSV file with append functionality
-- **Fields**: `ID, Amount, Tax, Description, Currency, Date, Confidence`
+- **Fields**: `ID, Amount, Tax, Description, Currency, Date, Confidence, Hash`
 - **ID Field**: Auto-incrementing number for each processed receipt
 - **Date Format**: dd-MM-YYYY
+- **Hash Field**: File hash for duplicate detection
 - **File Location**: Root directory alongside script
 
 ### File Management
@@ -74,7 +75,8 @@ The system extracts the following information from each receipt:
   "description": "string",
   "currency": "string",
   "date": "string",
-  "confidence": "integer (0-100)"
+  "confidence": "integer (0-100)",
+  "hash": "string"
 }
 ```
 
@@ -93,8 +95,9 @@ The system extracts the following information from each receipt:
 - **User Decision**: Human review based on confidence scores
 
 ### Duplicate Handling
-- **Strategy**: Process duplicates normally
-- **Rationale**: Human can identify and handle duplicates during review
+- **Strategy**: Skip duplicate files based on hash comparison
+- **Detection**: Use file hash stored in CSV to identify duplicates
+- **Feedback**: Log skipped duplicates to console
 
 ## Workflow
 

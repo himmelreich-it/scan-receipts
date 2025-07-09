@@ -1,0 +1,137 @@
+specification {
+  element component {
+    style {
+      shape: rectangle
+    }
+  }
+  
+  element external {
+    style {
+      shape: cylinder
+    }
+  }
+  
+  element application {
+    style {
+      shape: hexagon
+    }
+  }
+}
+
+model {
+  // Core Domain Components
+  component ReceiptDocumentProcessor {
+    title: "Receipt Document Processing"
+    description: "Core bounded context for managing receipt documents through their lifecycle"
+    technology: "Python"
+  }
+  
+  component FinancialDataExtractor {
+    title: "Financial Data Extraction"
+    description: "AI-powered extraction service that transforms receipt documents into structured financial data"
+    technology: "Python, Anthropic API"
+  }
+  
+  component ExpenseRecordManager {
+    title: "Expense Record Management"
+    description: "Domain service for managing expense records with proper business rules enforcement"
+    technology: "Python, CSV"
+  }
+  
+  // Supporting Domain Components
+  component FileSystemOrganizer {
+    title: "File System Organization"
+    description: "Supporting subdomain for file management operations"
+    technology: "Python, File System"
+  }
+  
+  // Cross-cutting Domain Services
+  component ProcessingErrorHandler {
+    title: "Processing Error Handling"
+    description: "Cross-cutting domain service for managing various error scenarios"
+    technology: "Python"
+  }
+  
+  component DataQualityAssessor {
+    title: "Data Quality Assessment"
+    description: "Domain service for evaluating and scoring the quality of extracted financial data"
+    technology: "Python"
+  }
+  
+  // Application Services
+  application ProcessingWorkflowOrchestrator {
+    title: "Processing Workflow Orchestration"
+    description: "Application service that coordinates the complete receipt processing workflow"
+    technology: "Python"
+  }
+  
+  application ProcessingProgressMonitor {
+    title: "Processing Progress Monitoring"
+    description: "Application service providing real-time visibility into processing operations"
+    technology: "Python, Console Output"
+  }
+  
+  // External Systems
+  external AnthropicClaudeAPI {
+    title: "Anthropic Claude API"
+    description: "External AI service for receipt data extraction"
+    technology: "REST API"
+  }
+  
+  external InputFolder {
+    title: "Input Folder"
+    description: "File system location containing receipt files to process"
+    technology: "File System"
+  }
+  
+  external DoneFolder {
+    title: "Done Folder"
+    description: "File system location for processed receipt files"
+    technology: "File System"
+  }
+  
+  external CSVOutput {
+    title: "CSV Output"
+    description: "Structured expense data output file"
+    technology: "CSV File"
+  }
+}
+
+views {
+  view ReceiptProcessingSystem {
+    title: "Receipt Processing System - Component View"
+    include: *
+    
+    // Core workflow relationships
+    ProcessingWorkflowOrchestrator -> ReceiptDocumentProcessor "orchestrates document processing"
+    ProcessingWorkflowOrchestrator -> FinancialDataExtractor "coordinates data extraction"
+    ProcessingWorkflowOrchestrator -> ExpenseRecordManager "manages expense records"
+    ProcessingWorkflowOrchestrator -> FileSystemOrganizer "organizes processed files"
+    
+    // Document processing flow
+    ReceiptDocumentProcessor -> InputFolder "reads receipt files"
+    ReceiptDocumentProcessor -> FileSystemOrganizer "requests file operations"
+    
+    // Financial data extraction
+    FinancialDataExtractor -> AnthropicClaudeAPI "sends receipt for analysis"
+    FinancialDataExtractor -> DataQualityAssessor "validates extraction quality"
+    
+    // Expense record management
+    ExpenseRecordManager -> CSVOutput "appends expense records"
+    
+    // File system organization
+    FileSystemOrganizer -> DoneFolder "moves processed files"
+    
+    // Error handling relationships
+    ProcessingErrorHandler -> ReceiptDocumentProcessor "handles document errors"
+    ProcessingErrorHandler -> FinancialDataExtractor "handles extraction errors"
+    ProcessingErrorHandler -> ProcessingProgressMonitor "reports errors"
+    
+    // Monitoring relationships
+    ProcessingProgressMonitor -> ProcessingWorkflowOrchestrator "monitors workflow progress"
+    ProcessingProgressMonitor -> ProcessingErrorHandler "displays error information"
+    
+    // Data quality assessment
+    DataQualityAssessor -> FinancialDataExtractor "receives extraction results"
+  }
+}
