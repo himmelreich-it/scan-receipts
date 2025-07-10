@@ -5,15 +5,19 @@ Extract high-level features (epics) from a Product Requirements Document (PRD) t
 
 ## Instructions  
 
-You are analyzing a Product Requirements Document to identify the core features that need to be built. Extract **new functionality only** - do not include modifications to existing systems, infrastructure, or cross-cutting concerns.
+You are analyzing a Product Requirements Document to identify the core features that need to be built. **ONLY extract features explicitly described in the PRD** - do not infer, assume, or add features not directly mentioned. Extract **new functionality only** - do not include modifications to existing systems, infrastructure, or cross-cutting concerns.
 
 ### Feature Identification Guidelines  
 
-1. **Scope Level**: Features should be substantial functional areas equivalent to "user authentication", "payment processing", or "content management" - not individual user stories like "login form validation"  
+1. **Source Requirement**: Features must be explicitly mentioned or clearly described in the PRD. Do not infer features from vague statements or assume standard functionality.  
 
-2. **Maximum Count**: Extract no more than **12 features** total. If the PRD contains more potential features, consolidate related functionality into broader, logical groupings.  
+2. **Scope Level**: Features should be substantial functional areas equivalent to "user authentication", "payment processing", or "content management" - not individual user stories like "login form validation"  
 
-3. **Completeness**: Be exhaustive - capture all new functionality described in the PRD, consolidating as needed to stay within the 12-feature limit.  
+3. **Maximum Count**: Extract no more than **12 features** total. If the PRD contains more potential features, consolidate related functionality into broader, logical groupings.  
+
+4. **Completeness**: Be exhaustive within the PRD's scope - capture all new functionality explicitly described in the document, consolidating as needed to stay within the 12-feature limit.  
+
+5. **Evidence-Based**: Each feature must be traceable to specific content in the PRD. If you cannot point to where a feature is described, do not include it.  
 
 ### Output Format  
 
@@ -30,10 +34,12 @@ For each feature, provide:
 
 ### Quality Checks  
 Each feature should be:  
-- Substantial enough to warrant its own detailed specification document  
-- Decomposable into multiple user stories for development  
-- Testable as a complete, contained unit of functionality  
-- Appropriately sized for review by a human before breaking into user stories  
+- **Explicitly described** in the PRD (not inferred or assumed)  
+- **Substantial enough** to warrant its own detailed specification document  
+- **Decomposable** into multiple user stories for development  
+- **Testable** as a complete, contained unit of functionality  
+- **Appropriately sized** for review by a human before breaking into user stories  
+- **Traceable** to specific sections or statements in the PRD  
 
 ### Consolidation Note  
 If you consolidated multiple potential features to stay within the 12-feature limit, include a brief note at the end explaining the consolidation decisions made.
@@ -51,5 +57,7 @@ If you consolidated multiple potential features to stay within the 12-feature li
 **Dependencies**: Hard - User Authentication [USER_AUTH_A7B3]  
 
 ---
+
+**CRITICAL**: Only extract features that are explicitly described in the PRD. Do not add features based on assumptions about what "should" be included in a typical system. If the PRD doesn't mention it, don't extract it.
 
 Now analyze the provided PRD and extract the features following these guidelines.

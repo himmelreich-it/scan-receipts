@@ -1,53 +1,55 @@
 # High-Level Features - Receipt Processor
 
-## Feature: Receipt Document Processing
-**Description**: Core bounded context for managing receipt documents through their lifecycle from input to processed state. Handles document validation, format support (PDF, JPG, PNG), and maintains document integrity throughout processing workflow.
-**Dependencies**: None
-**User Stories**: [receipt_document_processing_user_stories.md](receipt_document_processing_user_stories.md)
+## Feature: Terminal Script Interface
+**Code**: TERMINAL_UI_A1B2  
+**Description**: Provides a command-line interface for users to execute the receipt processing script from terminal. Displays progress updates and errors to the user during execution, supporting manual script execution on batches of receipts.  
+**Dependencies**: None  
 
-## Feature: Financial Data Extraction
-**Description**: AI-powered extraction service that transforms receipt documents into structured financial data. Encapsulates integration with external AI services and maintains data quality through confidence scoring and validation rules.
-**Dependencies**: Hard - Receipt Document Processing
+## Feature: One-Off Processing Mode
+**Code**: ONEOFF_PROC_C3D4  
+**Description**: Implements one-off processing runs that clear the done folder and remove receipts.csv at the start of each execution. Keeps the input folder intact, allowing users to re-run the script multiple times on the same receipt files.  
+**Dependencies**: Hard - Terminal Script Interface [TERMINAL_UI_A1B2]  
 
-## Feature: Expense Record Management
-**Description**: Domain service for managing expense records with proper business rules enforcement. Handles unique identification, data validation, and maintains expense record lifecycle from creation to storage with audit capabilities.
-**Dependencies**: Hard - Financial Data Extraction
+## Feature: Receipt Image Processing
+**Code**: RECEIPT_IMG_E5F6  
+**Description**: Processes receipt images and PDF files from the input folder, supporting PDF, JPG, and PNG formats. Handles sequential processing of all files in the input directory and manages file reading operations for AI analysis.  
+**Dependencies**: None  
 
-## Feature: File System Organization
-**Description**: Supporting subdomain for file management operations including folder structure maintenance, processed file archiving, and naming convention enforcement. Ensures proper file organization and audit trail preservation.
-**Dependencies**: Hard - Receipt Document Processing; Soft - Expense Record Management
+## Feature: AI Data Extraction
+**Code**: AI_EXTRACT_G7H8  
+**Description**: Integrates with Anthropic's Claude API to extract structured financial data from receipt images. Extracts amount, tax, description, currency, date, and generates confidence scores for each processed receipt using the anthropic Python library.  
+**Dependencies**: Hard - Receipt Image Processing [RECEIPT_IMG_E5F6]  
 
-## Feature: Processing Error Handling
-**Description**: Cross-cutting domain service for managing various error scenarios including document processing failures, AI service errors, and data corruption. Provides consistent error classification and recovery strategies while maintaining system stability.
-**Dependencies**: Hard - Receipt Document Processing, Financial Data Extraction
+## Feature: CSV Data Output
+**Code**: CSV_OUTPUT_I9J0  
+**Description**: Converts AI-extracted data into CSV format with fields: ID, Amount, Tax, Description, Currency, Date, Confidence, Hash. Manages CSV file creation, header addition, and append operations with auto-incrementing ID generation.  
+**Dependencies**: Hard - AI Data Extraction [AI_EXTRACT_G7H8]  
 
-## Feature: Processing Workflow Orchestration
-**Description**: Application service that coordinates the complete receipt processing workflow from document discovery through final record storage. Manages transaction boundaries and ensures proper sequencing of domain operations.
-**Dependencies**: Hard - Receipt Document Processing, Financial Data Extraction, Expense Record Management; Soft - File System Organization, Processing Error Handling
+## Feature: File Organization System
+**Code**: FILE_ORG_K1L2  
+**Description**: Creates and manages folder structure (input/, done/, receipts.csv), moves processed files to done folder with timestamp naming convention, and maintains original filename preservation in the archive structure.  
+**Dependencies**: Hard - Receipt Image Processing [RECEIPT_IMG_E5F6]  
 
-## Feature: Data Quality Assessment
-**Description**: Domain service for evaluating and scoring the quality of extracted financial data. Provides confidence metrics and quality indicators to support business decision-making and manual review processes.
-**Dependencies**: Hard - Financial Data Extraction
+## Feature: Duplicate Detection
+**Code**: DUPLICATE_DET_M3N4  
+**Description**: Implements hash-based duplicate detection using file hash comparison against existing CSV records. Skips processing of duplicate files and provides console feedback when duplicates are detected.  
+**Dependencies**: Hard - CSV Data Output [CSV_OUTPUT_I9J0]  
 
-## Feature: Processing Progress Monitoring
-**Description**: Application service providing real-time visibility into processing operations through console output and summary reporting. Supports operational monitoring and user feedback during batch processing operations.
-**Dependencies**: Soft - Processing Workflow Orchestration, Processing Error Handling
+## Feature: Error Handling
+**Code**: ERROR_HANDLE_O5P6  
+**Description**: Handles processing failures for unreadable files, API failures, and corrupted files by creating error entries in CSV with confidence 0 and "ERROR" description. Continues processing remaining files and logs all errors to console.  
+**Dependencies**: Hard - AI Data Extraction [AI_EXTRACT_G7H8], Hard - CSV Data Output [CSV_OUTPUT_I9J0]  
 
-## Feature: Command Line Interface and Script Execution
-**Description**: User interface layer that provides script execution capabilities for initiating receipt processing workflows. Enables users to run processing commands, configure input/output directories, and view processing results through a command-line interface. Serves as the primary entry point for all system operations.
-**Dependencies**: Hard - Processing Workflow Orchestration; Soft - Processing Progress Monitoring
+## Feature: Processing Progress Display
+**Code**: PROGRESS_DISP_Q7R8  
+**Description**: Displays real-time processing progress to console including individual file processing status, results logging, and final summary showing total processed files and errors encountered.  
+**Dependencies**: Hard - Terminal Script Interface [TERMINAL_UI_A1B2]  
+
+## Feature: Batch Processing Workflow
+**Code**: BATCH_PROC_S9T0  
+**Description**: Orchestrates the complete workflow from folder initialization through file processing completion. Manages sequential processing of all files in input folder and coordinates between all system components.  
+**Dependencies**: Hard - Receipt Image Processing [RECEIPT_IMG_E5F6], Hard - File Organization System [FILE_ORG_K1L2], Hard - AI Data Extraction [AI_EXTRACT_G7H8], Hard - One-Off Processing Mode [ONEOFF_PROC_C3D4]  
 
 ---
 
-### DDD Analysis Notes
-Features were identified using Domain-Driven Design principles:
-- **Receipt Document Processing** represents the core entity lifecycle management
-- **Financial Data Extraction** encapsulates external AI service integration as a domain service
-- **Expense Record Management** handles the main business aggregate (expense records)
-- **File System Organization** identified as supporting subdomain (not core business logic)
-- **Processing Error Handling** designed as domain service spanning multiple aggregates
-- **Processing Workflow Orchestration** serves as application service coordinating bounded contexts
-- **Data Quality Assessment** represents domain service for business rule evaluation
-- **Processing Progress Monitoring** provides application-level operational visibility
-
-Each feature maintains clear boundaries, uses ubiquitous language from the business domain, and respects aggregate design principles.
+**Consolidation Note**: The PRD explicitly describes 10 distinct functional areas including the newly added User Interface requirements. The Terminal Script Interface and One-Off Processing Mode were extracted as separate features based on the explicit UI requirements. All extracted features are directly traceable to explicit descriptions in the PRD document.

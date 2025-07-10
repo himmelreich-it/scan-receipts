@@ -24,6 +24,13 @@ An automated receipt processing tool that extracts financial information from re
 
 ## Functional Requirements
 
+### User Interface
+- User will use a terminal to run a python script
+- User will see be updated by the terminal on progress and errors
+- User will run this script once in a while on all the receipts available
+- Each run, the `done` folder will be cleared and `receipts.csv` removed, one off run
+- The input folder stays intact, the user can re-run
+
 ### Input Processing
 - **Source**: `input/` folder containing receipt files
 - **Supported Formats**: PDF, JPG, PNG files
