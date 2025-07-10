@@ -34,10 +34,11 @@ When creating C4-like diagrams, follow the DDD guidelines in `design/rules/ddd_a
 
 ## Feature Extraction
 When asked to extract high-level features:
+- Use `design/product_requirements.md` to extract features from
 - Use `design/prompts/feature_extraction_prompt.md` as the prompt/context for analysis
 - Use `design/rules/ddd_agent_instructions.md` as design principles
-- The user should provide the input PRD (Product Requirements Document)
 - Write all extracted features to the file specified in the user's instruction
+
 
 ## Design Next Feature
 When the user types "design next feature":
