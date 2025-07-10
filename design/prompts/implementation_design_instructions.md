@@ -111,6 +111,34 @@ Each `[package_name]_implementation_spec.md` contains:
 - Testing implementation requirements  
 - Integration points with other packages
 
+## User Stories File Updates
+**Required**: Update the original user stories file to include implementation references:
+
+### For Each User Story, Add:
+```
+## User Story: [STORY_ID]
+[Original user story content]
+
+**Implementation Design**: 
+- Package: [package_name] (see [package_name]_implementation_spec.md)
+- Modules: [list of modules that implement this story]
+- Dependencies: [other user stories this depends on]
+- Dependents: [other user stories that depend on this]
+```
+
+### Implementation Tracking Section
+Add to user stories file:
+```
+## Implementation Design Index
+| User Story | Package | Implementation File | Status |
+|------------|---------|-------------------|--------|
+| US001 | myapp.user | user_implementation_spec.md | Designed |
+| US002 | myapp.auth | auth_implementation_spec.md | Designed |
+```
+
+### Cross-Reference Validation
+Ensure every user story references its implementation design files and every implementation file references the user stories it serves.
+
 ## Example Structure
 ```
 ## Package: myapp.user

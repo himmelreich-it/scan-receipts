@@ -13,6 +13,12 @@
 **Data Requirements**: No persistent data, reads from filesystem only  
 **Error Scenarios**: Python interpreter issues, script file permissions, missing dependencies
 
+**Implementation Design**: 
+- Package: terminal_interface (see terminal_interface_implementation_spec.md)
+- Modules: src/terminal_interface/main.py
+- Dependencies: None
+- Dependents: STARTUP_MSG_T3B4, PROGRESS_DISP_T5C6, ERROR_DISP_T7D8, SUMMARY_DISP_T9E0
+
 ## Story 2: Startup Message Display
 **Code**: STARTUP_MSG_T3B4  
 **Functional Description**: Displays brief informational message about what the script is doing at startup before processing begins  
@@ -21,6 +27,12 @@
 **Dependencies**: Script Execution Entry Point [SCRIPT_EXEC_T1A2]  
 **Data Requirements**: Static message content, no external data needed  
 **Error Scenarios**: Terminal output issues, encoding problems
+
+**Implementation Design**: 
+- Package: terminal_interface (see terminal_interface_implementation_spec.md)
+- Modules: src/terminal_interface/display/messages.py
+- Dependencies: SCRIPT_EXEC_T1A2
+- Dependents: None
 
 ## Story 3: Progress Display During Processing
 **Code**: PROGRESS_DISP_T5C6  
@@ -31,6 +43,12 @@
 **Data Requirements**: File list from input folder, current processing index  
 **Error Scenarios**: Terminal output buffering, very long filenames, special characters in filenames
 
+**Implementation Design**: 
+- Package: terminal_interface (see terminal_interface_implementation_spec.md)
+- Modules: src/terminal_interface/display/progress_display.py
+- Dependencies: SCRIPT_EXEC_T1A2
+- Dependents: None
+
 ## Story 4: Error Display and Logging
 **Code**: ERROR_DISP_T7D8  
 **Functional Description**: Displays error messages to console for individual file processing failures while allowing processing to continue  
@@ -40,6 +58,12 @@
 **Data Requirements**: Error messages, failed file names, error count tracking  
 **Error Scenarios**: Multiple cascading errors, terminal output during error states, error message formatting
 
+**Implementation Design**: 
+- Package: terminal_interface (see terminal_interface_implementation_spec.md)
+- Modules: src/terminal_interface/errors/error_handler.py
+- Dependencies: SCRIPT_EXEC_T1A2
+- Dependents: None
+
 ## Story 5: Final Summary Display
 **Code**: SUMMARY_DISP_T9E0  
 **Functional Description**: Shows comprehensive summary at completion including total processed files, errors encountered, and duplicates skipped  
@@ -48,6 +72,21 @@
 **Dependencies**: Script Execution Entry Point [SCRIPT_EXEC_T1A2]  
 **Data Requirements**: Processing counters (success, error, duplicate), summary statistics  
 **Error Scenarios**: Counter overflow, summary display formatting issues
+
+**Implementation Design**: 
+- Package: terminal_interface (see terminal_interface_implementation_spec.md)
+- Modules: src/terminal_interface/display/summary_display.py
+- Dependencies: SCRIPT_EXEC_T1A2
+- Dependents: None
+
+## Implementation Design Index
+| User Story | Package | Implementation File | Status |
+|------------|---------|-------------------|--------|
+| SCRIPT_EXEC_T1A2 | terminal_interface | terminal_interface_implementation_spec.md | Designed |
+| STARTUP_MSG_T3B4 | terminal_interface | terminal_interface_implementation_spec.md | Designed |
+| PROGRESS_DISP_T5C6 | terminal_interface | terminal_interface_implementation_spec.md | Designed |
+| ERROR_DISP_T7D8 | terminal_interface | terminal_interface_implementation_spec.md | Designed |
+| SUMMARY_DISP_T9E0 | terminal_interface | terminal_interface_implementation_spec.md | Designed |
 
 ## Implementation Notes
 - Keep all output simple and text-based following KISS principle
