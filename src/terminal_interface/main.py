@@ -3,6 +3,7 @@
 import sys
 import signal
 import logging
+from .display.messages import display_startup_message
 
 
 def setup_signal_handlers() -> None:
@@ -33,12 +34,14 @@ def main() -> None:
     setup_signal_handlers()
     
     try:
+        # Display startup message before processing begins
+        display_startup_message()
+        
         # PLACEHOLDER: Main processing workflow not yet implemented
         # This will be implemented when the file processing user stories are completed
         logging.warning("UNIMPLEMENTED_DEPENDENCY: main processing workflow from story SCRIPT_EXEC_T1A2 requires file processing stories")
         
-        # For now, just display that the script is starting
-        print("Receipt processing script started successfully.")
+        # For now, just display that the processing workflow is not yet implemented
         print("Main processing workflow is not yet implemented.")
         
         # Exit with success code
