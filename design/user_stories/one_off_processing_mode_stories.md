@@ -66,3 +66,33 @@
 - Must integrate with Terminal Script Interface for error display
 - Must execute before any other processing components start
 - Must not interfere with folder creation logic in File Organization System
+
+## Implementation Design Index
+| User Story | Package | Implementation File | Status |
+|------------|---------|-------------------|--------|
+| DONE_FOLDER_CLEANUP_X1Y2 | cleanup | cleanup_implementation_spec.md | Designed |
+| CSV_FILE_REMOVAL_Z3A4 | cleanup | cleanup_implementation_spec.md | Designed |
+| CLEANUP_ERROR_HANDLE_B5C6 | cleanup | cleanup_implementation_spec.md | Designed |
+
+## User Story Implementation References
+
+### Story 1: Done Folder Cleanup
+**Implementation Design**: 
+- Package: cleanup (see cleanup_implementation_spec.md)
+- Modules: cleanup.cleaner.CleanupManager._clear_done_folder()
+- Dependencies: None
+- Dependents: CLEANUP_ERROR_HANDLE_B5C6
+
+### Story 2: CSV File Removal
+**Implementation Design**: 
+- Package: cleanup (see cleanup_implementation_spec.md)
+- Modules: cleanup.cleaner.CleanupManager._remove_csv_file()
+- Dependencies: None
+- Dependents: CLEANUP_ERROR_HANDLE_B5C6
+
+### Story 3: Cleanup Error Handling
+**Implementation Design**: 
+- Package: cleanup (see cleanup_implementation_spec.md)
+- Modules: cleanup.cleaner.CleanupManager._handle_cleanup_error()
+- Dependencies: DONE_FOLDER_CLEANUP_X1Y2, CSV_FILE_REMOVAL_Z3A4
+- Dependents: None
