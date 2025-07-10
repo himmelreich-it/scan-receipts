@@ -3,6 +3,8 @@
 ## Objective
 Generate detailed implementation specifications for Python applications from user stories. Create comprehensive coding instructions that AI agents can follow to build actual code.
 
+**CRITICAL CONSTRAINT**: Only implement what is explicitly required by the user stories and their acceptance criteria. Do not add features, libraries, or design decisions not directly needed to satisfy the acceptance criteria.
+
 ## Input Processing
 1. **Analyze user stories** in dependency order (dependencies first)
 2. **Extract acceptance criteria** and map to implementation requirements
@@ -35,16 +37,16 @@ Generate detailed implementation specifications for Python applications from use
 - **Internal methods**: Private methods needed for functionality
 
 #### Implementation Guidance
-- **Code samples**: Key methods with pseudocode/real code  
-- **Design patterns**: Which patterns to use and why  
-- **Error handling**: Exception types, validation strategies  
-- **Data structures**: Internal data handling approaches
+- **Code samples**: Key methods with pseudocode/real code (only if complexity requires it)  
+- **Design patterns**: Which patterns to use and why (only if needed for acceptance criteria)  
+- **Error handling**: Exception types, validation strategies (only as specified in user stories)  
+- **Data structures**: Internal data handling approaches (minimal viable solution)
 
 #### Technical Details
-- **Performance considerations**: Optimization strategies, caching, async patterns  
-- **Security considerations**: Input validation, authentication, authorization  
-- **Configuration**: Settings structure, environment variables, defaults  
-- **Database integration**: Models, queries, migrations (if applicable)
+- **Performance considerations**: Only include if performance requirements are specified in user stories  
+- **Security considerations**: Only include if security requirements are specified in user stories  
+- **Configuration**: Settings structure, environment variables, defaults (only as needed by acceptance criteria)  
+- **Database integration**: Models, queries, migrations (only if data persistence is required)
 
 #### Usage Examples
 - **Instantiation**: How to create and configure objects  
@@ -53,10 +55,10 @@ Generate detailed implementation specifications for Python applications from use
 - **API usage**: Request/response examples (if applicable)
 
 #### Testing Requirements
-- **Test scenarios**: Specific test cases for acceptance criteria  
-- **Mock requirements**: What to mock and how  
-- **Test data**: Required fixtures or data structures  
-- **Edge cases**: Important boundary conditions to test
+- **Test scenarios**: Specific test cases for acceptance criteria (only test what's specified)  
+- **Mock requirements**: What to mock and how (minimal necessary mocking)  
+- **Test data**: Required fixtures or data structures (only as needed for acceptance criteria)  
+- **Edge cases**: Important boundary conditions to test (only if mentioned in user stories)
 
 #### User Story References
 - **Implements**: [List of user story IDs this component implements]  
@@ -67,14 +69,38 @@ Generate detailed implementation specifications for Python applications from use
 - **Acceptance criteria coverage**: Every criterion must be implementable  
 - **Dependency satisfaction**: All referenced dependencies handled  
 - **Code consistency**: Follow Python standards and existing patterns  
-- **Package coherence**: Related functionality grouped logically
+- **Package coherence**: Related functionality grouped logically  
+- **No feature creep**: Only implement what's explicitly stated in user stories  
+- **Justification required**: Every technical decision must trace back to acceptance criteria  
+- **Minimal viable implementation**: Choose simplest solution that meets requirements
+
+## Validation Rules
+Before including any implementation detail, verify:
+1. **Is this required by a user story acceptance criterion?**  
+2. **Is this needed to satisfy a stated dependency?**  
+3. **Is this the minimal implementation that meets the requirement?**  
+4. **Can I trace this decision back to specific user story language?**  
+5. **Does this change break any existing dependent user stories?**  
+6. **Are all interfaces used by dependent user stories preserved?**
+
+If any answer is "no", do not include the implementation detail.
 
 ## Processing Rules
 1. **One file per package** - don't mix package specifications  
 2. **Update existing files** when adding to existing packages  
 3. **Preserve existing content** when updating specifications  
-4. **Resolve conflicts** or halt with specific error details  
-5. **Document assumptions** made during design decisions
+4. **Backward compatibility**: Ensure no breaking changes to interfaces used by existing user stories  
+5. **Dependency validation**: Check that all dependent user stories remain satisfiable  
+6. **Resolve conflicts** or halt with specific error details  
+7. **Document assumptions** made during design decisions
+
+## Backward Compatibility Requirements
+When modifying existing packages or interfaces:
+- **Preserve existing method signatures** used by dependent user stories  
+- **Maintain existing data structures** that dependent user stories rely on  
+- **Keep existing configuration options** that dependent user stories require  
+- **Preserve existing error handling** that dependent user stories expect  
+- **If breaking changes are unavoidable**: Create new versions/methods instead of modifying existing ones
 
 ## File Structure
 Each `[package_name]_implementation_spec.md` contains:
