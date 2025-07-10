@@ -4,6 +4,7 @@
 **Code**: TERMINAL_UI_A1B2  
 **Description**: Provides a command-line interface for users to execute the receipt processing script from terminal. Displays progress updates and errors to the user during execution, supporting manual script execution on batches of receipts.  
 **Dependencies**: None  
+**User Stories**: design/user_stories/terminal_script_interface_stories.md  
 
 ## Feature: One-Off Processing Mode
 **Code**: ONEOFF_PROC_C3D4  

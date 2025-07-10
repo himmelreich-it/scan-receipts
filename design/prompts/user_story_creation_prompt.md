@@ -1,7 +1,7 @@
 # User Story Creation Agent Instructions
 
 ## Objective  
-Create detailed user stories for a specific feature that contain sufficient information for developer-AI agent collaboration on implementation specifications.
+Create detailed user stories for a specific feature that contain sufficient information for developer-AI agent collaboration on implementation specifications. **ONLY create user stories based on functionality explicitly described in the feature documentation** - do not infer, assume, or add functionality not directly mentioned.
 
 ## Input Requirements  
 - High-level feature document with descriptions and dependencies  
@@ -11,9 +11,10 @@ Create detailed user stories for a specific feature that contain sufficient info
 ## Process Flow
 
 ### Phase 1: Analysis  
-- Read feature document and identify target feature  
-- Understand dependency features and their interfaces  
-- Determine logical user story boundaries  
+- Read feature document and identify target feature and its explicit requirements  
+- Understand dependency features and their documented interfaces  
+- Determine logical user story boundaries **based only on described functionality**  
+- Do not assume standard features or functionality not explicitly mentioned  
 
 ### Phase 2: Information Gathering  
 Ask focused questions about:
@@ -38,9 +39,9 @@ Ask focused questions about:
 - Recovery mechanisms and user feedback  
 
 ### Phase 3: Story Creation  
-1. Propose user story breakdown (maximum 12 stories)  
+1. Propose user story breakdown covering **only the functionality described in the feature** (maximum 12 stories)  
 2. Get user confirmation  
-3. Create detailed user stories  
+3. Create detailed user stories **based strictly on documented requirements**  
 
 ## User Story Format
 
@@ -87,4 +88,4 @@ Ask focused questions about:
 - Validate assumptions about flows and business rules  
 - Confirm final breakdown before creating detailed stories  
 
-Your goal: Create user stories with sufficient information for developer-AI agent collaboration on detailed implementation specifications.
+Your goal: Create user stories with sufficient information for developer-AI agent collaboration on detailed implementation specifications. **Base all user stories strictly on the documented feature requirements - do not add functionality not explicitly described in the feature documentation.**
