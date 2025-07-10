@@ -3,7 +3,9 @@
 import sys
 import signal
 import logging
+import time
 from .display.messages import display_startup_message
+from .display.progress_display import ProgressDisplay
 
 
 def setup_signal_handlers() -> None:
@@ -12,6 +14,7 @@ def setup_signal_handlers() -> None:
     Sets up handlers for SIGINT (Ctrl+C) and SIGTERM to allow clean exit.
     """
     def signal_handler(signum, frame):
+        del signum, frame  # Unused parameters
         print("\nOperation cancelled by user.")
         sys.exit(0)
     
@@ -41,8 +44,17 @@ def main() -> None:
         # This will be implemented when the file processing user stories are completed
         logging.warning("UNIMPLEMENTED_DEPENDENCY: main processing workflow from story SCRIPT_EXEC_T1A2 requires file processing stories")
         
-        # For now, just display that the processing workflow is not yet implemented
-        print("Main processing workflow is not yet implemented.")
+        # Mock demonstration of progress display functionality
+        # This shows how the progress display would work in the real implementation
+        mock_files = ["receipt1.pdf", "receipt2.jpg", "receipt3.png", "very_long_filename_that_exceeds_normal_length.pdf"]
+        print(f"Mock processing demonstration with {len(mock_files)} files:")
+        
+        progress = ProgressDisplay(len(mock_files))
+        for i, filename in enumerate(mock_files, 1):
+            progress.display_file_progress(i, filename)
+            time.sleep(0.5)  # Brief pause to simulate processing
+        
+        print("Mock processing complete.")
         
         # Exit with success code
         sys.exit(0)
