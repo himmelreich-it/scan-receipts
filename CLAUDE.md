@@ -64,3 +64,11 @@ When the user instructs "implement next user story from file YY":
 - Reference feature descriptions from `design/high_level_features.md` for additional context
 - Apply DDD principles from `design/rules/ddd_agent_instructions.md` for domain modeling
 - Follow the exact workflow outlined in the AI code agent instructions
+
+## Implement Feature
+When the user instructs "implement all user stories from file YY":
+- Use `design/prompts/ai_code_agent_instructions_feature.md` as the main implementation guide
+- Follow Python coding standards from `design/rules/python_agent_instructions.md`
+- Reference feature descriptions from `design/high_level_features.md` for additional context
+- Apply DDD principles from `design/rules/ddd_agent_instructions.md` for domain modeling
+- Follow the exact workflow outlined in the AI code agent instructions

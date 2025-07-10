@@ -10,6 +10,7 @@
 **Code**: ONEOFF_PROC_C3D4  
 **Description**: Implements one-off processing runs that clear the done folder and remove receipts.csv at the start of each execution. Keeps the input folder intact, allowing users to re-run the script multiple times on the same receipt files.  
 **Dependencies**: Hard - Terminal Script Interface [TERMINAL_UI_A1B2]  
+**User Stories**: design/user_stories/one_off_processing_mode_stories.md  
 
 ## Feature: Receipt Image Processing
 **Code**: RECEIPT_IMG_E5F6  
