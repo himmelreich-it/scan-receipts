@@ -3,7 +3,7 @@
 
 def display_startup_message() -> None:
     """Display startup message about receipt processing operation.
-    
+
     Shows informational message before processing begins.
     Message indicates processing is about to start and mentions input folder scanning.
     """

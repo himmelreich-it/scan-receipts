@@ -3,8 +3,8 @@
 ## Package: terminal_interface
 **Path**: `src/terminal_interface/`  
 **Purpose**: Provides command-line interface functionality for receipt processing script execution, including progress display, error reporting, and user interaction  
-**User Stories**: SCRIPT_EXEC_T1A2, STARTUP_MSG_T3B4, PROGRESS_DISP_T5C6, ERROR_DISP_T7D8, SUMMARY_DISP_T9E0  
-**Dependencies**: Standard Python library only (no external dependencies)
+**User Stories**: SCRIPT_EXEC_T1A2, STARTUP_MSG_T3B4, PROGRESS_DISP_T5C6, ERROR_DISP_T7D8, SUMMARY_DISP_T9E0, CLEANUP_MAIN_INTEGRATION_M7N8  
+**Dependencies**: Standard Python library, cleanup package
 
 ## Module Structure Overview
 
@@ -23,10 +23,10 @@ src/terminal_interface/
 
 ## Module: src/terminal_interface/main.py
 
-**Purpose**: Main script entry point that orchestrates terminal interface workflow  
-**Libraries**: Standard Python only (sys, os, signal)  
-**Implements**: SCRIPT_EXEC_T1A2  
-**Dependencies**: None
+**Purpose**: Main script entry point that orchestrates terminal interface workflow with cleanup integration  
+**Libraries**: Standard Python (sys, os, signal), cleanup.cleaner.CleanupManager  
+**Implements**: SCRIPT_EXEC_T1A2, CLEANUP_MAIN_INTEGRATION_M7N8  
+**Dependencies**: cleanup package
 
 ### Functions
 
@@ -36,6 +36,7 @@ def main() -> None:
     """Main entry point for receipt processing script.
     
     Handles script execution with proper exception handling and exit codes.
+    Includes cleanup integration before processing begins.
     Provides clean entry point following if __name__ == "__main__" pattern.
     
     Returns:
@@ -49,10 +50,19 @@ def main() -> None:
 **Implementation Notes**:
 - Use `if __name__ == "__main__":` pattern as specified
 - Implement top-level exception handling to catch all unhandled exceptions
+- Integrate CleanupManager after startup message display
+- Execute cleanup operations before any receipt processing begins
 - Return exit code 0 for successful completion
-- Return exit code 1 for any errors
+- Return exit code 1 for any errors (including cleanup failures)
 - Handle keyboard interrupts (Ctrl+C) gracefully
 - Ensure script can be executed from any directory
+
+**Cleanup Integration**:
+```python
+# Add after display_startup_message()
+cleanup_manager = CleanupManager("done", "receipts.csv")
+cleanup_manager.execute_cleanup()
+```
 
 #### `setup_signal_handlers() -> None`
 ```python
@@ -386,6 +396,11 @@ def test_summary_display_formatting():
 - **Implements**: main.py module with main() function
 - **Depends on**: None
 - **Used by**: All other terminal interface components
+
+### CLEANUP_MAIN_INTEGRATION_M7N8: Main Script Integration
+- **Implements**: main.py module with CleanupManager integration
+- **Depends on**: DONE_FOLDER_CLEANUP_X1Y2, CSV_FILE_REMOVAL_Z3A4, CLEANUP_ERROR_HANDLE_B5C6
+- **Used by**: None (this is the integration point)
 
 ### STARTUP_MSG_T3B4: Startup Message Display  
 - **Implements**: messages.py module with display_startup_message()

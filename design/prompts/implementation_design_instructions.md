@@ -13,6 +13,9 @@ Generate detailed implementation specifications for Python applications from use
 
 ## Output Format: Implementation Specifications
 
+### Location
+Implementation designs are in the `design/implementation` folder.
+
 ### Package Structure
 ```
 ## Package: [package_name]
