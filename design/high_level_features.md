@@ -16,6 +16,7 @@
 **Code**: RECEIPT_IMG_E5F6  
 **Description**: Processes receipt images and PDF files from the input folder, supporting PDF, JPG, and PNG formats. Handles sequential processing of all files in the input directory and manages file reading operations for AI analysis.  
 **Dependencies**: None  
+**User Stories**: design/user_stories/receipt_image_processing_stories.md  
 
 ## Feature: AI Data Extraction
 **Code**: AI_EXTRACT_G7H8  
