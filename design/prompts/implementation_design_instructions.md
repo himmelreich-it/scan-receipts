@@ -1,199 +1,117 @@
-# Implementation Design Instructions for AI Coding Agents
+# Interactive Implementation Design Instructions
 
 ## Objective
-Generate detailed implementation specifications for Python applications from user stories. Create comprehensive coding instructions that AI agents can follow to build actual code.
+Generate detailed implementation specifications for Python applications from user stories through interactive technical validation. Only implement what is explicitly required by user stories.
 
-**CRITICAL CONSTRAINT**: Only implement what is explicitly required by the user stories and their acceptance criteria. Do not add features, libraries, or design decisions not directly needed to satisfy the acceptance criteria.
+## Process Flow
 
-## Input Processing
-1. **Analyze user stories** in dependency order (dependencies first)
-2. **Extract acceptance criteria** and map to implementation requirements
-3. **Identify Python packages** that need creation or modification
-4. **Create one specification file per package**: `[package_name]_implementation_spec.md`
+### Phase 1: Analysis
+- Read user stories and extract implementation requirements
+- Identify Python packages needing creation/modification
+- Map acceptance criteria to technical needs
 
-## Output Format: Implementation Specifications
+### Phase 2: Interactive Technical Planning
+Ask focused questions about missing technical context:
 
-### Location
-Implementation designs are in the `design/implementation` folder.
+**Architecture & Libraries**
+- Preferred architectural pattern (MVC, layered, etc.)?
+- Required/prohibited libraries or frameworks?
+- Database technology and ORM preference?
+- Target Python version and constraints?
+
+**Performance & Integration**
+- Performance requirements not in user stories?
+- External APIs or services to integrate?
+- Caching, async processing, or message queue needs?
+- Authentication/authorization framework preference?
+
+**Implementation Approach**
+- Error handling strategy preference?
+- Testing framework and approach?
+- Configuration management approach?
+- Existing patterns or utilities to follow?
+
+### Phase 3: Design Validation
+1. Propose implementation approach with key design decisions
+2. Present technical trade-offs and rationale
+3. Get confirmation before generating detailed specs
+4. Adjust based on feedback
+
+### Phase 4: Specification Generation
+Create implementation specs based on validated approach.
+
+## Interactive Guidelines
+- Ask 1-2 focused questions at a time
+- Provide context for why questions matter
+- Offer specific options when possible
+- Confirm understanding before proceeding
+- Balance thoroughness with avoiding over-engineering
+
+## Output Format
 
 ### Package Structure
 ```
 ## Package: [package_name]
-**Path**: `[path/to/package]/`  
-**Purpose**: [Brief description]  
-**User Stories**: [List of user story IDs this package implements]  
-**Dependencies**: [List required packages/libraries]
+**Path**: `[path/to/package]/`
+**Purpose**: [Brief description]
+**User Stories**: [List of story IDs]
+**Dependencies**: [Required packages/libraries]
+**Design Decisions**: [Key technical choices from interactive planning]
 ```
 
-### For Each Component, Include:
+### Component Details
+For each module/class include:
+- **File location** and purpose
+- **Libraries used** with rationale
+- **Design patterns** applied
+- **Methods/properties** with implementation notes
+- **Error handling** approach
+- **Testing requirements** specific to acceptance criteria
+- **User story references** implemented
 
-#### Module Details
-- **Module location**: Exact file path  
-- **Libraries used**: Specific imports with versions/reasons  
-- **Module-level functions**: Signatures with implementation guidance  
-- **Module-level properties**: Configuration, constants, globals
-
-#### Class Specifications
-- **Class definition**: Inheritance, mixins, decorators  
-- **Methods**: Signatures, parameters, return types, implementation notes  
-- **Properties**: Getters/setters, validation, caching  
-- **Internal methods**: Private methods needed for functionality
-
-#### Implementation Guidance
-- **Code samples**: Key methods with pseudocode/real code (only if complexity requires it)  
-- **Design patterns**: Which patterns to use and why (only if needed for acceptance criteria)  
-- **Error handling**: Exception types, validation strategies (only as specified in user stories)  
-- **Data structures**: Internal data handling approaches (minimal viable solution)
-
-#### Technical Details
-- **Performance considerations**: Only include if performance requirements are specified in user stories  
-- **Security considerations**: Only include if security requirements are specified in user stories  
-- **Configuration**: Settings structure, environment variables, defaults (only as needed by acceptance criteria)  
-- **Database integration**: Models, queries, migrations (only if data persistence is required)
-
-#### Usage Examples
-- **Instantiation**: How to create and configure objects  
-- **Common operations**: Typical usage patterns  
-- **Integration**: How components work together  
-- **API usage**: Request/response examples (if applicable)
-
-#### Testing Requirements
-- **Test scenarios**: Specific test cases for acceptance criteria (only test what's specified)  
-- **Mock requirements**: What to mock and how (minimal necessary mocking)  
-- **Test data**: Required fixtures or data structures (only as needed for acceptance criteria)  
-- **Edge cases**: Important boundary conditions to test (only if mentioned in user stories)
-
-#### User Story References
-- **Implements**: [List of user story IDs this component implements]  
-- **Depends on**: [List of user story IDs this component depends on]  
-- **Used by**: [List of user story IDs that use this component]
+### Technical Specifications
+- **Code samples** for complex implementations only
+- **Configuration** structure and defaults
+- **Database integration** if data persistence required
+- **External integrations** confirmed in planning
+- **Performance considerations** if discussed
+- **Security measures** if specified
 
 ## Quality Requirements
-- **Acceptance criteria coverage**: Every criterion must be implementable  
-- **Dependency satisfaction**: All referenced dependencies handled  
-- **Code consistency**: Follow Python standards and existing patterns  
-- **Package coherence**: Related functionality grouped logically  
-- **No feature creep**: Only implement what's explicitly stated in user stories  
-- **Justification required**: Every technical decision must trace back to acceptance criteria  
-- **Minimal viable implementation**: Choose simplest solution that meets requirements
+- Every design decision must trace back to user story requirements or confirmed preferences
+- No feature creep beyond acceptance criteria
+- Backward compatibility with existing dependent user stories
+- All technical choices validated through interactive process
+
+## File Management
+- Create `[package_name]_implementation_spec.md` per package
+- Update user stories file with implementation references
+- Document design decisions and rationale
+- Maintain implementation tracking index
 
 ## Validation Rules
-Before including any implementation detail, verify:
-1. **Is this required by a user story acceptance criterion?**  
-2. **Is this needed to satisfy a stated dependency?**  
-3. **Is this the minimal implementation that meets the requirement?**  
-4. **Can I trace this decision back to specific user story language?**  
-5. **Does this change break any existing dependent user stories?**  
-6. **Are all interfaces used by dependent user stories preserved?**
+Before including any implementation detail:
+1. Is this required by user story acceptance criteria?
+2. Was this approach confirmed in interactive planning?
+3. Is this the minimal viable implementation?
+4. Does this preserve interfaces used by dependent stories?
 
-If any answer is "no", do not include the implementation detail.
-
-## Processing Rules
-1. **One file per package** - don't mix package specifications  
-2. **Update existing files** when adding to existing packages  
-3. **Preserve existing content** when updating specifications  
-4. **Backward compatibility**: Ensure no breaking changes to interfaces used by existing user stories  
-5. **Dependency validation**: Check that all dependent user stories remain satisfiable  
-6. **Resolve conflicts** or halt with specific error details  
-7. **Document assumptions** made during design decisions
-
-## Backward Compatibility Requirements
-When modifying existing packages or interfaces:
-- **Preserve existing method signatures** used by dependent user stories  
-- **Maintain existing data structures** that dependent user stories rely on  
-- **Keep existing configuration options** that dependent user stories require  
-- **Preserve existing error handling** that dependent user stories expect  
-- **If breaking changes are unavoidable**: Create new versions/methods instead of modifying existing ones
-
-## File Structure
-Each `[package_name]_implementation_spec.md` contains:
-- Package overview and dependencies  
-- Module-by-module implementation details  
-- Class-by-class specifications with code samples  
-- Configuration and deployment guidance  
-- Testing implementation requirements  
-- Integration points with other packages
-
-## User Stories File Updates
-**Required**: Update the original user stories file to include implementation references:
-
-### For Each User Story, Add:
+## Example Interactive Flow
 ```
-## User Story: [STORY_ID]
-[Original user story content]
+> "Looking at your authentication user stories, I need to clarify:
+> 
+> **Authentication**: JWT tokens or session-based auth?
+> **Database**: SQLAlchemy ORM or direct SQL queries?
+> **API Framework**: FastAPI, Flask, or Django REST?
+> 
+> This affects how I structure the auth package and user management."
 
-**Implementation Design**: 
-- Package: [package_name] (see [package_name]_implementation_spec.md)
-- Modules: [list of modules that implement this story]
-- Dependencies: [other user stories this depends on]
-- Dependents: [other user stories that depend on this]
+> "Based on your preferences, I propose:
+> - JWT tokens for stateless auth
+> - SQLAlchemy with repository pattern
+> - FastAPI with Pydantic validation
+> 
+> This approach satisfies your user stories while maintaining scalability. Confirm?"
 ```
 
-### Implementation Tracking Section
-Add to user stories file:
-```
-## Implementation Design Index
-| User Story | Package | Implementation File | Status |
-|------------|---------|-------------------|--------|
-| US001 | myapp.user | user_implementation_spec.md | Designed |
-| US002 | myapp.auth | auth_implementation_spec.md | Designed |
-```
-
-### Cross-Reference Validation
-Ensure every user story references its implementation design files and every implementation file references the user stories it serves.
-
-## Example Structure
-```
-## Package: myapp.user
-**Path**: `myapp/user/`  
-**Purpose**: User management functionality  
-**User Stories**: US001, US002, US003  
-**Dependencies**: SQLAlchemy 2.0+, Pydantic, bcrypt
-
-### Module: myapp.user.models
-**File**: `myapp/user/models.py`  
-**Libraries**: from sqlalchemy import Column, Integer, String  
-**Purpose**: User data models and database schema  
-**Implements**: US001 (User Registration), US002 (User Authentication)
-
-#### Class: User
-**Inherits**: SQLAlchemy Base  
-**Table**: users  
-**Properties**:
-- id: Integer, primary_key  
-- email: String(255), unique, not null  
-- password_hash: String(255), not null  
-**Methods**:
-- set_password(password: str) -> None  
-- verify_password(password: str) -> bool  
-**Implementation Notes**: Use bcrypt for password hashing
-
-### Module: myapp.user.services
-**File**: `myapp/user/services.py`  
-**Purpose**: User business logic  
-**Dependencies**: UserRepository, EmailValidator  
-**Implements**: US001, US002, US003
-
-#### Class: UserService
-**Methods**:
-- create_user(email: str, password: str) -> User  
-- authenticate_user(email: str, password: str) -> Optional[User]  
-**Error Handling**: Raise UserExistsError, InvalidCredentialsError  
-**Performance**: Cache user lookups for 5 minutes  
-**Security**: Validate email format, enforce password complexity
-
-### Configuration
-**File**: `myapp/user/config.py`  
-**Settings**:
-- PASSWORD_MIN_LENGTH: int = 8  
-- SESSION_TIMEOUT: int = 3600  
-- BCRYPT_ROUNDS: int = 12
-
-### Testing Requirements
-- Test password hashing/verification  
-- Test email validation  
-- Test duplicate user creation  
-- Mock database operations
-```
-
-The specification should provide enough detail for an AI coding agent to implement the complete functionality without additional design decisions.
+The interactive process ensures technically sound, validated implementation specifications that avoid over-engineering while meeting all user story requirements.

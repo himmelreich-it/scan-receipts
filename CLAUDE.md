@@ -55,7 +55,7 @@ When the user instructs "create implementation design for {user_stories_file}":
 - Reference feature descriptions from `design/high_level_features.md`
 - Use requirements context from `design/product_requirements.md`
 - Follow Python coding standards from `design/rules/python_agent_instructions.md`
-- Create implementation documentation following the package-based structure outlined in the instructions
+- Guide the user through the implementation design
 
 ## Implement User Story
 When the user instructs "implement next user story from file YY":
