@@ -171,6 +171,7 @@ scan-receipts/
 - Use virtual environments with `uv venv`
 - Keep dependencies minimal and well-justified
 - Regular security updates with `uv sync`
+- Use absolute paths for internal imports, `packageA.moduleB`, not `..packageA.moduleB`
 
 ## Performance
 - Use list comprehensions for simple transformations
