@@ -2,13 +2,17 @@
 
 import sys
 import signal
-import logging
-import time
-from .display.messages import display_startup_message
-from .display.progress_display import ProgressDisplay
-from .display.summary_display import SummaryDisplay
-from .errors.error_handler import ErrorHandler
-from ..cleanup.cleaner import CleanupManager
+from terminal_interface.display.messages import display_startup_message
+from terminal_interface.display.summary_display import SummaryDisplay
+from cleanup.cleaner import CleanupManager
+from receipt_processing import (
+    SequentialProcessingWorkflow,
+    LocalFileRepository,
+    FileFilteringService,
+    FileContentReader,
+    SupportedFileExtensionSpecification,
+    FileProcessingConfig
+)
 
 
 def setup_signal_handlers() -> None:
@@ -48,57 +52,36 @@ def main() -> None:
         cleanup_manager = CleanupManager("done", "receipts.csv")
         cleanup_manager.execute_cleanup()
 
-        # PLACEHOLDER: Main processing workflow not yet implemented
-        # This will be implemented when the file processing user stories are completed
-        logging.warning(
-            "UNIMPLEMENTED_DEPENDENCY: main processing workflow from story SCRIPT_EXEC_T1A2 requires file processing stories"
+        # Initialize receipt processing workflow
+        config = FileProcessingConfig()
+        repository = LocalFileRepository()
+        spec = SupportedFileExtensionSpecification(config.get_supported_extensions())
+        filtering_service = FileFilteringService(spec)
+        content_reader = FileContentReader()
+        
+        workflow = SequentialProcessingWorkflow(
+            repository,
+            filtering_service,
+            content_reader
         )
 
-        # Mock demonstration of complete terminal interface functionality
-        # This shows how all components work together in the real implementation
-        mock_files = [
-            "receipt1.pdf",
-            "receipt2.jpg",
-            "receipt3.png",
-            "very_long_filename_that_exceeds_normal_length.pdf",
-            "corrupted_file.pdf",
-            "duplicate_receipt.pdf",
-        ]
-        print(f"Mock processing demonstration with {len(mock_files)} files:")
+        # Execute receipt processing workflow
+        input_directory = config.get_input_directory()
+        result = workflow.process_input_directory(input_directory)
 
-        progress = ProgressDisplay(len(mock_files))
-        error_handler = ErrorHandler()
-        summary = SummaryDisplay()
-
-        processed_count = 0
-        duplicate_count = 0
-
-        for i, filename in enumerate(mock_files, 1):
-            progress.display_file_progress(i, filename)
-            time.sleep(0.3)  # Brief pause to simulate processing
-
-            # Mock processing scenarios for demonstration
-            if filename == "corrupted_file.pdf":
-                error_handler.display_file_error(
-                    filename, "File corrupted or unreadable"
-                )
-            elif filename == "very_long_filename_that_exceeds_normal_length.pdf":
-                error_handler.display_processing_error(
-                    filename, ValueError("Invalid file format")
-                )
-            elif filename == "duplicate_receipt.pdf":
-                print(f"DUPLICATE: {filename} already processed, skipping")
-                duplicate_count += 1
-            else:
-                processed_count += 1
-
-        print("Mock processing complete.")
-
-        # Display comprehensive summary
-        summary.set_counters(
-            processed_count, error_handler.get_error_count(), duplicate_count
-        )
-        summary.display_summary()
+        # Display results using terminal interface components
+        if result.total_processed > 0:
+            print(f"Processing complete: {result.total_processed} files processed")
+            
+            summary = SummaryDisplay()
+            summary.set_counters(
+                result.success_count,
+                result.error_count,
+                0  # No duplicate handling in current implementation
+            )
+            summary.display_summary()
+        else:
+            print("No supported files found to process")
 
         # Exit with success code
         sys.exit(0)

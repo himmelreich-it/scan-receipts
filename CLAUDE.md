@@ -72,3 +72,11 @@ When the user instructs "implement all user stories from file YY":
 - Reference feature descriptions from `design/high_level_features.md` for additional context
 - Apply DDD principles from `design/rules/ddd_agent_instructions.md` for domain modeling
 - Follow the exact workflow outlined in the AI code agent instructions
+
+## Integrate Implemented Feature
+When a feature has been fully implemented and tested:
+- Update the main application entry point to use the real implementation
+- Replace any placeholder or mock code with actual feature integration
+- Ensure the feature works end-to-end through the main application
+- Test the integration by running the main application
+- Update any configuration or dependencies needed for the integration

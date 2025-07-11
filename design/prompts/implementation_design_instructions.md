@@ -77,6 +77,12 @@ For each module/class include:
 - **Performance considerations** if discussed
 - **Security measures** if specified
 
+### Integration Specifications
+- **Main application entry point** integration requirements
+- **Configuration changes** needed for the feature
+- **CLI argument** or user interface integration points
+- **Initialization sequence** and dependency injection setup
+
 ## Quality Requirements
 - Every design decision must trace back to user story requirements or confirmed preferences
 - No feature creep beyond acceptance criteria
