@@ -64,18 +64,20 @@ For each module/class include:
 - **File location** and purpose
 - **Libraries used** with rationale
 - **Design patterns** applied
-- **Methods/properties** with implementation notes
-- **Error handling** approach
+- **Interface definitions** (method signatures, properties) with clear contracts
+- **Key algorithms** or complex logic descriptions (not full implementations)
+- **Error handling strategy** and exception types
 - **Testing requirements** specific to acceptance criteria
 - **User story references** implemented
 
 ### Technical Specifications
-- **Code samples** for complex implementations only
-- **Configuration** structure and defaults
-- **Database integration** if data persistence required
-- **External integrations** confirmed in planning
-- **Performance considerations** if discussed
-- **Security measures** if specified
+- **Architecture diagrams** showing component relationships
+- **Interface contracts** with method signatures and expected behaviors
+- **Data models** and their relationships (not full class implementations)
+- **Configuration structure** and environment requirements
+- **Integration points** with external systems and internal dependencies
+- **Performance considerations** and constraints
+- **Security measures** and validation requirements
 
 ### Integration Specifications
 - **Main application entry point** integration requirements
@@ -89,6 +91,26 @@ For each module/class include:
 - Backward compatibility with existing dependent user stories
 - All technical choices validated through interactive process
 
+## Specification Boundaries
+
+### DO Include:
+- **High-level architecture** and design decisions
+- **Interface definitions** with method signatures and clear contracts
+- **Design patterns** to apply with rationale
+- **Key algorithms** or complex logic descriptions (conceptual, not code)
+- **Integration points** and dependencies
+- **Data models** and relationships (structure, not implementation)
+- **Error handling strategy** and exception hierarchy design
+- **Configuration requirements** and environment setup
+
+### DO NOT Include:
+- **Complete method implementations** (provide signatures and contracts only)
+- **Full class bodies** with working code
+- **Detailed business logic code** (describe approach, not implementation)
+- **Complete configuration classes** (define structure and requirements only)
+- **Working validation logic** (specify validation rules, not code)
+- **Production-ready code blocks** that can be copied directly
+
 ## File Management
 - Create `[package_name]_implementation_spec.md` per package
 - Update user stories file with implementation references
@@ -96,11 +118,12 @@ For each module/class include:
 - Maintain implementation tracking index
 
 ## Validation Rules
-Before including any implementation detail:
+Before including any specification detail:
 1. Is this required by user story acceptance criteria?
 2. Was this approach confirmed in interactive planning?
-3. Is this the minimal viable implementation?
+3. Does this provide sufficient guidance without over-specifying implementation?
 4. Does this preserve interfaces used by dependent stories?
+5. Are interface contracts clear enough for independent implementation?
 
 ## Example Interactive Flow
 ```

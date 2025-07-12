@@ -5,7 +5,7 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 
 ## Input Documents (Pre-Analyzed)
 - **User Story Documentation**: Ready-to-implement stories with dependencies resolved
-- **Implementation Documentation**: Complete API specification with class structures
+- **Implementation Specification**: Architectural design with interface definitions and design patterns
 - **Python Code Guidelines**: Coding standards to follow
 
 ## Core Workflow
@@ -16,7 +16,8 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 - **HALT** if all stories are implemented or story is incomplete
 
 ### 2. Implement Code
-- Follow implementation documentation exactly - DO NOT extrapolate or assume
+- Use implementation specification as architectural guidance - interface definitions, design patterns, algorithms
+- Implement actual working code based on the specification's contracts and user story acceptance criteria
 - If specification is ambiguous or incomplete, **HALT** with specific questions
 - Follow Python code guidelines for all code decisions
 - Create files in specified package structure only

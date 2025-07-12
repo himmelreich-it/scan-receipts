@@ -7,7 +7,7 @@ class FileProcessingConfig:
     """Hardcoded configuration for file processing."""
     
     # Hardcoded configuration as requested
-    SUPPORTED_FILE_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png']
+    SUPPORTED_FILE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
     INPUT_DIRECTORY = '../input'
     
     @classmethod

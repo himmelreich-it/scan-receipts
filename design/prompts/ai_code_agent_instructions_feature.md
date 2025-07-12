@@ -5,7 +5,7 @@ Implement all user stories from pre-analyzed documentation as a complete, integr
 
 ## Input Documents (Pre-Analyzed)
 - **User Story Documentation**: Complete set of stories defining the feature
-- **Implementation Documentation**: Complete API specification with class structures
+- **Implementation Specification**: Architectural design with interface definitions, design patterns, and integration points
 - **Python Code Guidelines**: Coding standards to follow
 
 ## Core Workflow
@@ -18,10 +18,10 @@ Implement all user stories from pre-analyzed documentation as a complete, integr
 - **Feature Boundaries**: Define the complete scope of the feature being built
 
 ### 2. Implementation Planning
-- **Architecture Review**: Ensure all stories form a cohesive system
-- **File Structure**: Plan complete package/module structure for entire feature
-- **Interface Design**: Map all public APIs and internal interfaces
-- **Data Flow**: Trace data flow across all user stories
+- **Architecture Review**: Use implementation specification to understand system design and ensure all stories form a cohesive system
+- **Interface Implementation**: Implement the interface contracts defined in the specification
+- **Design Pattern Application**: Apply the design patterns specified in the architectural guidance
+- **Data Flow Implementation**: Implement data flow based on specification's integration points
 - **Testing Strategy**: Plan unit, integration, and end-to-end tests for complete feature
 
 ### 3. Dependency Resolution

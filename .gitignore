@@ -163,3 +163,7 @@ cython_debug/
 .uv_cache/
 
 input/
+input.bak/
+done/
+.env.test
+receipts.csv

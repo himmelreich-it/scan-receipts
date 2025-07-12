@@ -40,6 +40,7 @@ An automated receipt processing tool that extracts financial information from re
 The system extracts the following information from each receipt:
 - **Amount**: Total purchase amount
 - **Tax**: Tax amount (if separately listed)
+- **Tax Percentage**: Tax percentage amount (if separately listed)
 - **Description**: Business name or transaction description
 - **Currency**: Currency code (e.g., EUR, USD)
 - **Date**: Transaction date
@@ -47,7 +48,7 @@ The system extracts the following information from each receipt:
 
 ### Output Specification
 - **Format**: CSV file with append functionality
-- **Fields**: `ID, Amount, Tax, Description, Currency, Date, Confidence, Hash`
+- **Fields**: `ID, Amount, Tax, TaxPercetage, Description, Currency, Date, Confidence, Hash, DoneFilename`
 - **ID Field**: Auto-incrementing number for each processed receipt
 - **Date Format**: dd-MM-YYYY
 - **Hash Field**: File hash for duplicate detection
@@ -79,6 +80,7 @@ The system extracts the following information from each receipt:
 {
   "amount": "float",
   "tax": "float", 
+  "tax_percentage": "float", 
   "description": "string",
   "currency": "string",
   "date": "string",
@@ -118,7 +120,7 @@ The system extracts the following information from each receipt:
    - Generate incremental ID
    - Append to CSV file
    - Log results to console
-   - Move file to `done/` folder with new naming
+   - Copy file to `done/` folder with new naming
 4. **Complete**: Display summary (total processed, errors encountered)
 
 ### CSV Output Management

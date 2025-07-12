@@ -1,24 +1,28 @@
 # High-Level Features - Receipt Processor
 
 ## Feature: Terminal Script Interface
+**IMPLEMENTED**
 **Code**: TERMINAL_UI_A1B2  
 **Description**: Provides a command-line interface for users to execute the receipt processing script from terminal. Displays progress updates and errors to the user during execution, supporting manual script execution on batches of receipts.  
 **Dependencies**: None  
 **User Stories**: design/user_stories/terminal_script_interface_stories.md  
 
 ## Feature: One-Off Processing Mode
+**IMPLEMENTED**
 **Code**: ONEOFF_PROC_C3D4  
 **Description**: Implements one-off processing runs that clear the done folder and remove receipts.csv at the start of each execution. Keeps the input folder intact, allowing users to re-run the script multiple times on the same receipt files.  
 **Dependencies**: Hard - Terminal Script Interface [TERMINAL_UI_A1B2]  
 **User Stories**: design/user_stories/one_off_processing_mode_stories.md  
 
 ## Feature: Receipt Image Processing
+**IMPLEMENTED**
 **Code**: RECEIPT_IMG_E5F6  
 **Description**: Processes receipt images and PDF files from the input folder, supporting PDF, JPG, and PNG formats. Handles sequential processing of all files in the input directory and manages file reading operations for AI analysis.  
 **Dependencies**: None  
 **User Stories**: design/user_stories/receipt_image_processing_stories.md  
 
 ## Feature: AI Data Extraction
+**IMPLEMENTED**
 **Code**: AI_EXTRACT_G7H8  
 **Description**: Integrates with Anthropic's Claude API to extract structured financial data from receipt images. Extracts amount, tax, description, currency, date, and generates confidence scores for each processed receipt using the anthropic Python library.  
 **Dependencies**: Hard - Receipt Image Processing [RECEIPT_IMG_E5F6]  

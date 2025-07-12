@@ -39,7 +39,6 @@ When asked to extract high-level features:
 - Use `design/rules/ddd_agent_instructions.md` as design principles
 - Write all extracted features to the file specified in the user's instruction
 
-
 ## Design Next Feature
 When the user types "design next feature":
 - Read `design/high_level_features.md` to understand available features
@@ -74,9 +73,17 @@ When the user instructs "implement all user stories from file YY":
 - Follow the exact workflow outlined in the AI code agent instructions
 
 ## Integrate Implemented Feature
-When a feature has been fully implemented and tested:
+When the user instructs to integrate a feature which has been fully implemented and tested:
 - Update the main application entry point to use the real implementation
 - Replace any placeholder or mock code with actual feature integration
 - Ensure the feature works end-to-end through the main application
 - Test the integration by running the main application
 - Update any configuration or dependencies needed for the integration
+
+## Design and Implement Next Feature
+When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file
+1. Design Next Feature
+2. Implement User Story (with the user stories file just created)
+3. Create Implementation Design Documentation (with the user stories file just created)
+4. Implement Feature (with the user stories file just created)
+5. Integrate Implemented Feature (just created feature)
