@@ -83,7 +83,7 @@ logging.warning(
 - Verify acceptance criteria are met exactly as written
 
 ### 6. Update Documentation
-- Add **IMPLEMENTED** below user story name
+- Add `**Status:**: IMPLEMENTED  ` below user story name
 - Add implementation results at bottom of user story:
   ```
   ## Implementation Results

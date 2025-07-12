@@ -77,6 +77,13 @@ class TestFeatureComplete:
 ### 7. Documentation Update
 Mark all user stories as **IMPLEMENTED** and add comprehensive implementation summary:
 
+**Step 7a: Update User Story Status**
+- Add `**Status**: IMPLEMENTED` to each user story that was successfully implemented
+- Do NOT change any other content in the user story documentation
+- Only add the status field to stories that have been fully implemented and tested
+- Leave incomplete or failed stories without the status field
+
+**Step 7b: Create Implementation Summary**
 ```
 ## Complete Feature Implementation Results
 - **Feature Name**: [Name of complete feature]

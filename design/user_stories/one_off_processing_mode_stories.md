@@ -9,6 +9,7 @@
 ## User Stories
 
 ### Story 1: Done Folder Cleanup
+**Status**: IMPLEMENTED
 **Code**: DONE_FOLDER_CLEANUP_X1Y2  
 **Functional Description**: Automatically clears all files from the done folder at the beginning of script execution to ensure clean processing runs without accumulating previously processed files.  
 **Acceptance Criteria**:
@@ -25,6 +26,7 @@
 **Error Scenarios**: Files in use by other processes (handled in Story 3), permission errors, disk full scenarios
 
 ### Story 2: CSV File Removal
+**Status**: IMPLEMENTED
 **Code**: CSV_FILE_REMOVAL_Z3A4  
 **Functional Description**: Removes the receipts.csv file at the beginning of script execution to start with a clean CSV output file for each processing run.  
 **Acceptance Criteria**:
@@ -40,6 +42,7 @@
 **Error Scenarios**: File in use by other processes (handled in Story 3), permission errors
 
 ### Story 3: Cleanup Error Handling
+**Status**: IMPLEMENTED
 **Code**: CLEANUP_ERROR_HANDLE_B5C6  
 **Functional Description**: Handles file-in-use errors during cleanup operations and terminates script execution gracefully with appropriate error messages when files cannot be cleaned up.  
 **Acceptance Criteria**:
@@ -56,6 +59,7 @@
 **Error Scenarios**: Multiple files in use simultaneously, partial cleanup success before failure, permission denied errors
 
 ### Story 4: Main Script Integration
+**Status**: IMPLEMENTED
 **Code**: CLEANUP_MAIN_INTEGRATION_M7N8  
 **Functional Description**: Integrates cleanup functionality into the main script execution flow to ensure cleanup operations run automatically when the script starts.  
 **Acceptance Criteria**:

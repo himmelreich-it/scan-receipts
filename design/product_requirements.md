@@ -28,7 +28,7 @@ An automated receipt processing tool that extracts financial information from re
 - User will use a terminal to run a python script
 - User will see be updated by the terminal on progress and errors
 - User will run this script once in a while on all the receipts available
-- Each run, the `done` folder will be cleared and `receipts.csv` removed, one off run
+- Each run processes all receipts fresh, with `done` folder cleared and `receipts.csv` removed before processing
 - The input folder stays intact, the user can re-run
 
 ### Input Processing
@@ -124,9 +124,9 @@ The system extracts the following information from each receipt:
 4. **Complete**: Display summary (total processed, errors encountered)
 
 ### CSV Output Management
-- **Append Mode**: New data added to existing CSV
-- **ID Continuation**: IDs continue from last processed receipt
-- **Header Management**: Headers added only if file is new
+- **Fresh Mode**: CSV file recreated on each run
+- **ID Sequence**: IDs start from 1 for each processing run
+- **Header Management**: Headers always written as first line
 
 ## Configuration
 
