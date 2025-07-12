@@ -9,8 +9,8 @@
 **Path**: `src/ai_extraction/`  
 **Purpose**: Domain package for AI-powered receipt data extraction using Anthropic's Claude API  
 **User Stories**: EXTRACT_DATA_A1B2, EXTRACT_ERROR_C3D4  
-**Dependencies**: anthropic, pydantic, python-dotenv, receipt_image_processing  
-**Design Decisions**: DDD-based architecture with custom exception hierarchy, environment-based configuration, hardcoded retry logic with exponential backoff  
+**Dependencies**: anthropic, pydantic, python-dotenv, pdf2image, pillow, receipt_image_processing  
+**Design Decisions**: DDD-based architecture with custom exception hierarchy, environment-based configuration, hardcoded retry logic with exponential backoff, PDF-to-PNG conversion in infrastructure layer  
 
 ### Package Structure
 ```
@@ -182,7 +182,7 @@ class ClaudeApiSettings(BaseSettings):
 
 #### File: `src/ai_extraction/infrastructure/api/claude_client.py`
 **Purpose**: Anthropic API client wrapper with retry logic
-**Libraries**: anthropic, base64, time, logging
+**Libraries**: anthropic, base64, time, logging, pdf2image, pillow, io
 **Design Pattern**: Adapter pattern with Retry pattern
 
 **Interface Contracts:**
@@ -213,6 +213,7 @@ class ClaudeApiClient:
         # Implementation requirements:
         # - 3 retry attempts with exponential backoff
         # - Handle specific HTTP error codes (429, 401, 403)
+        # - Convert PDFs to PNG (first page only) before API submission
         # - Base64 encode images for API submission
         # - Use configured model with thinking enabled
         # - Parse and validate JSON response
@@ -222,7 +223,8 @@ class ClaudeApiClient:
 **Key Algorithms:**
 - **Retry Logic**: Exponential backoff starting at 1 second, max 60 seconds, 3 total attempts
 - **Error Categorization**: Map HTTP status codes and exception types to domain exceptions
-- **Image Encoding**: Base64 encode image data with proper MIME type headers
+- **PDF Conversion**: Convert PDF to PNG using pdf2image (first page only, 300 DPI)
+- **Image Encoding**: Base64 encode image data with proper MIME type headers (always image/png for converted PDFs)
 - **Response Validation**: Ensure JSON contains required fields before returning
 
 **Extraction Prompt Requirements:**
@@ -231,6 +233,37 @@ class ClaudeApiClient:
 - Specify confidence scoring approach (0-100)
 - Handle tax extraction (0 if not separately listed)
 - Request standard currency codes
+
+**PDF Processing Requirements:**
+- **Conversion Library**: Use pdf2image for PDF to PNG conversion
+- **Page Selection**: Process only the first page of multi-page PDFs
+- **Image Quality**: Convert at 300 DPI for optimal text recognition
+- **Format Standardization**: Always convert to PNG format for consistency
+- **Error Handling**: Map PDF conversion failures to FileExtractionError
+- **Memory Management**: Convert one page at a time to minimize memory usage
+- **Transparency**: Domain layer receives original PDF data, conversion is transparent infrastructure concern
+
+**PDF Conversion Algorithm:**
+```python
+def convert_pdf_to_png(pdf_data: bytes) -> Tuple[bytes, str]:
+    """
+    Convert PDF to PNG format for Claude API submission.
+    
+    Args:
+        pdf_data: Raw PDF file bytes
+        
+    Returns:
+        Tuple of (png_bytes, "image/png")
+        
+    Raises:
+        FileExtractionError: If PDF conversion fails
+    """
+    # Implementation:
+    # 1. Use pdf2image.convert_from_bytes() with first_page=1, last_page=1
+    # 2. Set DPI to 300 for optimal quality
+    # 3. Convert PIL Image to PNG bytes using BytesIO
+    # 4. Return PNG bytes and "image/png" MIME type
+```
 
 ### 5. Domain Service
 
@@ -328,6 +361,8 @@ anthropic = "^0.31.0"
 pydantic = "^2.7.0"
 pydantic-settings = "^2.3.0"
 python-dotenv = "^1.0.0"
+pdf2image = "^1.17.0"
+pillow = "^10.0.0"
 ```
 
 ### Integration Points

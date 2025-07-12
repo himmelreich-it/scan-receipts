@@ -7,8 +7,8 @@
 
 ---
 
-## Story 1: Core Receipt Data Extraction **IMPLEMENTED**
-**Status**: IMPLEMENTED
+## Story 1: Core Receipt Data Extraction
+**Status**: OUTDATED
 
 **Story Title**: Extract Financial Data from Receipt Images Using Claude API  
 **Code**: EXTRACT_DATA_A1B2  
@@ -27,9 +27,10 @@
 **Technical Notes**:
 - Use `anthropic` Python library for API integration
 - Configure with claude-sonnet-4-20250514 model and enable thinking mode
+- Convert PDFs to PNG format (first page only) before API submission using pdf2image
 - Implement proper image encoding for API submission (base64 for images)
 - Structure prompt to request specific JSON schema output
-- Handle different image formats (PDF pages, JPG, PNG) appropriately
+- Handle different image formats (JPG, PNG) and PDF conversion appropriately
 - Implement retry logic for transient API failures (3 attempts with exponential backoff)
 
 **Dependencies**: Receipt Image Processing [RECEIPT_IMG_E5F6] must provide valid image data
@@ -44,8 +45,8 @@
 
 ---
 
-## Story 2: Comprehensive Error Handling for AI Extraction **IMPLEMENTED**
-**Status**: IMPLEMENTED
+## Story 2: Comprehensive Error Handling for AI Extraction
+**Status**: OUTDATED
 
 **Story Title**: Handle AI Extraction Failures with Specific Error Categorization  
 **Code**: EXTRACT_ERROR_C3D4  
