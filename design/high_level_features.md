@@ -22,6 +22,7 @@
 **Code**: AI_EXTRACT_G7H8  
 **Description**: Integrates with Anthropic's Claude API to extract structured financial data from receipt images. Extracts amount, tax, description, currency, date, and generates confidence scores for each processed receipt using the anthropic Python library.  
 **Dependencies**: Hard - Receipt Image Processing [RECEIPT_IMG_E5F6]  
+**User Stories**: design/user_stories/ai_data_extraction_stories.md  
 
 ## Feature: CSV Data Output
 **Code**: CSV_OUTPUT_I9J0  
