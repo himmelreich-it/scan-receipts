@@ -44,13 +44,7 @@ When the user instructs "implement next user story from file YY":
 
 
 
-## Integrate Implemented Feature
-When the user instructs to integrate a feature which has been fully implemented and tested:
-- Update the main application entry point to use the real implementation
-- Replace any placeholder or mock code with actual feature integration
-- Ensure the feature works end-to-end through the main application
-- Test the integration by running the main application
-- Update any configuration or dependencies needed for the integration
+
 
 ## Design and Implement Next Feature
 When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file

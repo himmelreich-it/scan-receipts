@@ -2,7 +2,6 @@
 
 import sys
 import signal
-import csv
 from pathlib import Path
 from terminal_interface.display.messages import display_startup_message
 from terminal_interface.display.summary_display import SummaryDisplay
@@ -16,6 +15,7 @@ from receipt_processing import (
     FileProcessingConfig
 )
 from ai_extraction import ExtractionFacade, ImageExtractionRequest
+from csv_output.csv_service import CsvService
 
 
 def setup_signal_handlers() -> None:
@@ -33,54 +33,14 @@ def setup_signal_handlers() -> None:
     signal.signal(signal.SIGTERM, signal_handler)
 
 
-def get_next_csv_id(csv_file_path: str) -> int:
-    """Get the next available ID for CSV entries."""
-    if not Path(csv_file_path).exists():
-        return 1
+
+
+def move_processed_file(source_path: Path, done_directory: str, file_id: int) -> str:
+    """Move processed file to done directory with timestamp naming.
     
-    try:
-        with open(csv_file_path, 'r', newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            max_id = 0
-            for row in reader:
-                try:
-                    current_id = int(row.get('ID', 0))
-                    max_id = max(max_id, current_id)
-                except (ValueError, TypeError):
-                    continue
-            return max_id + 1
-    except Exception:
-        return 1
-
-
-def write_csv_header(csv_file_path: str) -> None:
-    """Write CSV header if file doesn't exist."""
-    if not Path(csv_file_path).exists():
-        with open(csv_file_path, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['ID', 'Amount', 'Tax', 'Description', 'Currency', 'Date', 'Confidence', 'Hash'])
-
-
-def write_extraction_to_csv(extraction_result, csv_file_path: str, file_id: int, file_hash: str) -> None:
-    """Write extraction result to CSV file."""
-    data = extraction_result.get_data()
-    
-    with open(csv_file_path, 'a', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow([
-            file_id,
-            float(data.amount),
-            float(data.tax),
-            data.description,
-            data.currency,
-            data.date,
-            data.confidence,
-            file_hash
-        ])
-
-
-def move_processed_file(source_path: Path, done_directory: str, file_id: int) -> None:
-    """Move processed file to done directory with timestamp naming."""
+    Returns:
+        The done filename for CSV storage
+    """
     import shutil
     from datetime import datetime
     
@@ -97,6 +57,8 @@ def move_processed_file(source_path: Path, done_directory: str, file_id: int) ->
     
     # Move the file
     shutil.move(str(source_path), str(destination_path))
+    
+    return new_filename
 
 
 def calculate_file_hash(file_path: Path) -> str:
@@ -155,13 +117,10 @@ def main() -> None:
 
         # Initialize AI extraction and CSV processing
         extraction_facade = ExtractionFacade()
-        csv_file_path = "receipts.csv"
+        csv_service = CsvService()
         
         # Ensure CSV file exists with headers
-        write_csv_header(csv_file_path)
-        
-        # Get starting ID for CSV entries
-        current_id = get_next_csv_id(csv_file_path)
+        csv_service.ensure_csv_exists()
         
         # Process each successfully read file with AI extraction
         success_count = 0
@@ -205,31 +164,65 @@ def main() -> None:
                 # Extract data using AI
                 extraction_result = extraction_facade.extract_from_image(extraction_request)
                 
-                # Write result to CSV
-                write_extraction_to_csv(extraction_result, csv_file_path, current_id, file_hash)
+                # Move processed file to done directory first to get done filename
+                done_filename = move_processed_file(file_path_obj, "done", csv_service.get_next_id())
                 
-                # Move processed file to done directory
-                move_processed_file(file_path_obj, "done", current_id)
-                
-                # Log result
+                # Write result to CSV using CSV service
                 if extraction_result.success:
                     data = extraction_result.data
+                    record_id = csv_service.append_record(
+                        amount=float(data.amount),
+                        tax=float(data.tax),
+                        tax_percentage=float(data.tax_percentage) if hasattr(data, 'tax_percentage') else 0.0,
+                        description=data.description,
+                        currency=data.currency,
+                        date=data.date,
+                        confidence=data.confidence,
+                        hash_value=file_hash,
+                        done_filename=done_filename
+                    )
                     print(f"✓ Extracted: {data.amount} {data.currency} (confidence: {data.confidence}%)")
                     success_count += 1
                 else:
                     error_data = extraction_result.error_data
+                    # Map error type to CSV service format
+                    error_type = "ERROR-API"  # Default
+                    if "file" in error_data.description.lower():
+                        error_type = "ERROR-FILE"
+                    elif "parse" in error_data.description.lower():
+                        error_type = "ERROR-PARSE"
+                    
+                    record_id = csv_service.append_error_record(
+                        error_type=error_type,
+                        hash_value=file_hash,
+                        done_filename=done_filename
+                    )
                     print(f"✗ Failed: {error_data.description}")
                     error_count += 1
-                
-                current_id += 1
                 
             except KeyboardInterrupt:
                 print("\nProcessing interrupted by user")
                 sys.exit(0)
             except Exception as e:
                 print(f"✗ Error processing {processable_file.file_path.name}: {str(e)}")
+                
+                # Still move file to done directory and record error
+                try:
+                    done_filename = move_processed_file(
+                        Path(processable_file.file_path.path), 
+                        "done", 
+                        csv_service.get_next_id()
+                    )
+                    file_hash = calculate_file_hash(Path(processable_file.file_path.path))
+                    csv_service.append_error_record(
+                        error_type="ERROR-UNKNOWN",
+                        hash_value=file_hash,
+                        done_filename=done_filename
+                    )
+                except Exception:
+                    pass  # Don't let cleanup errors stop processing
+                
                 error_count += 1
-                current_id += 1
 
         # Add failed files from initial processing to error count
         error_count += len(result.failed_files)
