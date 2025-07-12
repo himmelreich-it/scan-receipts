@@ -79,7 +79,7 @@ class ExtractionService:
         """Parse and validate API response into ReceiptData."""
         try:
             # Validate required fields
-            required_fields = {'amount', 'tax', 'description', 'currency', 'date', 'confidence'}
+            required_fields = {'amount', 'tax', 'tax_percentage', 'description', 'currency', 'date', 'confidence'}
             missing_fields = required_fields - set(api_response.keys())
             if missing_fields:
                 raise ParseExtractionError(
@@ -95,16 +95,7 @@ class ExtractionService:
     
     def _create_error_result(self, error_type: str, error: Exception, filename: str) -> ExtractionResult:
         """Create error result with appropriate logging."""
-        # Map error types to log messages
-        error_messages = {
-            "ERROR-API": "API-related error",
-            "ERROR-FILE": "File processing error", 
-            "ERROR-PARSE": "Response parsing error",
-            "ERROR-UNKNOWN": "Unexpected error"
-        }
-        
-        log_message = f"{error_messages.get(error_type, 'Error')} for file {filename}: {str(error)}"
-        
+        # Log specific error messages based on type
         if error_type == "ERROR-API":
             if "rate limit" in str(error).lower():
                 logger.error(f"Rate limit exceeded for file {filename}")

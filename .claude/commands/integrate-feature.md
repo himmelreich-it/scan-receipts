@@ -1,4 +1,5 @@
 The user wants to integrate feature $ARGUMENTS with the rest of the application:
+- If no feature is given in $ARGUMENTS, HALT!
 - Review `design/high_level_features.md` which feature it is trying to integrate
 - Look up the user stories and the implementation design so we know where to integrate this feature
 - Update the main application entry point to use the real implementation

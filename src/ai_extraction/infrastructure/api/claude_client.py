@@ -5,12 +5,14 @@ import time
 import logging
 import json
 import re
-from typing import Dict, Any
+from io import BytesIO
+from typing import Dict, Any, Tuple
 
 from anthropic import Anthropic, APIError, APIConnectionError, RateLimitError, AuthenticationError
+from pdf2image import convert_from_bytes
 
 from ...domain.exceptions import (
-    ApiExtractionError, ParseExtractionError, UnknownExtractionError
+    ApiExtractionError, ParseExtractionError, UnknownExtractionError, FileExtractionError
 )
 from ...domain.models import ImageExtractionRequest
 from ..config import settings
@@ -64,6 +66,8 @@ class ClaudeApiClient:
             except APIError as e:
                 logger.error(f"API error for {request.filename}: {e}")
                 raise ApiExtractionError(f"API error: {str(e)}", request.filename, e)
+            except ParseExtractionError:
+                raise
             except Exception as e:
                 logger.error(f"Unexpected error during API call for {request.filename}: {e}")
                 raise UnknownExtractionError(f"Unexpected API error: {str(e)}", request.filename, e)
@@ -71,8 +75,14 @@ class ClaudeApiClient:
     def _make_api_call(self, request: ImageExtractionRequest) -> Dict[str, Any]:
         """Make actual API call to Claude."""
         try:
+            # Convert PDF to PNG if necessary
+            if request.mime_type == "application/pdf":
+                image_data, mime_type = self._convert_pdf_to_png(request.image_data, request.filename)
+            else:
+                image_data, mime_type = request.image_data, request.mime_type
+            
             # Encode image as base64
-            image_b64 = base64.b64encode(request.image_data).decode('utf-8')
+            image_b64 = base64.b64encode(image_data).decode('utf-8')
             
             response = self.client.messages.create(
                 model=settings.model_name,
@@ -84,7 +94,7 @@ class ClaudeApiClient:
                             "type": "image",
                             "source": {
                                 "type": "base64",
-                                "media_type": request.mime_type,
+                                "media_type": mime_type,
                                 "data": image_b64
                             }
                         },
@@ -108,10 +118,46 @@ class ClaudeApiClient:
                 raise ParseExtractionError(f"Malformed JSON response: {str(e)}", request.filename, e)
                 
         except Exception as e:
-            if isinstance(e, (ApiExtractionError, ParseExtractionError)):
+            if isinstance(e, (ApiExtractionError, ParseExtractionError, AuthenticationError, RateLimitError, APIConnectionError, APIError)):
                 raise
             logger.error(f"Unexpected error in API call for {request.filename}: {e}")
             raise UnknownExtractionError(f"Unexpected error: {str(e)}", request.filename, e)
+    
+    def _convert_pdf_to_png(self, pdf_data: bytes, filename: str) -> Tuple[bytes, str]:
+        """
+        Convert PDF to PNG format for Claude API submission.
+        
+        Args:
+            pdf_data: Raw PDF file bytes
+            filename: Original filename for error logging
+            
+        Returns:
+            Tuple of (png_bytes, "image/png")
+            
+        Raises:
+            FileExtractionError: If PDF conversion fails
+        """
+        try:
+            # Convert PDF to images (first page only, 300 DPI)
+            pages = convert_from_bytes(pdf_data, first_page=1, last_page=1, dpi=300)
+            
+            if not pages:
+                raise FileExtractionError(f"No pages found in PDF: {filename}", filename)
+            
+            # Convert PIL Image to PNG bytes
+            page = pages[0]
+            png_buffer = BytesIO()
+            page.save(png_buffer, format='PNG', optimize=True)
+            png_bytes = png_buffer.getvalue()
+            
+            logger.debug(f"Successfully converted PDF to PNG: {filename}")
+            return png_bytes, "image/png"
+            
+        except Exception as e:
+            if isinstance(e, FileExtractionError):
+                raise
+            logger.error(f"Failed to convert PDF to PNG for {filename}: {e}")
+            raise FileExtractionError(f"PDF conversion failed: {str(e)}", filename, e)
     
     def _extract_json_from_response(self, response_text: str) -> str:
         """Extract JSON from response text, handling markdown code blocks."""

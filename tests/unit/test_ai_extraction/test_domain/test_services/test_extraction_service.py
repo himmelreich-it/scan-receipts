@@ -30,6 +30,7 @@ class TestExtractionService:
         api_response = {
             "amount": 45.67,
             "tax": 5.67,
+            "tax_percentage": 21,
             "description": "Test Store",
             "currency": "EUR",
             "date": "15-03-2024",

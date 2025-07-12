@@ -49,6 +49,7 @@ class TestClaudeApiClient:
         mock_response_content.text = json.dumps({
             "amount": 45.67,
             "tax": 5.67,
+            "tax_percentage": 21,
             "description": "Test Store",
             "currency": "EUR",
             "date": "15-03-2024",
@@ -79,6 +80,9 @@ class TestClaudeApiClient:
         """Test: When Claude API returns malformed JSON response, raise ParseExtractionError."""
         # Arrange
         mock_settings.anthropic_api_key = "test_key"
+        mock_settings.model_name = "claude-sonnet-4-20250514"
+        mock_settings.max_tokens = 2000
+        mock_settings.enable_thinking = True
         mock_settings.max_retries = 3
         
         mock_response_content = Mock()
@@ -110,11 +114,16 @@ class TestClaudeApiClient:
         mock_settings.base_backoff_delay = 1.0
         mock_settings.max_backoff_delay = 60.0
         
+        # Create mock response and body for Anthropic exceptions
+        mock_response = Mock()
+        mock_response.status_code = 429
+        mock_body = {"error": {"message": "Rate limit exceeded"}}
+        
         mock_anthropic = Mock()
         mock_anthropic.messages.create.side_effect = [
-            RateLimitError("Rate limit exceeded"),
-            RateLimitError("Rate limit exceeded"), 
-            RateLimitError("Rate limit exceeded")
+            RateLimitError("Rate limit exceeded", response=mock_response, body=mock_body),
+            RateLimitError("Rate limit exceeded", response=mock_response, body=mock_body), 
+            RateLimitError("Rate limit exceeded", response=mock_response, body=mock_body)
         ]
         mock_anthropic_class.return_value = mock_anthropic
         
@@ -139,8 +148,13 @@ class TestClaudeApiClient:
         mock_settings.anthropic_api_key = "test_key"
         mock_settings.max_retries = 3
         
+        # Create mock response and body for Anthropic exceptions
+        mock_response = Mock()
+        mock_response.status_code = 401
+        mock_body = {"error": {"message": "Authentication failed"}}
+        
         mock_anthropic = Mock()
-        mock_anthropic.messages.create.side_effect = AuthenticationError("Authentication failed")
+        mock_anthropic.messages.create.side_effect = AuthenticationError("Authentication failed", response=mock_response, body=mock_body)
         mock_anthropic_class.return_value = mock_anthropic
         
         client = ClaudeApiClient()
@@ -149,17 +163,32 @@ class TestClaudeApiClient:
         with pytest.raises(ApiExtractionError, match="Authentication failed"):
             client.extract_receipt_data(self.test_request)
     
-    @patch('ai_extraction.infrastructure.api.claude_client.base64.b64encode')
-    def test_image_encoding(self, mock_b64encode):
+    @patch('ai_extraction.infrastructure.api.claude_client.Anthropic')
+    @patch('ai_extraction.infrastructure.api.claude_client.settings')
+    def test_image_encoding(self, mock_settings, mock_anthropic_class):
         """Test: When processing image, encode image data as base64 for API submission."""
         # Arrange
-        mock_b64encode.return_value = b"encoded_image_data"
+        mock_settings.anthropic_api_key = "test_key"
+        mock_settings.model_name = "claude-sonnet-4-20250514"
+        mock_settings.max_tokens = 2000
+        mock_settings.enable_thinking = True
         
-        with patch.object(self.client, '_make_api_call') as mock_make_call:
-            mock_make_call.return_value = {"test": "data"}
-            
-            # Act
-            self.client.extract_receipt_data(self.test_request)
+        mock_response_content = Mock()
+        mock_response_content.text = '{"amount": 10.0, "tax": 0, "tax_percentage": 0, "description": "Test", "currency": "EUR", "date": "01-01-2024", "confidence": 90}'
+        
+        mock_response = Mock()
+        mock_response.content = [mock_response_content]
+        
+        mock_anthropic = Mock()
+        mock_anthropic.messages.create.return_value = mock_response
+        mock_anthropic_class.return_value = mock_anthropic
+        
+        client = ClaudeApiClient()
+        
+        # Act
+        with patch('ai_extraction.infrastructure.api.claude_client.base64.b64encode') as mock_b64encode:
+            mock_b64encode.return_value = b"encoded_image_data"
+            client.extract_receipt_data(self.test_request)
             
             # Assert
             mock_b64encode.assert_called_once_with(b"fake_jpeg_data")
@@ -192,6 +221,7 @@ class TestClaudeApiClient:
         json_data = {
             "amount": 8.50,
             "tax": 0.70,
+            "tax_percentage": 9,
             "description": "Coffeecompany De Dijk Amsterdam",
             "currency": "EUR",
             "date": "16-03-2025",

@@ -8,7 +8,7 @@
 ---
 
 ## Story 1: Core Receipt Data Extraction
-**Status**: OUTDATED
+**Status**: IMPLEMENTED
 
 **Story Title**: Extract Financial Data from Receipt Images Using Claude API  
 **Code**: EXTRACT_DATA_A1B2  
@@ -46,7 +46,7 @@
 ---
 
 ## Story 2: Comprehensive Error Handling for AI Extraction
-**Status**: OUTDATED
+**Status**: IMPLEMENTED
 
 **Story Title**: Handle AI Extraction Failures with Specific Error Categorization  
 **Code**: EXTRACT_ERROR_C3D4  

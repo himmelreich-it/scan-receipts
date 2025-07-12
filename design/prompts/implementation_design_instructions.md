@@ -110,6 +110,7 @@ For each module/class include:
 - **Complete configuration classes** (define structure and requirements only)
 - **Working validation logic** (specify validation rules, not code)
 - **Production-ready code blocks** that can be copied directly
+- **Library versions** this is handles during implemenation via `uv`
 
 ## File Management
 - Create `[package_name]_implementation_spec.md` per package

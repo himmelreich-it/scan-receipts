@@ -11,6 +11,8 @@ dependencies = [
     "pytest>=8.4.1",
     "python-dotenv>=1.1.1",
     "ruff>=0.12.2",
+    "pdf2image>=1.17.0",
+    "pillow>=10.0.0",
 ]
 
 [tool.pytest.ini_options]

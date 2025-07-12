@@ -11,6 +11,7 @@ class ReceiptData(BaseModel):
     
     amount: Decimal = Field(..., description="Total purchase amount")
     tax: Decimal = Field(default=Decimal('0'), description="Tax amount")
+    tax_percentage: Decimal = Field(default=Decimal('0'), description="Tax percentage")
     description: str = Field(..., max_length=500, description="Business name or transaction description")
     currency: str = Field(..., max_length=3, description="Currency code (EUR, USD, etc.)")
     date: str = Field(..., description="Transaction date in dd-MM-YYYY format")
@@ -38,6 +39,7 @@ class ErrorReceiptData(BaseModel):
     
     amount: Decimal = Field(default=Decimal('0'))
     tax: Decimal = Field(default=Decimal('0'))
+    tax_percentage: Decimal = Field(default=Decimal('0'))
     description: str  # ERROR-API, ERROR-FILE, ERROR-PARSE, ERROR-UNKNOWN
     currency: str = Field(default="")
     date: str = Field(default="")

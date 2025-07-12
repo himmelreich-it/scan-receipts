@@ -17,6 +17,7 @@ class TestReceiptData:
         receipt_data = ReceiptData(
             amount=Decimal('45.67'),
             tax=Decimal('5.67'),
+            tax_percentage=Decimal('21'),
             description="Test Store",
             currency="EUR",
             date="15-03-2024",
@@ -25,6 +26,7 @@ class TestReceiptData:
         
         assert receipt_data.amount == Decimal('45.67')
         assert receipt_data.tax == Decimal('5.67')
+        assert receipt_data.tax_percentage == Decimal('21')
         assert receipt_data.description == "Test Store"
         assert receipt_data.currency == "EUR"
         assert receipt_data.date == "15-03-2024"
@@ -34,6 +36,7 @@ class TestReceiptData:
         """Test: When currency is provided in lowercase, convert to uppercase."""
         receipt_data = ReceiptData(
             amount=Decimal('45.67'),
+            tax_percentage=Decimal('0'),
             description="Test Store",
             currency="eur",
             date="15-03-2024",
@@ -47,6 +50,7 @@ class TestReceiptData:
         with pytest.raises(ValueError, match="String should have at most 3 characters"):
             ReceiptData(
                 amount=Decimal('45.67'),
+                tax_percentage=Decimal('0'),
                 description="Test Store",
                 currency="EURO",
                 date="15-03-2024",
@@ -58,6 +62,7 @@ class TestReceiptData:
         with pytest.raises(ValueError, match="Date must be in dd-MM-YYYY format"):
             ReceiptData(
                 amount=Decimal('45.67'),
+                tax_percentage=Decimal('0'),
                 description="Test Store",
                 currency="EUR",
                 date="2024-03-15",
@@ -69,6 +74,7 @@ class TestReceiptData:
         with pytest.raises(ValueError):
             ReceiptData(
                 amount=Decimal('45.67'),
+                tax_percentage=Decimal('0'),
                 description="Test Store",
                 currency="EUR",
                 date="15-03-2024",
@@ -103,6 +109,7 @@ class TestExtractionResult:
         """Test: When extraction succeeds, create result with success=True and receipt data."""
         receipt_data = ReceiptData(
             amount=Decimal('45.67'),
+            tax_percentage=Decimal('0'),
             description="Test Store",
             currency="EUR",
             date="15-03-2024",
@@ -140,6 +147,7 @@ class TestExtractionResult:
         """Test: When result is successful, get_data returns receipt data."""
         receipt_data = ReceiptData(
             amount=Decimal('45.67'),
+            tax_percentage=Decimal('0'),
             description="Test Store",
             currency="EUR",
             date="15-03-2024",
