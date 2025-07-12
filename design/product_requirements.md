@@ -63,7 +63,7 @@ The system extracts the following information from each receipt:
   └── receipts.csv    # Output data
   ```
 - **Auto-Creation**: System creates folders if they don't exist
-- **Processed Files**: Moved to `done/` folder with naming convention:
+- **Processed Files**: Copied to `done/` folder with naming convention:
   `{ID}-{processing-timestamp}-{original-filename}`
 - **Timestamp Format**: %Y%m%d-%H%M%S%f
 
@@ -94,7 +94,7 @@ The system extracts the following information from each receipt:
 ### Processing Failures
 - **Unreadable Files**: Create CSV entry with confidence 0, description "ERROR", log error to console
 - **API Failures**: Same error handling as unreadable files, log API error to console
-- **Corrupted Files**: Process as error, move to done folder with "ERROR-" prefix, log to console
+- **Corrupted Files**: Process as error, copy to done folder with "ERROR-" prefix, log to console
 - **CSV Corruption**: Throw error and display message to console, halt execution
 - **Error Handling**: Continue processing remaining files after errors, all errors logged to console
 
