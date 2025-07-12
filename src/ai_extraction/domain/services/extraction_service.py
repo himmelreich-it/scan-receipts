@@ -1,12 +1,11 @@
 """Domain service orchestrating extraction logic and error handling."""
 
 import logging
-from typing import Union
 
 from ..models import ExtractionResult, ReceiptData, ErrorReceiptData, ImageExtractionRequest
 from ..exceptions import (
-    ExtractionError, ApiExtractionError, FileExtractionError, 
-    ParseExtractionError, UnknownExtractionError
+    ApiExtractionError, FileExtractionError, 
+    ParseExtractionError
 )
 from ...infrastructure.api import ClaudeApiClient
 

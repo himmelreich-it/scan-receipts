@@ -1,7 +1,6 @@
 """Tests for SequentialProcessingWorkflow."""
 
 import pytest
-import sys
 from unittest.mock import Mock, patch, call
 from src.receipt_processing.application.workflows.sequential_processing_workflow import SequentialProcessingWorkflow
 from src.receipt_processing.domain.models.file_path import FilePath

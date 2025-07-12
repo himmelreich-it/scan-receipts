@@ -3,7 +3,6 @@
 import pytest
 from decimal import Decimal
 from datetime import datetime
-from pathlib import Path
 
 from ai_extraction.domain.models.extraction_result import (
     ReceiptData, ErrorReceiptData, ExtractionResult

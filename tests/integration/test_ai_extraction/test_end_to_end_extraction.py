@@ -1,6 +1,5 @@
 """End-to-end integration tests for AI extraction."""
 
-import pytest
 from unittest.mock import patch, Mock
 from pathlib import Path
 import json

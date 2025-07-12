@@ -4,7 +4,7 @@ import csv
 import os
 import tempfile
 import pytest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from src.csv_output.csv_service import CsvService
 from src.csv_output.config import CSV_HEADERS, ERROR_API, ERROR_FILE
 

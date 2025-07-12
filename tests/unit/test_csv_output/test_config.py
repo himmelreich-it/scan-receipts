@@ -1,6 +1,5 @@
 """Unit tests for CSV configuration constants."""
 
-import pytest
 from src.csv_output.config import (
     CSV_FILENAME, CSV_HEADERS, CSV_ENCODING,
     ERROR_API, ERROR_FILE, ERROR_PARSE, ERROR_UNKNOWN

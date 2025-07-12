@@ -228,7 +228,7 @@ def main() -> None:
         error_count += len(result.failed_files)
 
         # Display final summary
-        print(f"\nProcessing complete!")
+        print("\nProcessing complete!")
         summary = SummaryDisplay()
         summary.set_counters(success_count, error_count, duplicate_count)
         summary.display_summary()

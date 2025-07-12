@@ -1,6 +1,5 @@
 """Tests for SupportedFileExtensionSpecification."""
 
-import pytest
 from src.receipt_processing.domain.specifications.supported_file_spec import SupportedFileExtensionSpecification
 from src.receipt_processing.domain.models.file_extension import FileExtension
 

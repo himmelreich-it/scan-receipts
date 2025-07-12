@@ -1,11 +1,9 @@
 """Tests for FileFilteringService."""
 
-import pytest
 from unittest.mock import patch
 from src.receipt_processing.domain.services.file_filtering_service import FileFilteringService
 from src.receipt_processing.domain.specifications.supported_file_spec import SupportedFileExtensionSpecification
 from src.receipt_processing.domain.models.file_path import FilePath
-from src.receipt_processing.domain.models.file_extension import FileExtension
 
 
 class TestFileFilteringService:

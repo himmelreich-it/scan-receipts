@@ -2,7 +2,7 @@
 
 import pytest
 import sys
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from terminal_interface.errors.error_handler import ErrorHandler
 
 

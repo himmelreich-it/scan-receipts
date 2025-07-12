@@ -2,7 +2,6 @@
 
 import tempfile
 import os
-from pathlib import Path
 
 from src.receipt_processing.infrastructure.config.file_processing_config import FileProcessingConfig
 from src.receipt_processing.infrastructure.adapters.local_file_repository import LocalFileRepository

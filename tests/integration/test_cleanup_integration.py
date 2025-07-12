@@ -1,9 +1,6 @@
 """Integration tests for One-Off Processing Mode cleanup feature."""
 
 import os
-import sys
-from pathlib import Path
-import pytest
 from unittest.mock import patch
 
 from src.cleanup import CleanupManager

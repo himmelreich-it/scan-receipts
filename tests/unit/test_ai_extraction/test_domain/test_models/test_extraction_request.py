@@ -44,13 +44,24 @@ class TestImageExtractionRequest:
         assert request.mime_type == "image/gif"
         assert request.filename == "test_receipt.gif"
     
+    def test_valid_pdf_request_creation(self):
+        """Test: When valid PDF request is provided, create request successfully."""
+        request = ImageExtractionRequest(
+            file_path=Path("test_receipt.pdf"),
+            image_data=b"fake_pdf_data",
+            mime_type="application/pdf"
+        )
+        
+        assert request.mime_type == "application/pdf"
+        assert request.filename == "test_receipt.pdf"
+    
     def test_unsupported_mime_type(self):
         """Test: When unsupported MIME type is provided, raise validation error."""
         with pytest.raises(ValueError, match="Unsupported MIME type"):
             ImageExtractionRequest(
-                file_path=Path("test_receipt.pdf"),
-                image_data=b"fake_pdf_data",
-                mime_type="application/pdf"
+                file_path=Path("test_receipt.doc"),
+                image_data=b"fake_doc_data",
+                mime_type="application/msword"
             )
     
     def test_filename_property(self):

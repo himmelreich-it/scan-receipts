@@ -1,14 +1,13 @@
 """Tests for extraction service."""
 
-import pytest
 from unittest.mock import Mock, patch
 from decimal import Decimal
 from pathlib import Path
 
 from ai_extraction.domain.services.extraction_service import ExtractionService
-from ai_extraction.domain.models import ImageExtractionRequest, ReceiptData
+from ai_extraction.domain.models import ImageExtractionRequest
 from ai_extraction.domain.exceptions import (
-    ApiExtractionError, FileExtractionError, ParseExtractionError
+    ApiExtractionError
 )
 
 

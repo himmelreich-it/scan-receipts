@@ -1,8 +1,5 @@
 """Unit tests for CleanupManager class."""
 
-import os
-import sys
-from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 

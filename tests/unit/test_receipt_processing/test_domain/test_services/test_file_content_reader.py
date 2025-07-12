@@ -1,6 +1,5 @@
 """Tests for FileContentReader."""
 
-import pytest
 from unittest.mock import patch, mock_open
 from src.receipt_processing.domain.services.file_content_reader import FileContentReader
 from src.receipt_processing.domain.models.processable_file import ProcessableFile

@@ -2,13 +2,13 @@
 
 import pytest
 import json
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from pathlib import Path
 
 from ai_extraction.infrastructure.api.claude_client import ClaudeApiClient
 from ai_extraction.domain.models import ImageExtractionRequest
 from ai_extraction.domain.exceptions import (
-    ApiExtractionError, ParseExtractionError, UnknownExtractionError
+    ApiExtractionError, ParseExtractionError
 )
 
 

@@ -1,9 +1,7 @@
 """Tests for terminal interface main module."""
 
-import pytest
-import sys
 import signal
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from src.terminal_interface.main import main, setup_signal_handlers
 
 

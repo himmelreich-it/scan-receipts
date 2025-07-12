@@ -13,8 +13,8 @@ class ImageExtractionRequest(BaseModel):
     
     @field_validator('mime_type')
     def validate_mime_type(cls, v):
-        """Ensure supported MIME types for AI extraction (images only)."""
-        supported_types = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+        """Ensure supported MIME types for AI extraction (images and PDFs)."""
+        supported_types = {'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'}
         if v not in supported_types:
             raise ValueError(f'Unsupported MIME type: {v}. Supported types: {supported_types}')
         return v

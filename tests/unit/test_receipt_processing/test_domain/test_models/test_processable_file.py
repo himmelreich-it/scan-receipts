@@ -1,6 +1,5 @@
 """Tests for ProcessableFile entity."""
 
-import pytest
 from datetime import datetime
 from unittest.mock import patch
 from src.receipt_processing.domain.models.processable_file import ProcessableFile
