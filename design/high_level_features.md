@@ -13,7 +13,7 @@
 - Duplicate detection using file hashing
 
 **Dependencies**: None
-**User Stories**: user_stories_receipt_processing_engine.md
+**User Stories**: user_stories/user_stories_receipt_processing_engine.md
 
 ## Feature: File Management System
 **Code**: FILE_MGMT_B7C4  

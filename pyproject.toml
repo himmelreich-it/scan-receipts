@@ -13,6 +13,7 @@ dependencies = [
     "ruff>=0.12.2",
     "pdf2image>=1.17.0",
     "pillow>=10.0.0",
+    "mypy>=1.16.1",
 ]
 
 [tool.pytest.ini_options]
