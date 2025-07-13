@@ -57,7 +57,7 @@ Ask before finalizing each feature:
 ### Extraction Mode Example
 ## Feature: User Account Management  
 **Code**: USER_ACCOUNT_A7B3  
-**Status**: NEW
+**Status**: NEW  
 **Description**: Complete user lifecycle management including registration, authentication, profile management, password reset, and account settings. Provides the foundation for all user-specific functionality in the system.
 **Implementation Scope**: 
 - User registration and email verification
@@ -66,12 +66,13 @@ Ask before finalizing each feature:
 - Profile editing and management
 - Account settings and preferences
 - Session management
+
 **Dependencies**: None  
 
 ### Update Mode Example
 ## Feature: User Account Management  
 **Code**: USER_ACCOUNT_A7B3  
-**Status**: OUTDATED
+**Status**: OUTDATED  
 **Description**: Complete user lifecycle management including registration, authentication, profile management, password reset, and account settings. Now includes social media login integration and multi-factor authentication as described in the updated PRD.
 **Implementation Scope**: 
 - User registration and email verification
@@ -81,6 +82,7 @@ Ask before finalizing each feature:
 - Profile editing and management
 - Account settings and preferences
 - Session management
+
 **Dependencies**: Soft - Social Media Integration [SOCIAL_AUTH_X4Y9] (new dependency)
 
 ## Mode Detection

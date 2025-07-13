@@ -5,7 +5,7 @@ An automated receipt processing tool that extracts financial information from re
 
 ## Purpose
 - **Primary Goal**: Streamline business expense tracking by automating receipt data extraction
-- **Target User**: Business owners preparing expense data for accountants
+- **Target User**: Tech-savvy business owners preparing expense data for accountants
 - **Usage Pattern**: Manual execution on batches of receipts as needed
 
 ## System Architecture
@@ -18,21 +18,36 @@ An automated receipt processing tool that extracts financial information from re
 
 ### Technology Stack
 - **Language**: Python
+- **Package Manager**: uv (for dependency management and execution)
 - **AI Service**: Anthropic Claude API via `anthropic` Python library
 - **Input Formats**: PDF, JPG, PNG
 - **Output Format**: CSV
+- **Architecture**: Simple, clean, KISS principle - no over-engineering
 
 ## Functional Requirements
 
-### User Interface
-- User will use a terminal to run a python script
-- User will see be updated by the terminal on progress and errors
-- User will run this script once in a while on all the receipts available
-- Each run processes all receipts fresh, with `done` folder cleared and `receipts.csv` removed before processing
-- The input folder stays intact, the user can re-run
+### User Interface & Execution
+- **Execution Method**: `uv run main.py` from the root folder
+- **User Type**: Tech-savvy user comfortable with terminal commands
+- **Progress Updates**: Terminal displays processing progress and errors
+- **Usage Frequency**: Run occasionally on accumulated receipts
+- **Fresh Processing**: Each run processes all receipts fresh, with `done` folder cleared and `receipts.csv` removed before processing
+- **Input Preservation**: The input folder stays intact, allowing re-runs
+
+### Project Structure
+```
+project/
+├── src/
+│   ├── main.py         # Entry point script
+│   └── [other modules] # Supporting code modules
+├── input/              # Receipts to process
+├── done/               # Processed receipts (cleared on each run)
+├── receipts.csv        # Output data (recreated on each run)
+└── pyproject.toml      # uv configuration
+```
 
 ### Input Processing
-- **Source**: `input/` folder containing receipt files
+- **Source**: `input/` folder containing receipt files (in root directory)
 - **Supported Formats**: PDF, JPG, PNG files
 - **Processing**: Sequential processing of all files in folder
 
@@ -52,20 +67,15 @@ The system extracts the following information from each receipt:
 - **ID Field**: Auto-incrementing number for each processed receipt
 - **Date Format**: dd-MM-YYYY
 - **Hash Field**: File hash for duplicate detection
-- **File Location**: Root directory alongside script
+- **File Location**: Root directory (`receipts.csv`)
 
 ### File Management
-- **Folder Structure**:
-  ```
-  project/
-  ├── input/          # Receipts to process
-  ├── done/           # Processed receipts
-  └── receipts.csv    # Output data
-  ```
+- **Folder Structure**: All data folders in root directory alongside src/
 - **Auto-Creation**: System creates folders if they don't exist
 - **Processed Files**: Copied to `done/` folder with naming convention:
   `{ID}-{processing-timestamp}-{original-filename}`
 - **Timestamp Format**: %Y%m%d-%H%M%S%f
+- **Cleanup**: Both `done/` folder and `receipts.csv` cleared/removed at start of each run
 
 ## AI Integration
 
@@ -111,7 +121,9 @@ The system extracts the following information from each receipt:
 ## Workflow
 
 ### Processing Steps
-1. **Initialize**: Check/create folder structure
+1. **Initialize**: 
+   - Clear/remove existing `done/` folder and `receipts.csv`
+   - Check/create folder structure
 2. **Scan**: Read all files from `input/` folder
 3. **Process**: For each file:
    - Display progress to console
@@ -131,9 +143,10 @@ The system extracts the following information from each receipt:
 ## Configuration
 
 ### Fixed Parameters
-- **Input Folder**: `input/`
-- **Output Folder**: `done/`
-- **CSV Filename**: `receipts.csv`
+- **Execution**: `uv run main.py` from root folder
+- **Input Folder**: `input/` (in root directory)
+- **Output Folder**: `done/` (in root directory)
+- **CSV Filename**: `receipts.csv` (in root directory)
 - **Date Format**: dd-MM-YYYY
 - **Processing**: Manual execution only
 - **Timestamp Format**: %Y%m%d-%H%M%S%f
@@ -143,13 +156,26 @@ The system extracts the following information from each receipt:
 - **File Formats**: Currently PDF, JPG, PNG (expandable)
 - **API Parameters**: Adjustable in implementation
 
+## Code Architecture Principles
+
+### KISS Approach
+- **Simplicity**: Simple, straightforward implementation
+- **No Over-engineering**: Avoid unnecessary complexity and abstractions
+- **Clean Code**: Well-organized, readable, and maintainable
+- **Proper Structure**: Logical separation of concerns without over-architecting
+
+### Module Organization
+- **main.py**: Entry point and orchestration
+- **Supporting Modules**: Clean separation of functionality (file handling, API calls, data processing)
+- **Dependencies**: Managed through uv and pyproject.toml
+
 ## Usage Pattern
 
 ### Typical Workflow
-1. **Preparation**: Place receipt files in `input/` folder
-2. **Execution**: Run script manually
+1. **Preparation**: Place receipt files in `input/` folder (root directory)
+2. **Execution**: Run `uv run main.py` from root folder
 3. **Monitor**: Watch console output for progress and results
-4. **Review**: Check CSV output and confidence scores
+4. **Review**: Check `receipts.csv` output and confidence scores
 5. **Summary**: View final processing summary (total files, errors)
 6. **Handoff**: Provide organized data to accountant
 
@@ -177,3 +203,4 @@ The system extracts the following information from each receipt:
 - **Volume**: Designed for small to medium business volumes
 - **Performance**: Sequential processing suitable for current needs
 - **Storage**: Local file system adequate for typical usage
+- **Simplicity**: Maintain KISS principle for future enhancements

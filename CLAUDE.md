@@ -3,17 +3,11 @@
 ## Python Development
 Please refer to `design/rules/python_agent_instructions.md` for comprehensive Python coding standards and best practices.
 
-## Domain-Driven Design (DDD)
-Please refer to `design/rules/ddd_agent_instructions.md` for comprehensive DDD patterns and practices when:
+## Architecture
+Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural patterns and practices when:
 - Designing features and breaking down requirements into features or stories
 - Creating domain models and bounded contexts
-- Implementing tactical DDD patterns (entities, value objects, aggregates, etc.)
 
-## C4 Architecture Diagrams
-When creating C4-like diagrams, follow the DDD guidelines in `design/rules/ddd_agent_instructions.md` to ensure:
-- Proper bounded context identification and boundaries
-- Correct context mapping relationships
-- Domain-focused component naming and descriptions
 
 ## Testing Commands
 - Run unit tests: `uv run pytest tests/unit/`
