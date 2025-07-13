@@ -6,3 +6,4 @@ The user is asking to create an implementation design for feature $ARGUMENTS :
 - Follow Python coding standards from `design/rules/python_agent_instructions.md`
 - Use `design/architecture/component_design.c4` and `design/architecture/component_design.md` for architectural reference
 - Guide the user through the implementation design
+- Designs are stored in `design/implementation` folder

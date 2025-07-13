@@ -14,7 +14,10 @@ dependencies = [
     "pdf2image>=1.17.0",
     "pillow>=10.0.0",
     "mypy>=1.16.1",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.2.1",
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+testpaths = ["tests"]

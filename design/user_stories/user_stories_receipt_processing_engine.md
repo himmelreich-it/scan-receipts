@@ -7,7 +7,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: Core Receipt Analysis and Data Extraction
 **Code**: RECEIPT_ANALYSIS_A1B2  
-**Status**: NEW  
+**Status**: IMPLEMENTED  
 **Functional Description**: Complete AI-powered analysis of receipt files using Claude API to extract structured financial data including amounts, taxes, descriptions, currencies, dates, and confidence scores  
 **Acceptance Criteria**: 
 - When valid receipt file (PDF, JPG, PNG) is processed, Claude Sonnet 4 API extracts amount, tax, tax_percentage, description, currency, date, and confidence fields
@@ -24,7 +24,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: File Format Validation and Error Handling
 **Code**: FILE_VALIDATION_C3D4  
-**Status**: NEW  
+**Status**: IMPLEMENTED  
 **Functional Description**: Validates input file formats and handles various error scenarios including unreadable files, API failures, and corrupted data while ensuring processing continuity  
 **Acceptance Criteria**: 
 - When file format is PDF, JPG, or PNG, system proceeds with processing
@@ -41,7 +41,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: Duplicate Detection and Management
 **Code**: DUPLICATE_DETECTION_E5F6  
-**Status**: NEW  
+**Status**: IMPLEMENTED  
 **Functional Description**: Prevents reprocessing of duplicate files using file hash comparison and provides clear user feedback about skipped duplicates  
 **Acceptance Criteria**: 
 - When file is processed, system generates file hash for duplicate detection
@@ -66,3 +66,6 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ## Dependencies
 None - This is a foundational feature with no dependencies on other features.
+
+## Implementation Reference
+**Implementation Specification**: [receipt_processing_engine_implementation_spec.md](../implementation_specs/receipt_processing_engine_implementation_spec.md)
