@@ -32,20 +32,6 @@ When creating C4-like diagrams, follow the DDD guidelines in `design/rules/ddd_a
 - Run formatting: `uv run ruff format`
 - Run type checking: `uv run mypy src/`
 
-
-
-## Implement User Story
-When the user instructs "implement next user story from file YY":
-- Use `design/prompts/ai_code_agent_instructions.md` as the main implementation guide
-- Follow Python coding standards from `design/rules/python_agent_instructions.md`
-- Reference feature descriptions from `design/high_level_features.md` for additional context
-- Apply DDD principles from `design/rules/ddd_agent_instructions.md` for domain modeling
-- Follow the exact workflow outlined in the AI code agent instructions
-
-
-
-
-
 ## Design and Implement Next Feature
 When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file
 1. Design Next Feature

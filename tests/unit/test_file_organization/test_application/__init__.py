@@ -1,1 +1,0 @@
-"""Unit tests for file organization application layer."""

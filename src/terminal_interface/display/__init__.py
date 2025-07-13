@@ -1,1 +1,0 @@
-"""Display components for terminal interface."""
