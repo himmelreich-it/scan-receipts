@@ -19,10 +19,70 @@ from pathlib import Path
 import requests
 import pandas as pd
 
-# Local application imports
-from .utils import helper_function
-from .core import Receipt
+# Local application imports (use absolute paths)
+from mypackage.utils import helper_function
+from mypackage.core import Receipt
 ```
+
+## Package and Module Organization
+
+### Module Design Principles
+- **Consolidate related functionality**: Use `models.py` for data classes, `exceptions.py` for custom exceptions, `utils.py` for utilities
+- **Avoid one-class-per-file**: Group related classes/functions in the same module unless >500 lines or distinct responsibilities
+- **Use descriptive module names**: `parser.py`, `validators.py`, `handlers.py` over generic names
+
+### Package Structure
+```
+myproject/
+├── src/
+│   └── mypackage/
+│       ├── __init__.py          # Public API definition
+│       ├── models.py            # Data models and domain objects
+│       ├── core.py              # Main business logic
+│       ├── utils.py             # Utility functions
+│       ├── exceptions.py        # Custom exceptions
+│       └── config.py            # Configuration
+├── tests/
+│   ├── test_models.py
+│   ├── test_core.py
+│   └── test_utils.py
+└── pyproject.toml
+```
+
+### Public API Design
+- Define package's public interface in `__init__.py`
+- Keep internal modules private unless explicitly exported
+- Use `__all__` to control exports
+```python
+# src/mypackage/__init__.py
+from models import Receipt, Transaction, User
+from core import process_receipt
+from exceptions import ParseError, ValidationError
+
+__all__ = ['Receipt', 'Transaction', 'User', 'process_receipt', 'ParseError', 'ValidationError']
+```
+
+### Import Strategy
+- **External users**: Import from package level only
+```python
+# Good: Clean public API usage
+from mypackage import Receipt, process_receipt
+
+# Avoid: Direct internal module imports
+from mypackage.models import Receipt
+```
+- **Internal modules**: Use absolute imports within the same package
+```python
+# Good: Internal module imports with absolute paths
+from mypackage.models import Receipt
+from mypackage.utils import validate_input
+from mypackage.exceptions import ValidationError
+
+# Avoid: Relative imports
+from .models import Receipt
+from .utils import validate_input
+```
+- **Subpackages**: Create only when >7-10 modules or distinct functional areas
 
 ## Agent Decision Making
 - When multiple approaches are valid, prioritize readability over performance unless specified
@@ -133,47 +193,12 @@ def process_image(image_path: str) -> None:
         raise
 ```
 
-## Project Structure and Context Awareness
-- Always consider existing code patterns in the project
-- Maintain consistency with established naming conventions
-- Check for existing utilities before creating new ones
-- Consider backwards compatibility when modifying existing code
-
-```
-scan-receipts/
-├── src/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── ocr.py
-│   │   └── parser.py
-│   └── utils/
-│       ├── __init__.py
-│       └── helpers.py
-├── tests/
-│   ├── __init__.py
-│   ├── unit/
-│   │   ├── __init__.py
-│   │   ├── test_core/
-│   │   └── test_utils/
-│   └── integration/
-│       ├── __init__.py
-│       └── test_e2e/
-├── pytest.ini
-├── pyproject.toml
-└── README.md
-```
-
 ## Dependencies (uv)
 - Use `uv` for dependency management
 - Pin dependency versions in pyproject.toml
 - Use virtual environments with `uv venv`
 - Keep dependencies minimal and well-justified
 - Regular security updates with `uv sync`
-
-## Internal Dependencies
-- Use absolute paths for internal imports, `packageA.moduleB`, not `..packageA.moduleB`
 
 ## Performance
 - Use list comprehensions for simple transformations

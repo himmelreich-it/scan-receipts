@@ -67,8 +67,8 @@ Ask focused questions about:
 ## Status Management Rules
 - **Stories with Status: IMPLEMENTED**: Change status to `OUTDATED` if the updated feature indicates changes need to be made to that story's functionality
 - **Stories without Status**: These are not yet implemented and have no status field
-- **New Stories**: Do not include status field unless specifically required
-- **Creation Mode**: New stories do not include status field
+- **New Stories**: Always include `Status: NEW` for newly created stories
+- **Creation Mode**: New stories include `Status: NEW`
 
 ## Acceptance Criteria Requirements
 - Must be **testable** with clear pass/fail outcomes
@@ -82,7 +82,7 @@ Ask focused questions about:
 
 ### Story Title: [Clear, descriptive name]  
 **Code**: STORY_NAME_HASH4  
-**Status**: [OUTDATED if was IMPLEMENTED and feature update requires changes, otherwise keep original status or omit if none]
+**Status**: [OUTDATED if was IMPLEMENTED and feature update requires changes, NEW for newly created stories, otherwise keep original status or omit if none]
 **Functional Description**: What this story accomplishes for implementation understanding  
 **Acceptance Criteria**: Specific, testable conditions for completion (must be verifiable with clear pass/fail outcomes)  
 **Technical Notes**: Implementation hints and constraints  
@@ -121,7 +121,7 @@ Before finalizing, ensure each story:
 
 2. **Add New Stories**
    - Identify any new functionality described in the updated feature that doesn't exist in the current user stories
-   - Create new story codes for new stories
+   - Create new story codes for new stories with `Status: NEW`
 
 3. **Remove Obsolete Stories**
    - Identify stories that may no longer be relevant to the updated feature requirements
@@ -130,7 +130,7 @@ Before finalizing, ensure each story:
 
 ### Story Title: Complete User Registration and Setup Flow
 **Code**: USER_REG_SETUP_B4K9  
-**Status**: OUTDATED *(Update Mode only, when applicable)*
+**Status**: NEW
 **Functional Description**: End-to-end user registration including form submission, validation, account creation, email verification, and initial profile setup
 **Acceptance Criteria**: 
 - When user submits valid registration form, account is created and confirmation email sent
@@ -182,6 +182,7 @@ Before finalizing, ensure each story:
 - **Update Mode**: Only change `Status: IMPLEMENTED` to `Status: OUTDATED` when feature update explicitly indicates changes needed
 - Stories without status remain without status unless updated
 - **Update Mode**: Keep original story codes for existing stories
+- **New Stories**: Always include `Status: NEW` for newly created stories
 - Do not add stories based on assumptions about what "should" be included
 - **Update Mode**: Clearly distinguish between updated existing stories and newly created stories
 
