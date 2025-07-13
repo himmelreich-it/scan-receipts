@@ -1,0 +1,263 @@
+specification {
+  element person
+  element system
+  element container
+  element component
+  element element
+  
+  relationship uses
+  relationship calls
+  relationship reads
+  relationship writes
+  relationship processes
+}
+
+model {
+  user = person 'Business Owner' {
+    description 'Tech-savvy business owner who processes receipts for expense tracking'
+  }
+  
+  receiptProcessor = system 'Receipt Processor System' {
+    description 'Automated receipt processing tool that extracts financial information from receipt images'
+    
+    cliInterface = container 'CLI Interface' {
+      description 'Terminal-based command line interface for user interaction'
+      technology 'Python CLI'
+      
+      mainScript = component 'Main Script' {
+        description 'Entry point for receipt processing execution'
+        technology 'Python main.py'
+      }
+      
+      progressMonitor = component 'Progress Monitor' {
+        description 'Displays processing progress and status updates'
+        technology 'Python console output'
+      }
+      
+      errorReporter = component 'Error Reporter' {
+        description 'Console error logging and summary reporting'
+        technology 'Python logging'
+      }
+    }
+    
+    receiptProcessingEngine = container 'Receipt Processing Engine' {
+      description 'Core business logic for receipt analysis and data extraction'
+      technology 'Python hexagonal architecture'
+      
+      // Domain Layer Components
+      receiptAggregate = component 'Receipt Aggregate' {
+        description 'Receipt domain entity with business logic and validation'
+        technology 'Python domain model'
+      }
+      
+      extractionValueObjects = component 'Extraction Value Objects' {
+        description 'Amount, Tax, Currency, Date value objects with validation'
+        technology 'Python value objects'
+      }
+      
+      processingPolicies = component 'Processing Policies' {
+        description 'Business rules for confidence scoring and validation'
+        technology 'Python domain services'
+      }
+      
+      // Application Layer Components
+      processReceiptUseCase = component 'Process Receipt Use Case' {
+        description 'Orchestrates receipt processing workflow'
+        technology 'Python application service'
+      }
+      
+      extractDataUseCase = component 'Extract Data Use Case' {
+        description 'Coordinates AI-powered data extraction'
+        technology 'Python application service'
+      }
+      
+      validateResultsUseCase = component 'Validate Results Use Case' {
+        description 'Validates extracted data and applies business rules'
+        technology 'Python application service'
+      }
+      
+      // Ports (Interfaces)
+      receiptRepositoryPort = component 'Receipt Repository Port' {
+        description 'Interface for receipt data persistence'
+        technology 'Python ABC interface'
+      }
+      
+      aiExtractionPort = component 'AI Extraction Port' {
+        description 'Interface for AI-powered data extraction service'
+        technology 'Python ABC interface'
+      }
+      
+      fileSystemPort = component 'File System Port' {
+        description 'Interface for file operations and management'
+        technology 'Python ABC interface'
+      }
+    }
+    
+    infrastructureLayer = container 'Infrastructure Layer' {
+      description 'External adapters and technical implementations'
+      technology 'Python adapters'
+      
+      // File Management Adapters
+      fileSystemAdapter = component 'File System Adapter' {
+        description 'Handles file operations, scanning, and organization'
+        technology 'Python pathlib/os'
+      }
+      
+      csvExportAdapter = component 'CSV Export Adapter' {
+        description 'Exports structured data to CSV format'
+        technology 'Python csv/pandas'
+      }
+      
+      // AI Service Adapter
+      anthropicAdapter = component 'Anthropic API Adapter' {
+        description 'Integrates with Claude API for receipt analysis'
+        technology 'Python anthropic library'
+      }
+      
+      // Data Persistence Adapter
+      csvRepositoryAdapter = component 'CSV Repository Adapter' {
+        description 'Implements receipt data storage in CSV format'
+        technology 'Python csv handling'
+      }
+      
+      // Error Handling Components
+      errorHandlingAdapter = component 'Error Handling Adapter' {
+        description 'Manages error scenarios and recovery strategies'
+        technology 'Python exception handling'
+      }
+      
+      duplicateDetectionAdapter = component 'Duplicate Detection Adapter' {
+        description 'File hash-based duplicate detection'
+        technology 'Python hashlib'
+      }
+    }
+  }
+  
+  externalSystems = system 'External Systems' {
+    description 'External services and file system'
+    
+    anthropicAPI = container 'Anthropic Claude API' {
+      description 'AI service for receipt text analysis and data extraction'
+      technology 'REST API'
+    }
+    
+    fileSystem = container 'Local File System' {
+      description 'Input and output file storage'
+      technology 'Operating system'
+      
+      inputFolder = component 'Input Folder' {
+        description 'Contains receipt files to be processed'
+        technology 'File system directory'
+      }
+      
+      doneFolder = component 'Done Folder' {
+        description 'Archive for processed receipt files'
+        technology 'File system directory'
+      }
+      
+      csvOutput = component 'CSV Output File' {
+        description 'Structured receipt data export'
+        technology 'CSV file format'
+      }
+    }
+  }
+  
+  // Primary Actor Relationships
+  user -> receiptProcessor.cliInterface.mainScript 'Executes uv run main.py'
+  
+  // CLI Interface Internal Relationships
+  receiptProcessor.cliInterface.mainScript -> receiptProcessor.cliInterface.progressMonitor 'Updates progress'
+  receiptProcessor.cliInterface.mainScript -> receiptProcessor.cliInterface.errorReporter 'Reports errors'
+  
+  // CLI to Application Layer
+  receiptProcessor.cliInterface.mainScript -> receiptProcessor.receiptProcessingEngine.processReceiptUseCase 'Initiates processing'
+  
+  // Application Layer Orchestration
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.extractDataUseCase 'Delegates extraction'
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.validateResultsUseCase 'Validates results'
+  
+  // Use Cases to Domain
+  receiptProcessor.receiptProcessingEngine.extractDataUseCase -> receiptProcessor.receiptProcessingEngine.receiptAggregate 'Creates receipt entity'
+  receiptProcessor.receiptProcessingEngine.validateResultsUseCase -> receiptProcessor.receiptProcessingEngine.extractionValueObjects 'Validates data'
+  receiptProcessor.receiptProcessingEngine.validateResultsUseCase -> receiptProcessor.receiptProcessingEngine.processingPolicies 'Applies business rules'
+  
+  // Application Layer to Ports
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.fileSystemPort 'File operations'
+  receiptProcessor.receiptProcessingEngine.extractDataUseCase -> receiptProcessor.receiptProcessingEngine.aiExtractionPort 'AI analysis'
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.receiptRepositoryPort 'Data persistence'
+  
+  // Infrastructure Implementations
+  receiptProcessor.receiptProcessingEngine.fileSystemPort -> receiptProcessor.infrastructureLayer.fileSystemAdapter 'Implemented by'
+  receiptProcessor.receiptProcessingEngine.aiExtractionPort -> receiptProcessor.infrastructureLayer.anthropicAdapter 'Implemented by'
+  receiptProcessor.receiptProcessingEngine.receiptRepositoryPort -> receiptProcessor.infrastructureLayer.csvRepositoryAdapter 'Implemented by'
+  
+  // Infrastructure to External Systems
+  receiptProcessor.infrastructureLayer.anthropicAdapter -> externalSystems.anthropicAPI 'API calls'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.inputFolder 'Reads files'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.doneFolder 'Archives files'
+  receiptProcessor.infrastructureLayer.csvExportAdapter -> externalSystems.fileSystem.csvOutput 'Writes data'
+  
+  // Cross-cutting Infrastructure
+  receiptProcessor.infrastructureLayer.errorHandlingAdapter -> receiptProcessor.cliInterface.errorReporter 'Error reporting'
+  receiptProcessor.infrastructureLayer.duplicateDetectionAdapter -> receiptProcessor.receiptProcessingEngine.processingPolicies 'Duplicate checking'
+  
+  // CSV Repository to CSV Export
+  receiptProcessor.infrastructureLayer.csvRepositoryAdapter -> receiptProcessor.infrastructureLayer.csvExportAdapter 'Uses for export'
+}
+
+views {
+  view componentOverview {
+    title 'Receipt Processor - Component Architecture'
+    description 'Component-level view showing hexagonal architecture implementation'
+    include *
+    
+    style receiptProcessor.receiptProcessingEngine.receiptAggregate {
+      color primary
+    }
+    
+    style receiptProcessor.receiptProcessingEngine.extractionValueObjects {
+      color primary
+    }
+    
+    style receiptProcessor.receiptProcessingEngine.processingPolicies {
+      color primary
+    }
+    
+    style receiptProcessor.receiptProcessingEngine.processReceiptUseCase {
+      color secondary
+    }
+    
+    style receiptProcessor.receiptProcessingEngine.extractDataUseCase {
+      color secondary
+    }
+    
+    style receiptProcessor.receiptProcessingEngine.validateResultsUseCase {
+      color secondary
+    }
+    
+    style receiptProcessor.infrastructureLayer {
+      color muted
+    }
+  }
+  
+  view domainFocus {
+    title 'Domain and Application Layers'
+    description 'Focus on core business logic and use cases'
+    include receiptProcessor.receiptProcessingEngine.*
+    
+    style receiptProcessor.receiptProcessingEngine.receiptAggregate {
+      color primary
+      size large
+    }
+  }
+  
+  view infrastructureFocus {
+    title 'Infrastructure and External Systems'
+    description 'Focus on adapters and external integrations'
+    include receiptProcessor.infrastructureLayer.*, externalSystems.*
+    
+    style externalSystems {
+      color muted
+    }
+  }
+}
