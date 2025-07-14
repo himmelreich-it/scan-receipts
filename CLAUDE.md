@@ -25,6 +25,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Run linting: `uv run ruff check`
 - Run formatting: `uv run ruff format`
 - Run type checking: `uv run mypy src/`
+- Run type checking: `uv run mypy tests/`
 
 ## Design and Implement Next Feature
 When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file

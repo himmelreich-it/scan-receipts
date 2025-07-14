@@ -1,7 +1,7 @@
 """Immutable value objects for financial data validation."""
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from datetime import datetime
 from typing import Dict, Any, Optional
 import re
@@ -69,8 +69,16 @@ class ReceiptDate:
     date: datetime
 
     def __post_init__(self):
-        if self.date > datetime.now():
-            raise ValueError("Receipt date cannot be in the future")
+        from datetime import datetime, timedelta
+
+        now = datetime.now()
+        one_year_ago = now - timedelta(days=365)
+
+        if self.date > now:
+            raise ValueError("Date validation failed: future date")
+
+        if self.date < one_year_ago:
+            raise ValueError("Date validation failed: date too old")
 
     def to_string(self) -> str:
         """Format date as dd-MM-YYYY."""
@@ -143,5 +151,5 @@ class ExtractionData:
                 date=receipt_date,
                 confidence=confidence,
             )
-        except (KeyError, ValueError, TypeError) as e:
+        except (KeyError, ValueError, TypeError, InvalidOperation) as e:
             raise ValueError(f"Invalid API response data: {e}")

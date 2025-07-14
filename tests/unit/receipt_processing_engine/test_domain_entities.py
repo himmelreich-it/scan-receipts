@@ -30,7 +30,7 @@ class TestReceipt:
             tax_percentage=None,
             description=Description("Test Store"),
             currency=Currency("EUR"),
-            date=ReceiptDate(datetime(2023, 1, 15)),
+            date=ReceiptDate(datetime(2025, 1, 15)),
             confidence=Confidence(85)
         )
         
@@ -44,7 +44,7 @@ class TestReceipt:
         """Test: Receipt can be marked as failed with error type."""
         receipt = Receipt(file_path="/test/receipt.jpg", file_hash="abc123")
         
-        receipt.mark_as_failed("API_FAILURE")
+        receipt.mark_as_failed("API call failed", "API_FAILURE")
         
         assert receipt.processing_status == ProcessingStatus.FAILED
         assert receipt.error_type == "API_FAILURE"
@@ -77,7 +77,7 @@ class TestReceipt:
             tax_percentage=None,
             description=Description("Test Store"),
             currency=Currency("EUR"),
-            date=ReceiptDate(datetime(2023, 1, 15)),
+            date=ReceiptDate(datetime(2025, 1, 15)),
             confidence=Confidence(85)
         )
         
@@ -88,7 +88,7 @@ class TestReceipt:
         assert csv_row['Tax'] == '5.67'
         assert csv_row['Description'] == 'Test Store'
         assert csv_row['Currency'] == 'EUR'
-        assert csv_row['Date'] == '15-01-2023'
+        assert csv_row['Date'] == '15-01-2025'
         assert csv_row['Confidence'] == '85'
         assert csv_row['Hash'] == 'abc123'
         assert csv_row['DoneFilename'] == 'receipt.jpg'

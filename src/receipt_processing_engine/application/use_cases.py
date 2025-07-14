@@ -2,15 +2,14 @@
 
 import logging
 from typing import Dict, Any, List, Optional
+from pathlib import Path
 from ..domain.entities import Receipt, ProcessingStatus
 from ..domain.value_objects import ExtractionData
-from ..domain.policies import ProcessingPolicies
-from ..domain.exceptions import ReceiptProcessingError, InvalidFileFormatError
+from ..domain.exceptions import ReceiptProcessingError
 from .ports import (
     AIExtractionPort,
     FileSystemPort,
     DuplicateDetectionPort,
-    ReceiptRepositoryPort,
 )
 
 
@@ -26,130 +25,173 @@ class ValidationResult:
 
 
 class ProcessReceiptUseCase:
-    """Main use case for processing receipt files."""
+    """Main orchestrator for receipt processing workflow."""
 
     def __init__(
         self,
-        ai_extraction_port: AIExtractionPort,
-        file_system_port: FileSystemPort,
-        receipt_repository_port: ReceiptRepositoryPort,
-        duplicate_detector_port: DuplicateDetectionPort,
+        ai_extraction: AIExtractionPort,
+        file_system: FileSystemPort,
+        duplicate_detection: DuplicateDetectionPort,
     ):
-        self.ai_extraction_port = ai_extraction_port
-        self.file_system_port = file_system_port
-        self.receipt_repository_port = receipt_repository_port
-        self.duplicate_detector_port = duplicate_detector_port
-        self.extract_data_use_case = ExtractDataUseCase(ai_extraction_port)
-        self.validate_results_use_case = ValidateResultsUseCase(ProcessingPolicies())
+        self.ai_extraction = ai_extraction
+        self.file_system = file_system
+        self.duplicate_detection = duplicate_detection
 
-    async def execute(self, file_path: str) -> Receipt:
-        """Execute complete receipt processing workflow.
+    async def process_receipts(
+        self, input_folder: Path, done_folder: Path
+    ) -> List[Receipt]:
+        """Process all receipts in input folder.
 
-        Args:
-            file_path: Path to receipt file to process
-
-        Returns:
-            Processed Receipt entity
+        Workflow:
+        1. Initialize duplicate detection with done folder
+        2. Get list of input files
+        3. Process each file through validation pipeline
+        4. Return list of processed receipts
         """
         try:
-            logger.info(f"Starting processing for {file_path}")
+            # Initialize duplicate detection with done folder
+            self.duplicate_detection.initialize_done_folder_hashes(done_folder)
 
-            file_hash = self.duplicate_detector_port.generate_file_hash(file_path)
-            receipt = Receipt(file_path=file_path, file_hash=file_hash)
-            receipt.processing_status = ProcessingStatus.PROCESSING
+            # Get list of input files
+            input_files = self.file_system.get_input_files(input_folder)
 
-            known_hashes = self.receipt_repository_port.get_processed_hashes()
-            if self.duplicate_detector_port.is_duplicate(file_hash, known_hashes):
+            results = []
+            for file_path in input_files:
+                receipt = await self._process_single_receipt(file_path)
+                results.append(receipt)
+
+            return results
+
+        except Exception as error:
+            logger.error(f"Failed to process receipts from {input_folder}: {error}")
+            raise ReceiptProcessingError(f"Processing failed: {error}")
+
+    async def _process_single_receipt(self, file_path: Path) -> Receipt:
+        """Process a single receipt file through complete workflow."""
+        try:
+            logger.info(f"Processing {file_path}")
+
+            # Generate file hash
+            file_hash = self.duplicate_detection.generate_file_hash(file_path)
+
+            # Create receipt entity
+            receipt = Receipt(
+                file_path=str(file_path),
+                file_hash=file_hash,
+                original_filename=file_path.name,
+                processing_status=ProcessingStatus.PROCESSING,
+            )
+
+            # Check for duplicates
+            if self.duplicate_detection.is_duplicate(file_hash):
                 receipt.mark_as_duplicate()
                 logger.info(f"Duplicate file skipped: {file_path}")
                 return receipt
 
-            if not self.file_system_port.validate_file_format(file_path):
-                raise InvalidFileFormatError(f"Unsupported file format: {file_path}")
+            # Add to session tracking
+            self.duplicate_detection.add_to_session(file_hash, file_path.name)
 
-            extraction_data = await self.extract_data_use_case.execute(file_path)
+            # Check file format
+            if not self.ai_extraction.supports_file_format(file_path):
+                self.file_system.move_file_to_failed(
+                    file_path, "Unsupported file format"
+                )
+                receipt.mark_as_failed("Unsupported file format", "UNSUPPORTED_FORMAT")
+                return receipt
 
-            validation_result = self.validate_results_use_case.execute(extraction_data)
-            if not validation_result.is_valid:
-                logger.warning(
-                    f"Validation issues for {file_path}: {validation_result.issues}"
+            # Extract data using AI
+            try:
+                api_response = await self.ai_extraction.extract_data(file_path)
+                extraction_data = ExtractionData.from_api_response(api_response)
+
+                # Mark as processed
+                receipt.mark_as_processed(extraction_data)
+                logger.info(
+                    f"Successfully processed {file_path} with confidence {extraction_data.confidence.score}"
                 )
 
-            receipt.mark_as_processed(extraction_data)
-            self.receipt_repository_port.save_receipt(receipt)
+            except ValueError as e:
+                # Handle date validation errors specifically
+                if "Date validation failed" in str(e):
+                    self.file_system.move_file_to_failed(file_path, str(e))
+                    receipt.mark_as_failed(str(e), "VALIDATION_ERROR")
+                else:
+                    # Handle other validation errors
+                    self.file_system.move_file_to_failed(
+                        file_path, f"JSON parsing failed: {str(e)}"
+                    )
+                    receipt.mark_as_failed(f"JSON parsing failed: {str(e)}", "VALIDATION_ERROR")
 
-            logger.info(
-                f"Successfully processed {file_path} with confidence {extraction_data.confidence.score}"
-            )
+            except Exception as e:
+                # Handle API failures
+                self.file_system.move_file_to_failed(
+                    file_path, f"API failure: {str(e)}"
+                )
+                receipt.mark_as_failed(f"API failure: {str(e)}", "API_FAILURE")
+
             return receipt
 
         except Exception as error:
-            return self._handle_processing_error(
-                error, file_path, receipt if "receipt" in locals() else None
-            )
-
-    def _handle_processing_error(
-        self, error: Exception, file_path: str, receipt: Optional[Receipt] = None
-    ) -> Receipt:
-        """Handle processing errors and create appropriate receipt."""
-        error_type = ProcessingPolicies.classify_processing_error(error)
-
-        if receipt is None:
+            logger.error(f"Unexpected error processing {file_path}: {error}")
+            # Create a failed receipt for unexpected errors
             try:
-                file_hash = self.duplicate_detector_port.generate_file_hash(file_path)
+                file_hash = self.duplicate_detection.generate_file_hash(file_path)
             except Exception:
                 file_hash = "unknown"
-            receipt = Receipt(file_path=file_path, file_hash=file_hash)
 
-        receipt.mark_as_failed(error_type)
+            receipt = Receipt(
+                file_path=str(file_path),
+                file_hash=file_hash,
+                original_filename=file_path.name,
+            )
+            receipt.mark_as_failed(f"File unreadable or corrupted: {str(error)}", "FILE_CORRUPT")
 
-        logger.error(f"{error_type} for {file_path}: {error}")
+            try:
+                self.file_system.move_file_to_failed(
+                    file_path, f"File unreadable or corrupted: {str(error)}"
+                )
+            except Exception:
+                pass  # Continue even if we can't move to failed folder
 
-        try:
-            self.receipt_repository_port.save_receipt(receipt)
-        except Exception as save_error:
-            logger.error(f"Failed to save error receipt for {file_path}: {save_error}")
-
-        return receipt
+            return receipt
 
 
 class ExtractDataUseCase:
-    """Use case for AI-powered data extraction."""
+    """Manages AI-powered data extraction from receipt files."""
 
-    def __init__(self, ai_extraction_port: AIExtractionPort):
-        self.ai_extraction_port = ai_extraction_port
+    def __init__(self, ai_extraction: AIExtractionPort):
+        self.ai_extraction = ai_extraction
 
-    async def execute(self, file_path: str) -> ExtractionData:
-        """Extract data from receipt file using AI.
+    async def extract_and_validate(self, file_path: Path) -> ExtractionData:
+        """Extract data from receipt and validate business rules.
 
-        Args:
-            file_path: Path to receipt file
-
-        Returns:
-            Extracted and validated data
-
-        Raises:
-            ReceiptProcessingError: When extraction or validation fails
+        Process:
+        1. Extract data using AI service
+        2. Validate date using business rules
+        3. Validate required fields
+        4. Return validated extraction result
         """
         try:
-            response_data = await self.ai_extraction_port.extract_receipt_data(
-                file_path
-            )
-            self._validate_api_response(response_data)
-            return ExtractionData.from_api_response(response_data)
+            # Extract data using AI
+            api_response = await self.ai_extraction.extract_data(file_path)
+
+            # Validate API response
+            self._validate_api_response(api_response)
+
+            # Create extraction data (this will trigger date validation)
+            extraction_data = ExtractionData.from_api_response(api_response)
+
+            return extraction_data
+
+        except ValueError as e:
+            # Re-raise validation errors (including date validation)
+            raise e
         except Exception as e:
             logger.error(f"Data extraction failed for {file_path}: {e}")
             raise ReceiptProcessingError(f"Failed to extract data: {e}")
 
     def _validate_api_response(self, response: Dict[str, Any]) -> None:
-        """Validate API response contains required fields.
-
-        Args:
-            response: API response dictionary
-
-        Raises:
-            ReceiptProcessingError: When response is invalid
-        """
+        """Validate API response contains required fields."""
         required_fields = ["amount", "description", "currency", "date", "confidence"]
         missing_fields = [field for field in required_fields if field not in response]
 
@@ -164,46 +206,3 @@ class ExtractDataUseCase:
             raise ReceiptProcessingError(
                 "Confidence must be an integer between 0 and 100"
             )
-
-
-class ValidateResultsUseCase:
-    """Use case for validating extraction results."""
-
-    def __init__(self, processing_policies: ProcessingPolicies):
-        self.processing_policies = processing_policies
-
-    def execute(self, extraction_data: ExtractionData) -> ValidationResult:
-        """Validate extracted data against business rules.
-
-        Args:
-            extraction_data: Data to validate
-
-        Returns:
-            ValidationResult with issues if any
-        """
-        issues = self._apply_business_rules(extraction_data)
-        return ValidationResult(is_valid=len(issues) == 0, issues=issues)
-
-    def _apply_business_rules(self, data: ExtractionData) -> List[str]:
-        """Apply business rules and return any issues found.
-
-        Args:
-            data: Data to validate
-
-        Returns:
-            List of validation issues
-        """
-        issues = []
-
-        if not self.processing_policies.is_confidence_acceptable(data.confidence.score):
-            issues.append(
-                f"Confidence score {data.confidence.score} outside acceptable range"
-            )
-
-        if data.amount.value <= 0:
-            issues.append("Amount must be positive")
-
-        if data.tax and data.tax.value < 0:
-            issues.append("Tax amount cannot be negative")
-
-        return issues

@@ -24,23 +24,28 @@ class Receipt:
     file_hash: str
     extraction_data: Optional[ExtractionData] = None
     processing_status: ProcessingStatus = ProcessingStatus.PENDING
+    error_message: Optional[str] = None
     error_type: Optional[str] = None
+    original_filename: Optional[str] = None
 
     def mark_as_processed(self, data: ExtractionData) -> None:
         """Mark receipt as successfully processed with extraction data."""
         self.extraction_data = data
         self.processing_status = ProcessingStatus.COMPLETED
+        self.error_message = None
         self.error_type = None
 
-    def mark_as_failed(self, error_type: str) -> None:
-        """Mark receipt as failed with error type."""
+    def mark_as_failed(self, error_message: str, error_type: str = "UNKNOWN") -> None:
+        """Mark receipt as failed with error message and type."""
         self.processing_status = ProcessingStatus.FAILED
+        self.error_message = error_message
         self.error_type = error_type
         self.extraction_data = None
 
     def mark_as_duplicate(self) -> None:
         """Mark receipt as duplicate."""
         self.processing_status = ProcessingStatus.DUPLICATE
+        self.error_message = None
         self.error_type = None
         self.extraction_data = None
 
@@ -74,7 +79,7 @@ class Receipt:
                 "DoneFilename": filename,
             }
         else:
-            error_description = self.error_type if self.error_type else "ERROR"
+            error_description = self.error_message if self.error_message else "ERROR"
             return {
                 "Amount": "0",
                 "Tax": "",

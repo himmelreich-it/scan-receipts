@@ -2,6 +2,8 @@
 
 import logging
 from typing import Set
+from datetime import datetime, timedelta
+from dataclasses import dataclass
 from .exceptions import InvalidFileFormatError, DuplicateFileError
 
 
@@ -45,3 +47,49 @@ class ProcessingPolicies:
     def is_confidence_acceptable(confidence: int) -> bool:
         """Check if confidence score meets business requirements."""
         return 0 <= confidence <= 100
+
+
+@dataclass(frozen=True)
+class ValidationResult:
+    """Result of validation operations."""
+
+    is_valid: bool
+    error_message: str = ""
+
+
+class DateValidationPolicy:
+    """Domain service for date validation business rules."""
+
+    @staticmethod
+    def validate_date(date: datetime) -> ValidationResult:
+        """Validate date is not future and not older than 1 year.
+
+        Business Rules:
+        - Date must not be in the future
+        - Date must not be older than 1 year from current date
+        """
+        now = datetime.now()
+        one_year_ago = now - timedelta(days=365)
+
+        if date > now:
+            return ValidationResult(
+                is_valid=False, error_message="Date validation failed: future date"
+            )
+
+        if date < one_year_ago:
+            return ValidationResult(
+                is_valid=False, error_message="Date validation failed: date too old"
+            )
+
+        return ValidationResult(is_valid=True)
+
+    @staticmethod
+    def is_date_in_future(date: datetime) -> bool:
+        """Check if date is in the future."""
+        return date > datetime.now()
+
+    @staticmethod
+    def is_date_too_old(date: datetime) -> bool:
+        """Check if date is older than 1 year."""
+        one_year_ago = datetime.now() - timedelta(days=365)
+        return date < one_year_ago

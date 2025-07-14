@@ -83,6 +83,7 @@ from .models import Receipt
 from .utils import validate_input
 ```
 - **Subpackages**: Create only when >7-10 modules or distinct functional areas
+- **Absolute local imports** Always assume we run from the src folder, base absolute import paths on this assumption
 
 ## Agent Decision Making
 - When multiple approaches are valid, prioritize readability over performance unless specified
@@ -161,6 +162,7 @@ def extract_total(receipt_text: str) -> Optional[float]:
 - Generate tests alongside implementation code
 - Provide realistic test data fixtures when needed
 - Configure pytest settings in pytest.ini
+- Do NOT add src in imports, the pythonpath is set in the pytest.ini
 
 ```python
 # Good: Tests what the spec requires

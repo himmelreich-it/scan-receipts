@@ -97,21 +97,21 @@ class TestReceiptDate:
     
     def test_valid_dates(self):
         """Test: ReceiptDate accepts valid past dates."""
-        past_date = datetime(2023, 1, 15)
+        past_date = datetime(2025, 1, 15)
         receipt_date = ReceiptDate(past_date)
         assert receipt_date.date == past_date
     
     def test_future_date_raises_error(self):
         """Test: ReceiptDate rejects future dates."""
         future_date = datetime(2050, 1, 1)
-        with pytest.raises(ValueError, match="Receipt date cannot be in the future"):
+        with pytest.raises(ValueError, match="Date validation failed: future date"):
             ReceiptDate(future_date)
     
     def test_to_string_format(self):
         """Test: ReceiptDate formats correctly as dd-MM-YYYY."""
-        date = datetime(2023, 1, 15)
+        date = datetime(2025, 1, 15)
         receipt_date = ReceiptDate(date)
-        assert receipt_date.to_string() == "15-01-2023"
+        assert receipt_date.to_string() == "15-01-2025"
 
 
 class TestExtractionData:
@@ -125,7 +125,7 @@ class TestExtractionData:
             tax_percentage=TaxPercentage(Decimal('12.5')),
             description=Description("Test Store"),
             currency=Currency("EUR"),
-            date=ReceiptDate(datetime(2023, 1, 15)),
+            date=ReceiptDate(datetime(2025, 1, 15)),
             confidence=Confidence(85)
         )
         
@@ -143,7 +143,7 @@ class TestExtractionData:
             "tax_percentage": 12.5,
             "description": "Test Store",
             "currency": "EUR",
-            "date": "15-01-2023",
+            "date": "15-01-2025",
             "confidence": 85
         }
         
@@ -154,7 +154,7 @@ class TestExtractionData:
         assert extraction_data.description.text == "Test Store"
         assert extraction_data.currency.code == "EUR"
         assert extraction_data.confidence.score == 85
-        assert extraction_data.date.to_string() == "15-01-2023"
+        assert extraction_data.date.to_string() == "15-01-2025"
     
     def test_from_api_response_optional_fields(self):
         """Test: ExtractionData handles optional tax fields."""
@@ -164,7 +164,7 @@ class TestExtractionData:
             "tax_percentage": None,
             "description": "Test Store",
             "currency": "EUR",
-            "date": "15-01-2023",
+            "date": "15-01-2025",
             "confidence": 85
         }
         
@@ -181,7 +181,7 @@ class TestExtractionData:
             "amount": "invalid",  # Should be number
             "description": "Test Store",
             "currency": "EUR",
-            "date": "15-01-2023",
+            "date": "15-01-2025",
             "confidence": 85
         }
         

@@ -8,7 +8,7 @@ from receipt_processing_engine.domain.value_objects import (
     ExtractionData, Amount, Currency, Confidence, Description, ReceiptDate
 )
 from receipt_processing_engine.infrastructure.file_system_adapter import FileSystemAdapter
-from receipt_processing_engine.infrastructure.duplicate_detection_adapter import DuplicateDetectionAdapter
+from receipt_processing_engine.infrastructure.duplicate_adapter import DuplicateDetectionAdapter
 
 
 class TestReceiptDomain:
@@ -26,14 +26,14 @@ class TestReceiptDomain:
         assert receipt.error_type is None
         
         # Test marking as failed
-        receipt.mark_as_failed("API_FAILURE")
+        receipt.mark_as_failed("API call failed", "API_FAILURE")
         assert receipt.processing_status == ProcessingStatus.FAILED
         assert receipt.error_type == "API_FAILURE"
         assert receipt.extraction_data is None
         
         # Test CSV output for failed receipt
         csv_row = receipt.to_csv_row()
-        assert csv_row['Description'] == 'API_FAILURE'
+        assert csv_row['Description'] == 'API call failed'
         assert csv_row['Confidence'] == '0'
         assert csv_row['Amount'] == '0'
 
@@ -89,7 +89,7 @@ class TestValueObjects:
             "tax_percentage": None,
             "description": "Test Store",
             "currency": "EUR",
-            "date": "15-01-2023",
+            "date": "15-01-2025",
             "confidence": 85
         }
         
@@ -101,7 +101,7 @@ class TestValueObjects:
         assert extraction_data.description.text == "Test Store"
         assert extraction_data.currency.code == "EUR"
         assert extraction_data.confidence.score == 85
-        assert extraction_data.date.to_string() == "15-01-2023"
+        assert extraction_data.date.to_string() == "15-01-2025"
 
 
 class TestInfrastructure:
@@ -140,9 +140,14 @@ class TestInfrastructure:
         assert isinstance(hash1, str)
         
         # Test duplicate detection
-        known_hashes = {hash1}
-        assert adapter.is_duplicate(hash1, known_hashes) is True
-        assert adapter.is_duplicate("different_hash", known_hashes) is False
+        # Initially no duplicates
+        assert adapter.is_duplicate(hash1) is False
+        assert adapter.is_duplicate("different_hash") is False
+        
+        # Add to session and test
+        adapter.add_to_session(hash1, "test_file.txt")
+        assert adapter.is_duplicate(hash1) is True
+        assert adapter.is_duplicate("different_hash") is False
 
 
 class TestCompleteWorkflow:
@@ -160,7 +165,7 @@ class TestCompleteWorkflow:
             tax_percentage=None,
             description=Description("Test Store"),
             currency=Currency("EUR"),
-            date=ReceiptDate(datetime(2023, 1, 15)),
+            date=ReceiptDate(datetime(2025, 1, 15)),
             confidence=Confidence(85)
         )
         
@@ -176,7 +181,7 @@ class TestCompleteWorkflow:
         assert csv_row['Amount'] == '45.67'
         assert csv_row['Description'] == 'Test Store'
         assert csv_row['Currency'] == 'EUR'
-        assert csv_row['Date'] == '15-01-2023'
+        assert csv_row['Date'] == '15-01-2025'
         assert csv_row['Confidence'] == '85'
         assert csv_row['Hash'] == 'abc123'
     
@@ -185,12 +190,12 @@ class TestCompleteWorkflow:
         receipt = Receipt("/test/corrupt.jpg", "def456")
         
         # Test different error types
-        receipt.mark_as_failed("FILE_CORRUPT")
+        receipt.mark_as_failed("File is corrupted", "FILE_CORRUPT")
         assert receipt.processing_status == ProcessingStatus.FAILED
         assert receipt.error_type == "FILE_CORRUPT"
         
         csv_row = receipt.to_csv_row()
-        assert csv_row['Description'] == 'FILE_CORRUPT'
+        assert csv_row['Description'] == 'File is corrupted'
         assert csv_row['Confidence'] == '0'
         
         # Test duplicate handling

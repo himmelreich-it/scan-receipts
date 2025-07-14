@@ -1,11 +1,515 @@
 # Receipt Processing Engine Implementation Specification
 
-## Package: receipt_processing_engine
-**Path**: `src/receipt_processing_engine/`  
-**Purpose**: Core automated receipt processing system with AI-powered data extraction using hexagonal architecture  
-**User Stories**: RECEIPT_ANALYSIS_A1B2, FILE_VALIDATION_C3D4, DUPLICATE_DETECTION_E5F6  
-**Dependencies**: anthropic, hashlib, pathlib, logging, json, os  
-**Design Decisions**: Hexagonal architecture with domain/application/infrastructure layers, error classification system, SHA-256 file hashing, Claude Sonnet 4 API integration
+## Feature Overview
+Core automated receipt processing system that handles file intake, AI-powered data extraction using Anthropic's Claude API, and structured data output. Includes advanced duplicate detection, date validation, and enhanced error handling with failed folder management.
+
+## User Stories Implemented
+- **RECEIPT_ANALYSIS_A1B2**: Core Receipt Analysis and Data Extraction
+- **FILE_VALIDATION_C3D4**: File Format Validation and Error Handling  
+- **DUPLICATE_DETECTION_E5F6**: Duplicate Detection and Management
+
+## Architecture Overview
+
+Following hexagonal architecture principles, the implementation is structured in three layers:
+
+### Domain Layer (Core Business Logic)
+- **Receipt Aggregate**: Central domain entity with business rules
+- **Extraction Value Objects**: Immutable data structures for extracted information
+- **Validation Policies**: Business rules for date validation and data integrity
+
+### Application Layer (Use Cases)
+- **Process Receipt Use Case**: Main orchestrator for receipt processing workflow
+- **Extract Data Use Case**: Manages AI-powered data extraction
+- **Validate Results Use Case**: Applies business rules and validation
+
+### Infrastructure Layer (Adapters)
+- **Anthropic AI Adapter**: Handles API integration and PDF conversion
+- **File System Adapter**: Manages file operations and folder organization
+- **Duplicate Detection Adapter**: Implements hash-based duplicate detection
+
+## Package Structure
+
+```
+src/
+└── receipt_processing_engine/
+    ├── __init__.py                 # Public API exports
+    ├── domain/
+    │   ├── __init__.py
+    │   ├── models.py              # Receipt aggregate and value objects
+    │   ├── policies.py            # Date validation and business rules
+    │   └── exceptions.py          # Domain-specific exceptions
+    ├── application/
+    │   ├── __init__.py
+    │   ├── use_cases.py           # Main use case implementations
+    │   └── ports.py               # Interface definitions (ports)
+    └── infrastructure/
+        ├── __init__.py
+        ├── ai_adapter.py          # Anthropic API integration
+        ├── file_adapter.py        # File system operations
+        ├── duplicate_adapter.py   # Hash-based duplicate detection
+        └── config.py              # Configuration and constants
+```
+
+## Implementation Specifications
+
+### Package: receipt_processing_engine
+**Path**: `src/receipt_processing_engine/`
+**Purpose**: Core receipt processing functionality with AI-powered data extraction
+**User Stories**: RECEIPT_ANALYSIS_A1B2, FILE_VALIDATION_C3D4, DUPLICATE_DETECTION_E5F6
+**Dependencies**: anthropic, pdf2image, pathlib, hashlib, json, logging, datetime
+**Design Decisions**: Hexagonal architecture, PDF-to-image conversion, SHA-256 hashing, hard-coded 1-year date validation
+## Domain Layer Components
+
+### File: `domain/models.py`
+**Purpose**: Core domain entities and value objects
+
+#### Receipt Aggregate
+```python
+@dataclass
+class Receipt:
+    """Central domain entity representing a receipt and its processing state."""
+    
+    file_path: Path
+    original_filename: str
+    file_hash: str
+    extraction_result: Optional[ExtractionResult]
+    processing_status: ProcessingStatus
+    error_message: Optional[str]
+    
+    def mark_as_processed(self, result: ExtractionResult) -> None:
+        """Mark receipt as successfully processed with extraction result."""
+        
+    def mark_as_failed(self, error_message: str) -> None:
+        """Mark receipt as failed with error details."""
+        
+    def is_duplicate(self) -> bool:
+        """Check if this receipt is marked as a duplicate."""
+```
+
+#### ExtractionResult Value Object
+```python
+@dataclass(frozen=True)
+class ExtractionResult:
+    """Immutable value object containing extracted receipt data."""
+    
+    amount: float
+    tax: Optional[float]
+    tax_percentage: Optional[float]
+    description: str
+    currency: str
+    date: datetime.date
+    confidence: int
+    
+    def __post_init__(self) -> None:
+        """Validate extraction result data on creation."""
+```
+
+#### ProcessingStatus Enum
+```python
+class ProcessingStatus(Enum):
+    """Receipt processing status enumeration."""
+    
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    DUPLICATE = "duplicate"
+```
+
+### File: `domain/policies.py`
+**Purpose**: Business rules and validation policies
+
+#### DateValidationPolicy
+```python
+class DateValidationPolicy:
+    """Domain service for date validation business rules."""
+    
+    @staticmethod
+    def validate_date(date: datetime.date) -> ValidationResult:
+        """Validate date is not future and not older than 1 year.
+        
+        Business Rules:
+        - Date must not be in the future
+        - Date must not be older than 1 year from current date
+        """
+        
+    @staticmethod
+    def is_date_in_future(date: datetime.date) -> bool:
+        """Check if date is in the future."""
+        
+    @staticmethod
+    def is_date_too_old(date: datetime.date) -> bool:
+        """Check if date is older than 1 year."""
+```
+
+#### ValidationResult
+```python
+@dataclass(frozen=True)
+class ValidationResult:
+    """Result of validation operations."""
+    
+    is_valid: bool
+    error_message: Optional[str]
+```
+
+### File: `domain/exceptions.py`
+**Purpose**: Domain-specific exceptions
+
+```python
+class ReceiptProcessingError(Exception):
+    """Base exception for receipt processing errors."""
+
+class DateValidationError(ReceiptProcessingError):
+    """Exception for date validation failures."""
+
+class ExtractionValidationError(ReceiptProcessingError):
+    """Exception for data extraction validation failures."""
+
+class DuplicateReceiptError(ReceiptProcessingError):
+    """Exception for duplicate receipt detection."""
+```
+
+## Application Layer Components
+
+### File: `application/ports.py`
+**Purpose**: Interface definitions (ports) for external dependencies
+
+#### AI Extraction Port
+```python
+class AIExtractionPort(ABC):
+    """Port for AI-powered data extraction services."""
+    
+    @abstractmethod
+    async def extract_data(self, file_path: Path) -> ExtractionResult:
+        """Extract structured data from receipt file."""
+        
+    @abstractmethod
+    def supports_file_format(self, file_path: Path) -> bool:
+        """Check if file format is supported for extraction."""
+```
+
+#### File System Port
+```python
+class FileSystemPort(ABC):
+    """Port for file system operations."""
+    
+    @abstractmethod
+    def ensure_folders_exist(self, folders: List[Path]) -> None:
+        """Create folder structure if it doesn't exist."""
+        
+    @abstractmethod
+    def move_file_to_failed(self, file_path: Path, error_message: str) -> None:
+        """Move file to failed folder with error log."""
+        
+    @abstractmethod
+    def get_input_files(self, input_folder: Path) -> List[Path]:
+        """Get list of receipt files from input folder."""
+```
+
+#### Duplicate Detection Port
+```python
+class DuplicateDetectionPort(ABC):
+    """Port for duplicate detection services."""
+    
+    @abstractmethod
+    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
+        """Scan done folder and build hash database."""
+        
+    @abstractmethod
+    def is_duplicate(self, file_hash: str) -> bool:
+        """Check if file hash is a duplicate."""
+        
+    @abstractmethod
+    def add_to_session(self, file_hash: str, filename: str) -> None:
+        """Add file hash to current session tracking."""
+```
+
+### File: `application/use_cases.py`
+**Purpose**: Main use case implementations
+
+#### ProcessReceiptUseCase
+```python
+class ProcessReceiptUseCase:
+    """Main orchestrator for receipt processing workflow."""
+    
+    def __init__(
+        self,
+        ai_extraction: AIExtractionPort,
+        file_system: FileSystemPort,
+        duplicate_detection: DuplicateDetectionPort
+    ):
+        """Initialize use case with required dependencies."""
+        
+    async def process_receipts(self, input_folder: Path) -> List[Receipt]:
+        """Process all receipts in input folder.
+        
+        Workflow:
+        1. Initialize duplicate detection with done folder
+        2. Get list of input files
+        3. Process each file through validation pipeline
+        4. Return list of processed receipts
+        """
+        
+    async def _process_single_receipt(self, file_path: Path) -> Receipt:
+        """Process a single receipt file through complete workflow."""
+```
+
+#### ExtractDataUseCase
+```python
+class ExtractDataUseCase:
+    """Manages AI-powered data extraction from receipt files."""
+    
+    def __init__(self, ai_extraction: AIExtractionPort):
+        """Initialize with AI extraction service."""
+        
+    async def extract_and_validate(self, file_path: Path) -> ExtractionResult:
+        """Extract data from receipt and validate business rules.
+        
+        Process:
+        1. Extract data using AI service
+        2. Validate date using business rules
+        3. Validate required fields
+        4. Return validated extraction result
+        """
+```
+
+## Infrastructure Layer Components
+
+### File: `infrastructure/ai_adapter.py`
+**Purpose**: Anthropic API integration with PDF conversion
+
+#### AnthropicAIAdapter
+```python
+class AnthropicAIAdapter(AIExtractionPort):
+    """Adapter for Anthropic Claude API with PDF conversion support."""
+    
+    def __init__(self, api_key: str):
+        """Initialize with Anthropic API key."""
+        
+    async def extract_data(self, file_path: Path) -> ExtractionResult:
+        """Extract structured data from receipt file.
+        
+        Process:
+        1. Check file format (PDF, JPG, PNG)
+        2. Convert PDF to image if needed
+        3. Send image to Claude API
+        4. Parse JSON response
+        5. Create ExtractionResult object
+        """
+        
+    def _convert_pdf_to_image(self, pdf_path: Path) -> Path:
+        """Convert PDF first page to PNG image.
+        
+        Uses pdf2image library to convert PDF to image format
+        that can be sent to Anthropic API.
+        """
+        
+    def _send_to_claude_api(self, image_path: Path) -> dict:
+        """Send image to Claude API and get structured response."""
+        
+    def _parse_extraction_response(self, response: dict) -> ExtractionResult:
+        """Parse Claude API response into ExtractionResult object."""
+        
+    def supports_file_format(self, file_path: Path) -> bool:
+        """Check if file format is supported (PDF, JPG, PNG)."""
+```
+
+### File: `infrastructure/file_adapter.py`
+**Purpose**: File system operations and folder management
+
+#### FileSystemAdapter
+```python
+class FileSystemAdapter(FileSystemPort):
+    """Adapter for file system operations."""
+    
+    def __init__(self, done_folder: Path, failed_folder: Path):
+        """Initialize with folder paths."""
+        
+    def ensure_folders_exist(self, folders: List[Path]) -> None:
+        """Create folder structure if it doesn't exist."""
+        
+    def move_file_to_failed(self, file_path: Path, error_message: str) -> None:
+        """Move file to failed folder with error log.
+        
+        Process:
+        1. Copy file to failed folder
+        2. Create text error log with same name + .error extension
+        3. Log error details to console
+        """
+        
+    def get_input_files(self, input_folder: Path) -> List[Path]:
+        """Get list of receipt files from input folder.
+        
+        Filters for supported formats: PDF, JPG, PNG
+        """
+        
+    def _create_error_log(self, failed_file_path: Path, error_message: str) -> None:
+        """Create simple text error log file."""
+```
+
+### File: `infrastructure/duplicate_adapter.py`
+**Purpose**: Hash-based duplicate detection
+
+#### DuplicateDetectionAdapter
+```python
+class DuplicateDetectionAdapter(DuplicateDetectionPort):
+    """Adapter for SHA-256 hash-based duplicate detection."""
+    
+    def __init__(self):
+        """Initialize with empty hash databases."""
+        
+    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
+        """Scan done folder and build hash database.
+        
+        Process:
+        1. Scan all files in done folder
+        2. Generate SHA-256 hash for each file
+        3. Store in hash database for duplicate checking
+        """
+        
+    def is_duplicate(self, file_hash: str) -> bool:
+        """Check if file hash is a duplicate.
+        
+        Checks against:
+        1. Done folder hash database
+        2. Current session hash database
+        """
+        
+    def add_to_session(self, file_hash: str, filename: str) -> None:
+        """Add file hash to current session tracking."""
+        
+    def _generate_file_hash(self, file_path: Path) -> str:
+        """Generate SHA-256 hash for file."""
+```
+
+### File: `infrastructure/config.py`
+**Purpose**: Configuration and constants
+
+```python
+class ProcessingConfig:
+    """Configuration constants for receipt processing."""
+    
+    # Date validation
+    MAX_DATE_AGE_DAYS = 365  # 1 year
+    
+    # Supported file formats
+    SUPPORTED_FORMATS = {'.pdf', '.jpg', '.jpeg', '.png'}
+    
+    # API configuration
+    CLAUDE_MODEL = "claude-sonnet-4-20250514"
+    
+    # Error messages
+    ERROR_MESSAGES = {
+        'date_future': 'Date validation failed: future date',
+        'date_too_old': 'Date validation failed: date too old',
+        'unsupported_format': 'Unsupported file format',
+        'api_failure': 'API failure',
+        'json_parsing': 'JSON parsing failed',
+        'date_extraction': 'Date extraction failed: no valid date found',
+        'file_unreadable': 'File unreadable or corrupted'
+    }
+```
+
+## Integration Specifications
+
+### Main Application Entry Point
+```python
+# Integration with main application
+from receipt_processing_engine import ProcessReceiptUseCase, create_receipt_processor
+
+async def main():
+    # Initialize receipt processor with configuration
+    processor = create_receipt_processor(
+        api_key=os.getenv('ANTHROPIC_API_KEY'),
+        done_folder=Path(os.getenv('DONE_FOLDER')),
+        failed_folder=Path(os.getenv('FAILED_FOLDER'))
+    )
+    
+    # Process receipts
+    results = await processor.process_receipts(
+        input_folder=Path(os.getenv('INPUT_RECEIPTS_FOLDER'))
+    )
+    
+    return results
+```
+
+### Public API (Package `__init__.py`)
+```python
+# src/receipt_processing_engine/__init__.py
+from .application.use_cases import ProcessReceiptUseCase
+from .domain.models import Receipt, ExtractionResult, ProcessingStatus
+from .domain.exceptions import ReceiptProcessingError
+from .infrastructure.ai_adapter import AnthropicAIAdapter
+from .infrastructure.file_adapter import FileSystemAdapter
+from .infrastructure.duplicate_adapter import DuplicateDetectionAdapter
+
+def create_receipt_processor(
+    api_key: str,
+    done_folder: Path,
+    failed_folder: Path
+) -> ProcessReceiptUseCase:
+    """Factory function to create configured receipt processor."""
+
+__all__ = [
+    'ProcessReceiptUseCase',
+    'Receipt',
+    'ExtractionResult',
+    'ProcessingStatus',
+    'ReceiptProcessingError',
+    'create_receipt_processor'
+]
+```
+
+## Configuration Requirements
+
+### Environment Variables
+```bash
+ANTHROPIC_API_KEY=your_api_key_here
+DONE_FOLDER=/path/to/done/folder
+FAILED_FOLDER=/path/to/failed/folder
+INPUT_RECEIPTS_FOLDER=/path/to/input/folder
+```
+
+### Dependencies (pyproject.toml)
+```toml
+[project]
+dependencies = [
+    "anthropic",
+    "pdf2image",
+    "pillow",
+    "python-dateutil"
+]
+```
+
+## Error Handling Strategy
+
+### Error Categories
+1. **File System Errors**: Permission issues, disk space, folder access
+2. **PDF Conversion Errors**: Corrupted PDFs, conversion failures
+3. **API Errors**: Network failures, rate limiting, authentication
+4. **Data Validation Errors**: Date validation, required field validation
+5. **Duplicate Detection Errors**: Hash generation failures
+
+### Error Handling Approach
+- **Fail Fast**: Stop processing individual file on error, continue with next
+- **Error Logging**: Create detailed error logs in failed folder
+- **Recovery**: Allow retry by moving files back to input folder
+- **Continuation**: Continue processing other files when one fails
+
+## Performance Considerations
+
+### Optimization Strategies
+1. **Async Processing**: Use asyncio for AI API calls
+2. **Lazy Loading**: Load done folder hashes only when needed
+3. **Memory Management**: Process files one at a time to avoid memory issues
+4. **Caching**: Cache file hashes to avoid recalculation
+
+### Scalability Constraints
+- **API Rate Limits**: Anthropic API has rate limiting
+- **Memory Usage**: PDF conversion requires temporary image storage
+- **Disk Space**: Failed folder accumulates files over time
+
+This implementation specification provides comprehensive guidance for developing the Receipt Processing Engine while maintaining clean architecture principles and meeting all user story requirements.
 
 ## Architecture Overview
 

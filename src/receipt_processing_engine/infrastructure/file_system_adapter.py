@@ -2,6 +2,8 @@
 
 import logging
 import mimetypes
+import shutil
+from typing import List
 from pathlib import Path
 from ..application.ports import FileSystemPort
 
@@ -112,3 +114,29 @@ class FileSystemAdapter(FileSystemPort):
             error: Exception that occurred
         """
         logger.error(f"File access error: {type(error).__name__}: {error}")
+
+    def get_input_files(self, input_folder: Path) -> List[Path]:
+        """Get list of supported files in input folder."""
+        try:
+            files = []
+            for file_path in input_folder.iterdir():
+                if file_path.is_file() and self.validate_file_format(str(file_path)):
+                    files.append(file_path)
+            return files
+        except Exception as e:
+            logger.error(f"Failed to get input files from {input_folder}: {e}")
+            return []
+
+    def ensure_folders_exist(self, folders: List[Path]) -> None:
+        """Create folder structure if it doesn't exist."""
+        for folder in folders:
+            try:
+                folder.mkdir(parents=True, exist_ok=True)
+                logger.debug(f"Ensured folder exists: {folder}")
+            except Exception as e:
+                logger.error(f"Failed to create folder {folder}: {e}")
+                raise
+
+    def move_file_to_failed(self, file_path: Path, error_message: str) -> None:
+        """Move file to failed folder with error log (stub implementation)."""
+        logger.info(f"Would move {file_path} to failed folder: {error_message}")
