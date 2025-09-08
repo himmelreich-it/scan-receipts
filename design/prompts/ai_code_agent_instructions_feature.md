@@ -60,8 +60,9 @@ For stories marked `Status: OUTDATED`:
 1. **Unit Tests**: Test individual components from each user story
 2. **Integration Tests**: Test interaction between user stories
 3. **Feature Tests**: Test complete workflows spanning multiple stories
-4. **End-to-End Tests**: Test entire feature from user perspective
-5. **Regression Tests**: Ensure updates to outdated stories don't break existing functionality
+4. **BDD Tests**: Execute all feature scenarios end-to-end
+5. **End-to-End Tests**: Test entire feature from user perspective
+6. **Regression Tests**: Ensure updates to outdated stories don't break existing functionality
 
 #### Test Structure:
 ```python
@@ -79,6 +80,7 @@ class TestFeatureComplete:
 
 ### 6. Feature Validation
 - **All User Stories**: Verify every story's acceptance criteria are met
+- **BDD Scenarios**: All feature scenarios pass
 - **Integration Points**: Validate all stories work together seamlessly
 - **Data Consistency**: Ensure data flows correctly between stories
 - **Error Handling**: Verify error conditions are handled across story boundaries
@@ -105,10 +107,53 @@ Mark all user stories as **IMPLEMENTED** and add comprehensive implementation su
 - **Architecture**: [Brief description of how stories fit together]
 - **Public APIs**: [List all public interfaces]
 - **Integration Points**: [How stories communicate]
-- **Test Coverage**: [Unit: X, Integration: Y, End-to-End: Z]
+- **Test Coverage**: [Unit: X, Integration: Y, End-to-End: Z, **BDD: Z**]
+- **BDD Scenarios**: [List all executed scenarios and status]
 - **All Acceptance Criteria**: PASS/FAIL for each story
 - **Feature Validation**: PASS/FAIL for complete feature
 ```
+
+## BDD Implementation Guidelines
+
+### Complete Feature BDD Strategy
+- **Feature-Level Scenarios**: Implement all BDD scenarios for the complete feature
+- **Cross-Story Workflows**: Create scenarios that span multiple user stories
+- **Integration Scenarios**: Test how stories work together
+- **End-to-End Scenarios**: Test complete user journeys across the feature
+
+### Step Definition Creation
+- Implement step definitions in `tests/bdd/steps/`
+- Map each step to corresponding application functionality
+- Use page object pattern for UI interactions where applicable
+- Reuse step definitions across scenarios where possible
+- Create shared step definitions for common feature workflows
+
+### BDD Test Structure
+```python
+# tests/bdd/steps/feature_steps.py
+from behave import given, when, then
+from your_app.main import YourApp
+
+@given('the complete feature is initialized')
+def step_impl(context):
+    context.app = YourApp()
+    context.feature = context.app.get_feature()
+
+@when('user completes workflow spanning multiple stories')
+def step_impl(context):
+    context.result = context.feature.complete_workflow()
+
+@then('all user stories work together seamlessly')
+def step_impl(context):
+    assert context.result.all_stories_integrated == True
+```
+
+### BDD Validation Requirements
+- All feature scenarios must pass
+- Step definitions must call actual application code (no mocks in BDD tests)
+- Use context object to share state between steps
+- Clear assertion messages for failed scenarios
+- Test complete feature workflows, not just individual stories
 
 ## Implementation Guidelines
 
@@ -119,7 +164,7 @@ Mark all user stories as **IMPLEMENTED** and add comprehensive implementation su
 - **Validate Integration**: Test story interactions at each step
 - **Maintain Consistency**: Ensure consistent interfaces across stories
 - **Document Architecture**: Show how all pieces fit together
-- **Test Comprehensively**: Unit, integration, and end-to-end testing
+- **Test Comprehensively**: Unit, integration, BDD, and end-to-end testing
 
 ### DO NOT:
 - **Implement Stories in Isolation**: Stories must work together
@@ -162,24 +207,27 @@ def external_dependency_adapter(*args, **kwargs):
 2. **Outdated Stories Updated**: All **OUTDATED** stories successfully updated to **IMPLEMENTED**
 3. **Complete Feature Works**: End-to-end functionality verified
 4. **Integration Validated**: All story interactions work properly
-5. **Comprehensive Testing**: Unit, integration, and feature tests pass
-6. **Code Quality**: Follows Python guidelines throughout
-7. **Documentation Complete**: Architecture and integration documented
-8. **No Breaking Changes**: Existing code continues to work
-9. **Feature Ready**: Complete feature ready for production use
+5. Comprehensive Testing: Unit, integration, BDD, and feature tests pass
+6. All BDD Scenarios Pass: Complete feature scenarios execute successfully
+7. **Code Quality**: Follows Python guidelines throughout
+8. **Documentation Complete**: Architecture and integration documented
+9. **No Breaking Changes**: Existing code continues to work
+10. **Feature Ready**: Complete feature ready for production use
 
 ## Halt Conditions
 - **Circular Dependencies**: Cannot resolve story dependencies → HALT
 - **Incomplete Feature Specification**: Missing critical cross-story information → HALT
 - **Integration Failures**: Stories don't integrate properly → HALT
 - **Test Failures**: After 3 correction attempts across any layer → HALT
+- **BDD Scenario Failures**: Feature scenarios don't pass → HALT
 - **Architecture Conflicts**: Stories cannot be made to work together → HALT
 
 ## Output Requirements
 - **Complete Feature Summary**: What was built (entire feature description)
 - **Architecture Overview**: How all stories fit together
 - **Implementation Map**: Which files implement which stories
-- **Test Results**: Pass/fail for unit, integration, and end-to-end tests
+- **Test Results**: Pass/fail for unit, integration, BDD, and end-to-end tests
+- **BDD Results**: Complete scenario execution status
 - **Integration Validation**: Confirmation that all stories work together
 - **Feature Validation**: Confirmation that complete feature meets requirements
 - **File Structure**: Complete directory tree with all created files

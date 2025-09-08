@@ -79,6 +79,51 @@ For each module/class include:
 - **Performance considerations** and constraints
 - **Security measures** and validation requirements
 
+### BDD Scenario Specifications
+Generate BDD feature files and scenario outlines based on user story acceptance criteria:
+
+**BDD Requirements:**
+- Generate Gherkin scenarios that directly test acceptance criteria
+- Map each scenario to specific user story acceptance criteria
+- Create scenario outlines for parameterized testing where appropriate
+- Include edge cases and error scenarios from user stories
+- Store scenarios in organized feature files by functional area
+
+**BDD Output Format:**
+```
+### BDD Test Scenarios
+- **Feature Files**: [List of .feature files created]
+- **Scenario Coverage**: [Mapping to acceptance criteria]
+- **Test Data Requirements**: [Any test data needed]
+- **Step Definition Interfaces**: [Expected step definition signatures]
+```
+
+**Feature File Structure:**
+```gherkin
+Feature: [Feature name from user story]
+  As a [user type]
+  I want [capability]
+  So that [business value]
+
+  Background:
+    Given [common setup steps]
+
+  Scenario: [Acceptance criteria 1]
+    Given [precondition]
+    When [action]
+    Then [expected result]
+
+  Scenario Outline: [Parameterized test]
+    Given [precondition with <parameter>]
+    When [action with <parameter>]
+    Then [expected result with <parameter>]
+    
+    Examples:
+      | parameter | expected |
+      | value1    | result1  |
+      | value2    | result2  |
+```
+
 ### Integration Specifications
 - **Main application entry point** integration requirements
 - **Configuration changes** needed for the feature
@@ -102,6 +147,7 @@ For each module/class include:
 - **Data models** and relationships (structure, not implementation)
 - **Error handling strategy** and exception hierarchy design
 - **Configuration requirements** and environment setup
+- **BDD feature files** with scenarios mapped to acceptance criteria
 
 ### DO NOT Include:
 - **Complete method implementations** (provide signatures and contracts only)
@@ -111,9 +157,11 @@ For each module/class include:
 - **Working validation logic** (specify validation rules, not code)
 - **Production-ready code blocks** that can be copied directly
 - **Library versions** this is handles during implemenation via `uv`
+- **BDD step definition implementations** (provide interfaces and expectations only)
 
 ## File Management
 - Create `[package_name]_implementation_spec.md` per package
+- Create BDD feature files in `design/implementation/[package_name]_bdd_scenarios/`
 - Update user stories file with implementation references
 - Document design decisions and rationale
 - Maintain implementation tracking index
@@ -125,6 +173,7 @@ Before including any specification detail:
 3. Does this provide sufficient guidance without over-specifying implementation?
 4. Does this preserve interfaces used by dependent stories?
 5. Are interface contracts clear enough for independent implementation?
+6. Do BDD scenarios directly map to acceptance criteria?
 
 ## Example Interactive Flow
 ```

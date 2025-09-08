@@ -68,7 +68,8 @@ logging.warning(
 - DO NOT invent additional test cases or edge cases
 - Unit tests: mock external dependencies using dummy implementations
 - Integration tests: test only class interactions specified in story
-- Use pytest framework
+- BDD tests: implement step definitions for scenarios from implementation design
+- Use pytest framework for unit/integration, behave for BDD
 - Test structure:
   ```python
   def test_acceptance_criteria_1():
@@ -79,6 +80,7 @@ logging.warning(
 ### 5. Validate
 - Run new tests first
 - Run all existing tests
+- Run BDD scenarios: `behave tests/bdd/`
 - **HALT** if any tests fail after corrections
 - Verify acceptance criteria are met exactly as written
 
@@ -90,8 +92,43 @@ logging.warning(
   - Files created: [list with paths]
   - Dependencies mocked: [list with references to user stories]
   - Tests created: [count and types]
+  - BDD scenarios: [count and status]
   - All acceptance criteria: PASS/FAIL
   ```
+
+## BDD Implementation Guidelines
+
+### Step Definition Creation
+- Implement step definitions in `tests/bdd/steps/`
+- Map each step to corresponding application functionality
+- Use page object pattern for UI interactions where applicable
+- Reuse step definitions across scenarios where possible
+- Only implement step definitions for scenarios related to current user story
+
+### BDD Test Structure
+```python
+# tests/bdd/steps/feature_steps.py
+from behave import given, when, then
+from your_app.main import YourApp
+
+@given('the system is initialized')
+def step_impl(context):
+    context.app = YourApp()
+
+@when('user performs action')
+def step_impl(context):
+    context.result = context.app.perform_action()
+
+@then('expected outcome occurs')
+def step_impl(context):
+    assert context.result.status == "expected_value"
+```
+
+### BDD Validation Requirements
+- Step definitions must call actual application code (no mocks in BDD tests)
+- Use context object to share state between steps
+- Clear assertion messages for failed scenarios
+- Handle missing dependencies with logged placeholders in step definitions
 
 ## Strict Boundaries
 
@@ -109,12 +146,15 @@ logging.warning(
 - Follow provided Python code guidelines
 - Create specified file structure
 - Generate tests for stated acceptance criteria
+- Implement BDD step definitions for current user story scenarios
 - Handle missing dependencies with logged placeholders
 
 ## Halt Conditions
 - **Missing/Ambiguous Specification**: Cannot determine exact requirements → HALT
 - **Circular Dependencies**: Detected → HALT
 - **Test Failures**: After 3 correction attempts → HALT
+- **BDD Scenario Failures**: Scenarios don't match application behavior → HALT
+- **Missing Step Definitions**: Scenarios can't execute → HALT
 - **Incomplete Stories**: Missing critical information → HALT
 - **File System Errors**: Cannot create required files → HALT
 
@@ -167,15 +207,17 @@ PLACEHOLDER_CONFIG = {
 
 ## Success Criteria
 1. All acceptance criteria implemented exactly as written
-2. All tests pass (new and existing)
-3. Code follows Python guidelines exactly
-4. User story marked **IMPLEMENTED**
-5. No breaking changes to existing code
-6. All missing dependencies properly logged with references
+2. All tests pass (unit, integration, and BDD)
+3. All BDD scenarios execute successfully
+4. Code follows Python guidelines exactly
+5. User story marked **IMPLEMENTED**
+6. No breaking changes to existing code
+7. All missing dependencies properly logged with references
 
 ## Output Requirements
 - **Implementation Summary**: What was built (only features in acceptance criteria)
 - **Test Results**: Pass/fail status with test names
+- **BDD Results**: Pass/fail status for scenarios
 - **File Locations**: Exact paths where code was created
 - **Placeholder Dependencies**: List of dummy implementations with user story references
 - **Any Issues**: Problems and resolutions
