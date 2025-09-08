@@ -870,6 +870,166 @@ dependencies = [
 - Corrupted files for error handling testing
 - Various file sizes for performance testing
 
+## BDD Test Scenarios
+
+### Feature Files
+- **duplicate_detection.feature**: Comprehensive duplicate detection and management scenarios in `tests/bdd/features/`
+
+### Scenario Coverage
+**DUPLICATE_DETECTION_E5F6 Acceptance Criteria Mapping**:
+- `Initialize done folder hash database at session start` → "When processing session starts, system scans done folder and generates hash database"
+- `Skip duplicate file that matches done folder` → "When file hash matches existing hash in done folder, system skips file and logs message"
+- `Skip duplicate file that matches current session` → "When file hash matches hash from current processing session, system skips file and logs message"
+- `Process file from failed folder (no duplicate check)` → "When checking duplicates, system does NOT check failed folder"
+- `Generate and store file hash` → "When file is processed, system generates file hash" and "When file hash is generated, it is stored"
+- `Continue processing after duplicate detection` → "When duplicate detection occurs, system continues processing next file"
+- `Hash generation for different file types` → Parameterized testing for PDF/JPG/PNG formats
+- `Handle hash generation failure` → "Hash generation failures" error scenario
+- `Handle hash comparison error` → "Hash comparison errors" error scenario  
+- `Handle done folder access error` → "Done folder access errors" error scenario
+- `Handle logging failure` → "Logging failures" error scenario
+
+### Test Data Requirements
+**File System Test Data**:
+- Sample receipt files (PDF, JPG, PNG) with known binary content for hash generation
+- Corrupted files for error testing
+- Files with identical content for duplicate detection testing
+- Folder structure with done/failed/input directories
+
+**Hash Test Data**:
+- Pre-calculated SHA-256 hashes for test files
+- Hash collision scenarios for edge case testing
+- Invalid hash formats for error condition testing
+
+**Session State Test Data**:
+- Current session hash tracking with filename mappings
+- Done folder hash database with existing file hashes
+- Failed folder files excluded from duplicate checking
+
+### Step Definition Interfaces
+**Expected step definition signatures for behave implementation**:
+
+```python
+# Background and setup steps
+@given('a receipt processing system is initialized')
+def step_system_initialized(context): pass
+
+@given('a done folder exists with processed receipts')  
+def step_done_folder_exists(context): pass
+
+@given('the done folder contains existing processed receipt files')
+def step_done_folder_contains_files(context): pass
+
+# Hash database initialization steps
+@when('the processing session starts')
+def step_processing_session_starts(context): pass
+
+@then('the system scans the done folder')
+def step_system_scans_done_folder(context): pass
+
+@then('generates SHA-256 hashes for all existing files')
+def step_generates_hashes(context): pass
+
+# Duplicate detection steps
+@given('the done folder contains a file "{filename}" with hash "{hash_value}"')
+def step_done_folder_file_with_hash(context, filename, hash_value): pass
+
+@when('processing a file "{filename}" with the same hash "{hash_value}"')
+def step_processing_file_with_hash(context, filename, hash_value): pass
+
+@then('the system detects the file as a duplicate')
+def step_detects_duplicate(context): pass
+
+@then('skips processing without sending to API')
+def step_skips_processing(context): pass
+
+@then('logs "{message}"')
+def step_logs_message(context, message): pass
+
+@then('continues processing the next file')
+def step_continues_processing(context): pass
+
+@then('does not create a CSV entry for the duplicate')
+def step_no_csv_entry(context): pass
+
+# Session duplicate detection steps  
+@given('the current processing session has already processed "{filename}" with hash "{hash_value}"')
+def step_session_processed_file(context, filename, hash_value): pass
+
+# Failed folder exclusion steps
+@given('the failed folder contains a file "{filename}" with hash "{hash_value}"')
+def step_failed_folder_contains_file(context, filename, hash_value): pass
+
+@then('the system does not check the failed folder for duplicates')
+def step_no_failed_folder_check(context): pass
+
+@then('processes the file normally')
+def step_processes_normally(context): pass
+
+# Hash generation steps
+@given('a file "{filename}" is being processed')
+def step_file_being_processed(context, filename): pass
+
+@when('the system generates the file hash')
+def step_generates_file_hash(context): pass
+
+@then('it calculates SHA-256 hash of the binary file content')
+def step_calculates_sha256(context): pass
+
+@then('stores the hash with the extracted data')
+def step_stores_hash(context): pass
+
+# Batch processing steps
+@given('multiple files in the input folder')
+def step_multiple_files(context): pass
+
+@when('the system processes the files in sequence')
+def step_processes_sequence(context): pass
+
+@then('it processes {filename} normally')
+def step_processes_file_normally(context, filename): pass
+
+@then('skips {filename} as duplicate without interruption')
+def step_skips_duplicate(context, filename): pass
+
+# Error handling steps
+@given('a file "{filename}" that cannot be read properly')
+def step_unreadable_file(context, filename): pass
+
+@when('the system attempts to generate the file hash')
+def step_attempts_hash_generation(context): pass
+
+@then('hash generation fails with an error')
+def step_hash_generation_fails(context): pass
+
+@then('moves the file to failed folder with error log "{error_message}"')
+def step_moves_to_failed_folder(context, error_message): pass
+
+@given('the hash database is corrupted or inaccessible')
+def step_hash_database_corrupted(context): pass
+
+@when('the system attempts to compare a file hash for duplicate detection')
+def step_attempts_hash_comparison(context): pass
+
+@then('hash comparison fails with an error')
+def step_hash_comparison_fails(context): pass
+
+@then('continues processing the file as non-duplicate')
+def step_processes_as_non_duplicate(context): pass
+
+@given('the done folder is inaccessible due to permissions or missing directory')
+def step_done_folder_inaccessible(context): pass
+
+@then('initializes with empty hash database')
+def step_initializes_empty_database(context): pass
+
+@given('the logging system is unavailable or failing')
+def step_logging_unavailable(context): pass
+
+@then('logging fails but duplicate detection continues')
+def step_logging_fails_continues(context): pass
+```
+
 ## Implementation Tracking
 
 ### Story Implementation Mapping

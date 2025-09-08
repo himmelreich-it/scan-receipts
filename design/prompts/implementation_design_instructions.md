@@ -88,6 +88,7 @@ Generate BDD feature files and scenario outlines based on user story acceptance 
 - Create scenario outlines for parameterized testing where appropriate
 - Include edge cases and error scenarios from user stories
 - Store scenarios in organized feature files by functional area
+- Behave will be used to create the implementation afterwards, keep this in mind
 
 **BDD Output Format:**
 ```
