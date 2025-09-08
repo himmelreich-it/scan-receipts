@@ -1,10 +1,9 @@
 """Unit tests for domain entities."""
 
-import pytest
 from decimal import Decimal
 from datetime import datetime
 from receipt_processing_engine.domain.entities import Receipt, ProcessingStatus
-from receipt_processing_engine.domain.value_objects import ExtractionData, Amount, Currency, Confidence, Description, ReceiptDate
+from receipt_processing_engine.domain.value_objects import ExtractionData, Amount, Tax, Currency, Confidence, Description, ReceiptDate
 
 
 class TestReceipt:
@@ -73,7 +72,7 @@ class TestReceipt:
         
         extraction_data = ExtractionData(
             amount=Amount(Decimal('45.67')),
-            tax=Amount(Decimal('5.67')),
+            tax=Tax(Decimal('5.67')),
             tax_percentage=None,
             description=Description("Test Store"),
             currency=Currency("EUR"),

@@ -67,7 +67,7 @@ class FileSystemAdapter(FileSystemPort):
                 logger.warning(f"Input folder does not exist: {input_folder}")
                 return []
 
-            files = []
+            files: List[Path] = []
             for file_path in input_folder.iterdir():
                 if (
                     file_path.is_file()

@@ -1,8 +1,11 @@
 """Interface definitions for external dependencies."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Set, List
+from typing import Dict, Any, Set, List, TYPE_CHECKING
 from pathlib import Path
+
+if TYPE_CHECKING:
+    from receipt_processing_engine.domain.entities import Receipt
 
 
 class AIExtractionPort(ABC):
@@ -122,7 +125,7 @@ class ReceiptRepositoryPort(ABC):
     """Port for receipt data persistence operations."""
 
     @abstractmethod
-    def save_receipt(self, receipt) -> None:
+    def save_receipt(self, receipt: 'Receipt') -> None:
         """Save receipt to repository.
 
         Args:

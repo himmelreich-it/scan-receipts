@@ -6,9 +6,7 @@ import os
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
 from decimal import Decimal
-from datetime import datetime
 
-from receipt_processing_engine import create_receipt_processor
 from receipt_processing_engine.domain.entities import ProcessingStatus
 
 

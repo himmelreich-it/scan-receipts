@@ -104,6 +104,9 @@ logging.warning(
 - Use page object pattern for UI interactions where applicable
 - Reuse step definitions across scenarios where possible
 - Only implement step definitions for scenarios related to current user story
+- Prevent pylance errors:
+  - Use unique names for step implementations, prevent
+  - Use `# type: ignore` comment on behave decorator
 
 ### BDD Test Structure
 ```python
@@ -123,6 +126,9 @@ def step_impl(context):
 def step_impl(context):
     assert context.result.status == "expected_value"
 ```
+
+### BDD Run instructions
+Run `behave` from the root of the project with `src` as `PYTHONPATH`. This ensures all imports are implemented correctly.
 
 ### BDD Validation Requirements
 - Step definitions must call actual application code (no mocks in BDD tests)

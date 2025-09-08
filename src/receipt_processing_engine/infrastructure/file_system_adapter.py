@@ -2,7 +2,6 @@
 
 import logging
 import mimetypes
-import shutil
 from typing import List
 from pathlib import Path
 from ..application.ports import FileSystemPort
@@ -118,7 +117,7 @@ class FileSystemAdapter(FileSystemPort):
     def get_input_files(self, input_folder: Path) -> List[Path]:
         """Get list of supported files in input folder."""
         try:
-            files = []
+            files: List[Path] = []
             for file_path in input_folder.iterdir():
                 if file_path.is_file() and self.validate_file_format(str(file_path)):
                     files.append(file_path)

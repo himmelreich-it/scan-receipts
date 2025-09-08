@@ -55,7 +55,7 @@ class ProcessReceiptUseCase:
             # Get list of input files
             input_files = self.file_system.get_input_files(input_folder)
 
-            results = []
+            results: List[Receipt] = []
             for file_path in input_files:
                 receipt = await self._process_single_receipt(file_path)
                 results.append(receipt)

@@ -130,7 +130,7 @@ class TestExtractionData:
         )
         
         assert extraction_data.amount.value == Decimal('45.67')
-        assert extraction_data.tax.value == Decimal('5.67')
+        assert extraction_data.tax is not None and extraction_data.tax.value == Decimal('5.67')
         assert extraction_data.description.text == "Test Store"
         assert extraction_data.currency.code == "EUR"
         assert extraction_data.confidence.score == 85
@@ -150,7 +150,7 @@ class TestExtractionData:
         extraction_data = ExtractionData.from_api_response(api_response)
         
         assert extraction_data.amount.value == Decimal('45.67')
-        assert extraction_data.tax.value == Decimal('5.67')
+        assert extraction_data.tax is not None and extraction_data.tax.value == Decimal('5.67')
         assert extraction_data.description.text == "Test Store"
         assert extraction_data.currency.code == "EUR"
         assert extraction_data.confidence.score == 85

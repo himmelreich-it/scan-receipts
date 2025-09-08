@@ -3,9 +3,6 @@ BDD step definitions for duplicate detection scenarios.
 Maps Gherkin steps to actual receipt processing engine functionality.
 """
 import hashlib
-import tempfile
-from pathlib import Path
-from typing import Dict, Set
 import logging
 import os
 
@@ -479,7 +476,6 @@ def step_no_csv_entry(context):
 def step_no_failed_folder_check(context):
     """Verify failed folder is not checked for duplicates."""
     # The duplicate detection adapter doesn't scan failed folder
-    failed_files = list(context.temp_dirs['failed'].glob('*'))
     # Even if failed folder has files, they shouldn't affect duplicate detection
     assert True  # This is ensured by design - failed folder is never scanned
 

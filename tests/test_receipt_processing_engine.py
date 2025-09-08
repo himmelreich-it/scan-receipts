@@ -1,8 +1,10 @@
 """Simple unit tests for Receipt Processing Engine."""
 
 import pytest
+import tempfile
 from decimal import Decimal
 from datetime import datetime
+from pathlib import Path
 from receipt_processing_engine.domain.entities import Receipt, ProcessingStatus
 from receipt_processing_engine.domain.value_objects import (
     ExtractionData, Amount, Currency, Confidence, Description, ReceiptDate
@@ -96,7 +98,7 @@ class TestValueObjects:
         extraction_data = ExtractionData.from_api_response(api_response)
         
         assert extraction_data.amount.value == Decimal('45.67')
-        assert extraction_data.tax.value == Decimal('5.67')
+        assert extraction_data.tax is not None and extraction_data.tax.value == Decimal('5.67')
         assert extraction_data.tax_percentage is None
         assert extraction_data.description.text == "Test Store"
         assert extraction_data.currency.code == "EUR"
@@ -126,14 +128,13 @@ class TestInfrastructure:
         adapter = DuplicateDetectionAdapter()
         
         # Create test file
-        import tempfile
         with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as f:
             f.write('test content')
             test_file = f.name
         
         # Test hash generation consistency
-        hash1 = adapter.generate_file_hash(test_file)
-        hash2 = adapter.generate_file_hash(test_file)
+        hash1 = adapter.generate_file_hash(Path(test_file))
+        hash2 = adapter.generate_file_hash(Path(test_file))
         
         assert hash1 == hash2
         assert len(hash1) == 64  # SHA-256 hash length

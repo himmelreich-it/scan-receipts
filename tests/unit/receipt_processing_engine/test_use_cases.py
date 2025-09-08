@@ -3,14 +3,11 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from decimal import Decimal
-from datetime import datetime
 from receipt_processing_engine.application.use_cases import (
     ProcessReceiptUseCase, ExtractDataUseCase
 )
-from receipt_processing_engine.domain.entities import Receipt, ProcessingStatus
-from receipt_processing_engine.domain.value_objects import ExtractionData, Amount, Currency, Confidence, Description, ReceiptDate
-from receipt_processing_engine.domain.policies import ProcessingPolicies
-from receipt_processing_engine.domain.exceptions import InvalidFileFormatError
+from receipt_processing_engine.domain.entities import ProcessingStatus
+from receipt_processing_engine.domain.value_objects import ExtractionData
 
 
 class TestProcessReceiptUseCase:

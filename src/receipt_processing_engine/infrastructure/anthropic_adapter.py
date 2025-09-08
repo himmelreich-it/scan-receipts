@@ -109,7 +109,7 @@ class AnthropicAIAdapter(AIExtractionPort):
         that can be sent to Anthropic API.
         """
         try:
-            from pdf2image import convert_from_path
+            from pdf2image import convert_from_path  # type: ignore
 
             # Convert first page of PDF to image
             images = convert_from_path(pdf_path, first_page=1, last_page=1)
@@ -178,11 +178,11 @@ class AnthropicAIAdapter(AIExtractionPort):
             )
 
             # Parse response
-            response_text = (
-                message.content[0].text
-                if hasattr(message.content[0], "text")
-                else str(message.content[0])
-            )
+            first_content = message.content[0]
+            if hasattr(first_content, "text"):
+                response_text: str = str(first_content.text)  # type: ignore
+            else:
+                response_text = str(first_content)
             response_data = self._parse_extraction_response(response_text)
 
             return response_data

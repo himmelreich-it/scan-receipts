@@ -1,0 +1,9 @@
+{
+    "stubPath": "./stubs",
+    "typeCheckingMode": "strict",
+    "pythonVersion": "3.13",
+    "pythonPath": ".venv/bin/python",
+    "include": ["src"],
+    "reportMissingImports": "error",
+    "reportMissingTypeStubs": "warning"
+}

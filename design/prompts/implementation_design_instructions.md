@@ -84,7 +84,7 @@ Generate BDD feature files and scenario outlines based on user story acceptance 
 
 **BDD Requirements:**
 - Generate Gherkin scenarios that directly test acceptance criteria
-- Map each scenario to specific user story acceptance criteria
+- Ensure each scenario maps to specific user story acceptance criteria (verify mapping during creation, no separate mapping file needed)
 - Create scenario outlines for parameterized testing where appropriate
 - Include edge cases and error scenarios from user stories
 - Store scenarios in organized feature files by functional area
@@ -94,7 +94,6 @@ Generate BDD feature files and scenario outlines based on user story acceptance 
 ```
 ### BDD Test Scenarios
 - **Feature Files**: [List of .feature files created]
-- **Scenario Coverage**: [Mapping to acceptance criteria]
 - **Test Data Requirements**: [Any test data needed]
 - **Step Definition Interfaces**: [Expected step definition signatures]
 ```

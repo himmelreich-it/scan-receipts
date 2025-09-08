@@ -45,6 +45,22 @@ def cleanup_previous_scenario(context):
     if hasattr(context, 'temp_dirs'):
         restore_permissions(context.temp_dirs)
     
+    # Also restore permissions for temp_base_dir if it exists
+    if hasattr(context, 'temp_base_dir') and context.temp_base_dir.exists():
+        import os
+        try:
+            os.chmod(context.temp_base_dir, 0o755)
+            for item in context.temp_base_dir.rglob('*'):
+                try:
+                    if item.is_file():
+                        os.chmod(item, 0o644)
+                    elif item.is_dir():
+                        os.chmod(item, 0o755)
+                except (PermissionError, OSError, FileNotFoundError):
+                    pass
+        except (PermissionError, OSError, FileNotFoundError):
+            pass
+    
     # Clean up temporary files and directories
     if hasattr(context, 'cleanup_paths'):
         for path in context.cleanup_paths:
@@ -68,17 +84,28 @@ def cleanup_previous_scenario(context):
 def restore_permissions(temp_dirs):
     """Restore normal permissions to all temp directories and files."""
     import os
-    for temp_dir in temp_dirs.values():
+    
+    # Also restore permissions in temp_base_dir if it exists
+    all_paths = list(temp_dirs.values())
+    
+    for temp_dir in all_paths:
         if temp_dir.exists():
             try:
                 # Restore directory permissions first
                 os.chmod(temp_dir, 0o755)
-                # Then restore file permissions
+                # Then restore file permissions recursively
                 for item in temp_dir.rglob('*'):
-                    if item.is_file():
-                        os.chmod(item, 0o644)
-                    elif item.is_dir():
-                        os.chmod(item, 0o755)
+                    try:
+                        if item.is_file():
+                            os.chmod(item, 0o644)
+                        elif item.is_dir():
+                            os.chmod(item, 0o755)
+                    except (PermissionError, OSError, FileNotFoundError):
+                        # Try to restore at least basic permissions if possible
+                        try:
+                            os.chmod(item, 0o755 if item.is_dir() else 0o644)
+                        except (PermissionError, OSError, FileNotFoundError):
+                            pass
             except (PermissionError, OSError, FileNotFoundError):
                 pass  # Best effort restoration
 
