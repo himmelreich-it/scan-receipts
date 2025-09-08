@@ -162,7 +162,7 @@ Feature: [Feature name from user story]
 
 ## File Management
 - Create `[package_name]_implementation_spec.md` per package
-- Create BDD feature files in `design/implementation/[package_name]_bdd_scenarios/`
+- Create BDD feature files in `tests/bdd/features/`
 - Update user stories file with implementation references
 - Document design decisions and rationale
 - Maintain implementation tracking index
