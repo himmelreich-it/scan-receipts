@@ -20,23 +20,43 @@ model {
   receiptProcessor = system 'Receipt Processor System' {
     description 'Automated receipt processing tool that extracts financial information from receipt images'
     
-    cliInterface = container 'CLI Interface' {
-      description 'Terminal-based command line interface for user interaction'
-      technology 'Python CLI'
+    tuiInterface = container 'TUI Interface' {
+      description 'Advanced terminal user interface with tables and interactive menus'
+      technology 'Python TUI framework'
       
       mainScript = component 'Main Script' {
         description 'Entry point for receipt processing execution'
         technology 'Python main.py'
       }
       
+      startupScreen = component 'Startup Screen' {
+        description 'Displays system status, file counts, and available actions'
+        technology 'Python TUI display'
+      }
+      
+      menuController = component 'Menu Controller' {
+        description 'Manages menu navigation and user input handling'
+        technology 'Python TUI interaction'
+      }
+      
+      tableRenderer = component 'Table Renderer' {
+        description 'Renders data tables for staging review and validation display'
+        technology 'Python TUI tables'
+      }
+      
       progressMonitor = component 'Progress Monitor' {
-        description 'Displays processing progress and status updates'
-        technology 'Python console output'
+        description 'Real-time progress display with file-by-file updates'
+        technology 'Python TUI progress bars'
+      }
+      
+      validationDisplay = component 'Validation Display' {
+        description 'Shows staging validation results and import readiness status'
+        technology 'Python TUI validation views'
       }
       
       errorReporter = component 'Error Reporter' {
-        description 'Console error logging and summary reporting'
-        technology 'Python logging'
+        description 'User-friendly error display with recovery guidance'
+        technology 'Python TUI error handling'
       }
     }
     
@@ -45,7 +65,7 @@ model {
       technology 'Python hexagonal architecture'
       
       // Domain Layer Components
-      receiptAggregate = component 'Receipt Aggregate' {
+      receiptEntity = component 'Receipt Entity' {
         description 'Receipt domain entity with business logic and validation'
         technology 'Python domain model'
       }
@@ -62,12 +82,17 @@ model {
       
       // Application Layer Components
       processReceiptUseCase = component 'Process Receipt Use Case' {
-        description 'Orchestrates receipt processing workflow'
+        description 'Complete receipt processing workflow including AI extraction, validation, and file management'
         technology 'Python application service'
       }
       
-      extractDataUseCase = component 'Extract Data Use Case' {
-        description 'Coordinates AI-powered data extraction'
+      validateStagingUseCase = component 'Validate Staging Use Case' {
+        description 'Validates CSV staging data and file synchronization'
+        technology 'Python application service'
+      }
+      
+      importToXlsxUseCase = component 'Import to XLSX Use Case' {
+        description 'Imports validated CSV data to XLSX with sequential numbering'
         technology 'Python application service'
       }
       
@@ -91,6 +116,16 @@ model {
         description 'Interface for file operations and management'
         technology 'Python ABC interface'
       }
+      
+      xlsxIntegrationPort = component 'XLSX Integration Port' {
+        description 'Interface for XLSX file operations and data import'
+        technology 'Python ABC interface'
+      }
+      
+      configurationPort = component 'Configuration Port' {
+        description 'Interface for system configuration access and validation'
+        technology 'Python ABC interface'
+      }
     }
     
     infrastructureLayer = container 'Infrastructure Layer' {
@@ -99,13 +134,13 @@ model {
       
       // File Management Adapters
       fileSystemAdapter = component 'File System Adapter' {
-        description 'Handles file operations, scanning, and organization'
-        technology 'Python pathlib/os'
+        description 'Handles file operations, scanning, organization, error logging, and duplicate detection'
+        technology 'Python pathlib/hashlib'
       }
       
-      csvExportAdapter = component 'CSV Export Adapter' {
-        description 'Exports structured data to CSV format'
-        technology 'Python csv/pandas'
+      configurationAdapter = component 'Configuration Adapter' {
+        description 'Loads configuration from .env file with validation and folder creation'
+        technology 'Python python-dotenv/pathlib'
       }
       
       // AI Service Adapter
@@ -114,22 +149,17 @@ model {
         technology 'Python anthropic library'
       }
       
-      // Data Persistence Adapter
-      csvRepositoryAdapter = component 'CSV Repository Adapter' {
-        description 'Implements receipt data storage in CSV format'
-        technology 'Python csv handling'
+      // Data Persistence Adapters
+      csvStagingAdapter = component 'CSV Staging Adapter' {
+        description 'Handles CSV staging operations including read/write for receipt data'
+        technology 'Python csv module'
       }
       
-      // Error Handling Components
-      errorHandlingAdapter = component 'Error Handling Adapter' {
-        description 'Manages error scenarios and recovery strategies'
-        technology 'Python exception handling'
+      xlsxIntegrationAdapter = component 'XLSX Integration Adapter' {
+        description 'Handles XLSX import with sequential numbering and validation'
+        technology 'Python openpyxl/xlsxwriter'
       }
       
-      duplicateDetectionAdapter = component 'Duplicate Detection Adapter' {
-        description 'File hash-based duplicate detection'
-        technology 'Python hashlib'
-      }
     }
   }
   
@@ -145,64 +175,94 @@ model {
       description 'Input and output file storage'
       technology 'Operating system'
       
-      inputFolder = component 'Input Folder' {
-        description 'Contains receipt files to be processed'
+      incomingFolder = component 'Incoming Folder' {
+        description 'Contains new receipt files to be processed'
         technology 'File system directory'
       }
       
-      doneFolder = component 'Done Folder' {
-        description 'Archive for processed receipt files'
+      scannedFolder = component 'Scanned Folder' {
+        description 'Successfully processed receipts during analysis'
+        technology 'File system directory'
+      }
+      
+      importedFolder = component 'Imported Folder' {
+        description 'Final archive for imported receipt files'
+        technology 'File system directory'
+      }
+      
+      failedFolder = component 'Failed Folder' {
+        description 'Failed receipts with error logs'
         technology 'File system directory'
       }
       
       csvOutput = component 'CSV Output File' {
-        description 'Structured receipt data export'
+        description 'Structured receipt data staging file'
         technology 'CSV file format'
+      }
+      
+      xlsxOutput = component 'XLSX Output File' {
+        description 'Source of truth for finalized expense entries'
+        technology 'Excel XLSX format'
       }
     }
   }
   
   // Primary Actor Relationships
-  user -> receiptProcessor.cliInterface.mainScript 'Executes uv run main.py'
+  user -> receiptProcessor.tuiInterface.mainScript 'Executes uv run main.py'
   
-  // CLI Interface Internal Relationships
-  receiptProcessor.cliInterface.mainScript -> receiptProcessor.cliInterface.progressMonitor 'Updates progress'
-  receiptProcessor.cliInterface.mainScript -> receiptProcessor.cliInterface.errorReporter 'Reports errors'
+  // Configuration Loading
+  receiptProcessor.tuiInterface.mainScript -> receiptProcessor.receiptProcessingEngine.configurationPort 'Loads startup config'
   
-  // CLI to Application Layer
-  receiptProcessor.cliInterface.mainScript -> receiptProcessor.receiptProcessingEngine.processReceiptUseCase 'Initiates processing'
+  // TUI Interface Internal Relationships
+  receiptProcessor.tuiInterface.mainScript -> receiptProcessor.tuiInterface.startupScreen 'Shows initial state'
+  receiptProcessor.tuiInterface.mainScript -> receiptProcessor.tuiInterface.menuController 'Manages interactions'
+  receiptProcessor.tuiInterface.menuController -> receiptProcessor.tuiInterface.tableRenderer 'Displays data tables'
+  receiptProcessor.tuiInterface.menuController -> receiptProcessor.tuiInterface.validationDisplay 'Shows validation status'
+  receiptProcessor.tuiInterface.mainScript -> receiptProcessor.tuiInterface.progressMonitor 'Updates progress'
+  receiptProcessor.tuiInterface.mainScript -> receiptProcessor.tuiInterface.errorReporter 'Reports errors'
+  
+  // TUI to Application Layer
+  receiptProcessor.tuiInterface.menuController -> receiptProcessor.receiptProcessingEngine.processReceiptUseCase 'Initiates processing'
+  receiptProcessor.tuiInterface.menuController -> receiptProcessor.receiptProcessingEngine.validateStagingUseCase 'Validates staging'
+  receiptProcessor.tuiInterface.menuController -> receiptProcessor.receiptProcessingEngine.importToXlsxUseCase 'Imports to XLSX'
   
   // Application Layer Orchestration
-  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.extractDataUseCase 'Delegates extraction'
   receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.validateResultsUseCase 'Validates results'
+  receiptProcessor.receiptProcessingEngine.importToXlsxUseCase -> receiptProcessor.receiptProcessingEngine.validateStagingUseCase 'Pre-import validation'
   
   // Use Cases to Domain
-  receiptProcessor.receiptProcessingEngine.extractDataUseCase -> receiptProcessor.receiptProcessingEngine.receiptAggregate 'Creates receipt entity'
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.receiptEntity 'Creates receipt entity'
   receiptProcessor.receiptProcessingEngine.validateResultsUseCase -> receiptProcessor.receiptProcessingEngine.extractionValueObjects 'Validates data'
   receiptProcessor.receiptProcessingEngine.validateResultsUseCase -> receiptProcessor.receiptProcessingEngine.processingPolicies 'Applies business rules'
   
   // Application Layer to Ports
   receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.fileSystemPort 'File operations'
-  receiptProcessor.receiptProcessingEngine.extractDataUseCase -> receiptProcessor.receiptProcessingEngine.aiExtractionPort 'AI analysis'
+  receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.aiExtractionPort 'AI analysis'
   receiptProcessor.receiptProcessingEngine.processReceiptUseCase -> receiptProcessor.receiptProcessingEngine.receiptRepositoryPort 'Data persistence'
+  receiptProcessor.receiptProcessingEngine.validateStagingUseCase -> receiptProcessor.receiptProcessingEngine.fileSystemPort 'File validation'
+  receiptProcessor.receiptProcessingEngine.importToXlsxUseCase -> receiptProcessor.receiptProcessingEngine.xlsxIntegrationPort 'XLSX operations'
+  receiptProcessor.receiptProcessingEngine.importToXlsxUseCase -> receiptProcessor.receiptProcessingEngine.fileSystemPort 'File movement'
   
   // Infrastructure Implementations
   receiptProcessor.receiptProcessingEngine.fileSystemPort -> receiptProcessor.infrastructureLayer.fileSystemAdapter 'Implemented by'
   receiptProcessor.receiptProcessingEngine.aiExtractionPort -> receiptProcessor.infrastructureLayer.anthropicAdapter 'Implemented by'
-  receiptProcessor.receiptProcessingEngine.receiptRepositoryPort -> receiptProcessor.infrastructureLayer.csvRepositoryAdapter 'Implemented by'
+  receiptProcessor.receiptProcessingEngine.receiptRepositoryPort -> receiptProcessor.infrastructureLayer.csvStagingAdapter 'Implemented by'
+  receiptProcessor.receiptProcessingEngine.xlsxIntegrationPort -> receiptProcessor.infrastructureLayer.xlsxIntegrationAdapter 'Implemented by'
+  receiptProcessor.receiptProcessingEngine.configurationPort -> receiptProcessor.infrastructureLayer.configurationAdapter 'Implemented by'
   
   // Infrastructure to External Systems
   receiptProcessor.infrastructureLayer.anthropicAdapter -> externalSystems.anthropicAPI 'API calls'
-  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.inputFolder 'Reads files'
-  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.doneFolder 'Archives files'
-  receiptProcessor.infrastructureLayer.csvExportAdapter -> externalSystems.fileSystem.csvOutput 'Writes data'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.incomingFolder 'Reads files'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.scannedFolder 'Stages files'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.importedFolder 'Archives files'
+  receiptProcessor.infrastructureLayer.fileSystemAdapter -> externalSystems.fileSystem.failedFolder 'Error files'
+  receiptProcessor.infrastructureLayer.csvStagingAdapter -> externalSystems.fileSystem.csvOutput 'Stages data'
+  receiptProcessor.infrastructureLayer.xlsxIntegrationAdapter -> externalSystems.fileSystem.xlsxOutput 'Imports data'
   
-  // Cross-cutting Infrastructure
-  receiptProcessor.infrastructureLayer.errorHandlingAdapter -> receiptProcessor.cliInterface.errorReporter 'Error reporting'
-  receiptProcessor.infrastructureLayer.duplicateDetectionAdapter -> receiptProcessor.receiptProcessingEngine.processingPolicies 'Duplicate checking'
-  
-  // CSV Repository to CSV Export
-  receiptProcessor.infrastructureLayer.csvRepositoryAdapter -> receiptProcessor.infrastructureLayer.csvExportAdapter 'Uses for export'
+  // Configuration Distribution
+  receiptProcessor.infrastructureLayer.configurationAdapter -> receiptProcessor.infrastructureLayer.fileSystemAdapter 'Provides folder paths'
+  receiptProcessor.infrastructureLayer.configurationAdapter -> receiptProcessor.infrastructureLayer.csvStagingAdapter 'Provides CSV path'
+  receiptProcessor.infrastructureLayer.configurationAdapter -> receiptProcessor.infrastructureLayer.xlsxIntegrationAdapter 'Provides XLSX path'
 }
 
 views {
@@ -211,7 +271,7 @@ views {
     description 'Component-level view showing hexagonal architecture implementation'
     include *
     
-    style receiptProcessor.receiptProcessingEngine.receiptAggregate {
+    style receiptProcessor.receiptProcessingEngine.receiptEntity {
       color primary
     }
     
@@ -224,10 +284,6 @@ views {
     }
     
     style receiptProcessor.receiptProcessingEngine.processReceiptUseCase {
-      color secondary
-    }
-    
-    style receiptProcessor.receiptProcessingEngine.extractDataUseCase {
       color secondary
     }
     
@@ -245,7 +301,7 @@ views {
     description 'Focus on core business logic and use cases'
     include receiptProcessor.receiptProcessingEngine.*
     
-    style receiptProcessor.receiptProcessingEngine.receiptAggregate {
+    style receiptProcessor.receiptProcessingEngine.receiptEntity {
       color primary
       size large
     }

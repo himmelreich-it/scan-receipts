@@ -1,3 +1,14 @@
+incoming
+scanned
+imported
+failed
+
+scan is from incoming to scanned, can be redone over and over, gets into a csv including hashes
+import is from scanned to imported, this is the final list
+scan is checking imported, we need the hashes from there, duplicates are checked against scanned and imported before API calls to Claude
+import is giving the files their final name and making sure imported and the xslx are exactly the same
+
+
 # Receipt Processor - High-Level Documentation
 
 ## Overview
@@ -7,12 +18,12 @@ An automated receipt processing tool that extracts financial information from re
 - **Primary Goal**: Streamline business expense tracking by automating receipt data extraction with user control
 - **Target User**: Tech-savvy business owners preparing expense data for accountants
 - **Usage Pattern**: Manual execution with step-by-step workflow control
-- **Source of Truth**: XLSX file containing all finalized expense entries
+- **Source of Truth**: XLSX file containing all finalized expense entries, it should only receive new entries
 
 ## System Architecture
 
 ### Core Components
-1. **Receipt Scanner**: Processes images from configurable input folder
+1. **Receipt Scanner**: Processes images from configurable incoming folder
 2. **AI Analysis Engine**: Uses Anthropic's Claude API for data extraction
 3. **Data Processor**: Converts API responses to structured CSV format for review
 4. **XLSX Manager**: Imports approved data to XLSX source of truth
@@ -32,8 +43,9 @@ An automated receipt processing tool that extracts financial information from re
 ## Configuration
 
 ### Environment Variables (.env)
-- **INPUT_RECEIPTS_FOLDER**: Path to folder containing new receipts to process
-- **DONE_FOLDER**: Path to folder containing successfully processed receipts
+- **INCOMING_RECEIPTS_FOLDER**: Path to folder containing new receipts to process
+- **SCANNED_FOLDER**: Path to folder containing successfully processed receipts
+- **IMPORTED_FOLDER**: Path to folder containing successfully processed receipts
 - **FAILED_FOLDER**: Path to folder containing failed receipts with error logs
 - **XLSX_OUTPUT_FILE**: Path to XLSX file (source of truth)
 - **CSV_STAGING_FILE**: Path to receipts.csv (staging file, defaults to receipts.csv)
@@ -45,18 +57,20 @@ project/
 │   ├── main.py         # Entry point script
 │   └── [other modules] # Supporting code modules
 ├── .env                # Configuration file
-├── receipts.csv        # Staging data (created/cleared during analysis)
-├── expenses.xlsx       # Source of truth (configured path)
-├── input/              # New receipts folder (configurable)
-├── done/               # Processed receipts (configurable, persistent)
-├── failed/             # Failed receipts (configurable, persistent)
+├── content
+│   ├── incoming/       # New receipts folder (configurable)
+│   ├── scanned/        # Processed receipts (configurable)
+│   ├── imported/       # Processed receipts (configurable, persistent)
+│   ├── failed/         # Failed receipts (configurable, persistent)
+│   ├── receipts.csv    # Staging data (created/cleared during analysis)
+│   └── expenses.xlsx   # Source of truth (configured path)
 └── pyproject.toml      # uv configuration
 ```
 
 ## Functional Requirements
 
 ### User Interface & Execution
-- **Execution Method**: `uv run main.py` from the root folder
+- **Execution Method**: `uv run main.py` from the src folder
 - **Interface Type**: TUI (Text User Interface) with tables, menus, and status updates
 - **User Type**: Tech-savvy user comfortable with terminal commands
 - **Workflow Control**: Step-by-step process with user decisions at each stage
@@ -73,29 +87,52 @@ The application starts by displaying:
 #### Option 1: AI Analysis (Import from Input Folder)
 - **Trigger**: User selects "Run Analysis" or "Re-run Analysis"
 - **Behavior**: 
+  - If no files in incoming folder: display 'No files in {incoming} folder' and go back to menu.
   - Clears/removes existing receipts.csv
-  - Does NOT clear done or failed folders (persistent)
-  - Processes all files in input folder using AI
+  - Clears scanned folder (only when re-running analysis)
+  - Does NOT clear imported or failed folders (persistent)
+  - Processes all files in incoming folder sequentially using LLM such as Claude
+  - For each file: first check for duplicates against imported folder, then against already processed files in current session (scanned folder cache)
+  - Successfully scanned files are placed in scanned folder and get a line in receipts.csv
   - Shows progress with TUI updates
+  - Go back to menu.
 
 #### Option 2: Import to XLSX
 - **Trigger**: User selects "Import to XLSX" (only available if receipts.csv exists)
-- **Validation**: First number in receipts.csv must equal max XLSX number + 1
-- **Behavior**: Appends receipts.csv entries to XLSX file
+- **Validation**: For each succesful item in receipts.csv there is a file in scanned folder
+- **Behavior**:
+  - If no receipts.csv: display 'No receipts.csv' and go back to menu
+  - Each item in receipts.csv is added to XLSX and file added to imported folder
+    - Sequential number taken from last item in XSLX + 1
+    - File is renamed to {sequential-number}-{yyyyMMdd of receipt}-{description:20}.{original-extension}
+  - Appends receipts.csv entries to XLSX file
+  - Go back to menu
 - **Post-Import**: receipts.csv remains until next analysis
+
+#### Option 3: View Staging Table
+- **Trigger**: User selects "View Staging Table"
+- **Behavior**: 
+  - Verify if the number if items in receipts.csv is equal to items in scanned folder
+  - Verify whether the names of files in receipts.csv are equal to items in scanned folder
+  - Verify whether the hashes in the receipts.csv do not correspond to any hashes from the imported folder
+  - Displays 'receipts.csv is ready to be imported' or which items are wrong
+    - Count mismatch if applicable
+    - Name mismatches if applicable
+    - List duplicates if any
+  - Go back to menu
 
 ## Data Processing Workflow
 
 ### AI Analysis Phase
 
 #### Input Processing
-- **Source**: Configurable input folder containing receipt files
+- **Source**: Configurable incoming folder containing receipt files
 - **Supported Formats**: PDF, JPG, PNG files
 - **Processing Order**: Sequential processing of all files
 - **Persistence**: Input files remain unchanged for re-processing
 
 #### Duplicate Detection
-- **Method**: Hash comparison against files in done folder and against other files in current processing session
+- **Method**: Hash comparison against files in imported folder and against other files in current processing session (cache)
 - **Behavior**: Skip processing, log duplicate detection
 - **Failed Folder**: Not checked for duplicates (allows retry of previously failed files)
 - **Session Deduplication**: Prevent processing duplicate files within the same analysis run
@@ -105,10 +142,10 @@ The system extracts the following information from each receipt:
 - **Amount**: Total purchase amount (required)
 - **Tax**: VAT amount (if separately listed)
 - **Tax Percentage**: VAT percentage (if separately listed)
-- **Description**: Business name or transaction description (required)
+- **Description**: Business name or transaction description, if not found, use the original filename
 - **Currency**: Currency code (e.g., EUR, USD) (required)
 - **Date**: Transaction date (required - must be extractable)
-- **Confidence**: AI confidence score (0-100)
+- **Confidence**: AI confidence score of proper extraction (0-100)
 
 #### Success Criteria
 - **Valid Data**: All required fields successfully extracted
@@ -126,32 +163,37 @@ Files are moved to failed folder if:
 
 #### Data Organization
 - **Format**: CSV file for staging approved extractions
-- **Ordering**: Entries sorted by date, then time (if extractable), then description
-- **Numbering**: Sequential numbers starting from max XLSX number + 1
+- **Ordering**: Entries sorted by date, then time (if extractable), ascending, then description
 - **Content**: Only successful extractions (no failed or duplicate items)
+
+#### Scan behavior (per file processing)
+- Pick each file from the incoming folder sequentially
+- Check for duplicates against hashes from imported folder (persistent duplicates)
+- Check for duplicates against hashes from files already processed in current session (session cache in scanned folder)
+- Only perform AI analysis when file is not a duplicate
+- Successfully analyzed files are copied to the scanned folder with proper naming
+- Each successful analysis adds one entry to receipts.csv
 
 #### CSV Structure
 ```
-ID, Amount, Tax, TaxPercentage, Description, Currency, Date, Confidence, Hash, DoneFilename
+Amount, Tax, TaxPercentage, Description, Currency, Date, Confidence, Hash, DoneFilename
 ```
 
 #### Field Specifications
-- **ID**: Sequential number for XLSX import
 - **Date Format**: dd-MM-YYYY
 - **DoneFilename**: Target filename for done folder
 - **Hash**: File hash for duplicate detection
 
 #### Display After Analysis
-- **TUI Table**: Shows all entries with assigned numbers
+- **TUI Table**: Shows all entries
 - **Summary**: Total processed, failed, duplicates skipped
 - **Preview**: What will be imported to XLSX
 
 ### XLSX Import Phase
 
 #### Validation Requirements
-- **Sequential Check**: First receipts.csv number = max XLSX number + 1
 - **Empty Handling**: If XLSX empty (no entries from row 11), start numbering at 1
-- **User Warning**: Alert if manual XLSX edits broke sequential numbering
+- **No XLSX entries without files**: There should be no entries in the XLSX without a file in the imported folder
 
 #### XLSX Structure
 - **Data Range**: Entries start from row 11 downward
@@ -171,7 +213,16 @@ ID, Amount, Tax, TaxPercentage, Description, Currency, Date, Confidence, Hash, D
 
 ## File Management
 
-### Done Folder Management
+### Scanned Folder Management
+- **Clearing**: Cleared automatically only at the start of each analysis run (not after completion)
+- **Population**: Populated during analysis as each file is successfully processed
+- **Validation**: After analysis completion, contains exactly the files referenced in receipts.csv
+- **Naming Convention**: `{yyyyMMdd}-{description}.{ext}`
+  - `{yyyyMMdd}`: Purchase date from receipt
+  - `{description}`: Cleaned description (special chars removed, max 15 chars)
+  - `{ext}`: Original file extension
+
+### Imported Folder Management
 - **Persistence**: Never cleared automatically
 - **Naming Convention**: `{number}-{yyyyMMdd}-{description}.{ext}`
   - `{number}`: Sequential ID from XLSX
@@ -186,8 +237,9 @@ ID, Amount, Tax, TaxPercentage, Description, Currency, Date, Confidence, Hash, D
 - **Overwrite Behavior**: If same filename fails again, overwrite with new error log
 - **Metadata**: Include error logs/reasons for failure
 - **Manual Review**: Users can inspect and potentially move back to input folder
+- **Error Log**: Each failed file has a logfile {original-filename}.{original-extension}.log
 
-### Input Folder Management
+### Incoming Folder Management
 - **Persistence**: Files never removed automatically
 - **Re-processing**: Allows multiple analysis runs until satisfied
 - **User Control**: Manual cleanup when ready
@@ -222,7 +274,6 @@ Available Actions:
 
 ### Menu System
 - **Navigation**: Number-based menu selection
-- **Context-Sensitive**: Available options based on current state
 - **Confirmation**: User confirmation for destructive actions
 
 ## Error Handling Strategy
@@ -258,7 +309,7 @@ Available Actions:
 
 ### Validation Checks
 - **Sequential Numbering**: Ensure no gaps in XLSX numbering
-- **File Synchronization**: done folder files match XLSX entries
+- **File Synchronization**: imported folder files match XLSX entries
 - **Hash Verification**: Prevent duplicate processing
 
 ### User Modifications
@@ -276,7 +327,6 @@ Available Actions:
 
 ### Error Tracking
 - **Failed Processing**: Clear marking and logging of failures
-- **Audit Trail**: Original filenames preserved in done folder
 - **Error Logs**: Detailed failure reasons in failed folder
 
 ### Human Review Points
@@ -291,11 +341,11 @@ Available Actions:
 2. **Analysis**: Run AI processing on input folder receipts
 3. **Review**: Examine staging results in TUI table
 4. **Import**: Approve import to XLSX source of truth
-5. **Cleanup**: Manually organize input folder when satisfied
+5. **Cleanup**: Manually organize incoming folder when satisfied
 6. **Handoff**: Provide XLSX file to accountant
 
 ### Batch Processing Pattern
-- **Accumulation**: Collect receipts in input folder over time
+- **Accumulation**: Collect receipts in incoming folder over time
 - **Periodic Processing**: Run analysis when convenient
 - **Incremental Import**: Add to existing XLSX data
 - **Archive Management**: Manage failed and done folders periodically

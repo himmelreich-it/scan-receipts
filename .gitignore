@@ -167,3 +167,4 @@ input.bak/
 done/
 .env.test
 receipts.csv
+content/**
