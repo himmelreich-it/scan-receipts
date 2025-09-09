@@ -147,7 +147,7 @@ Feature: [Feature name from user story]
 - **Data models** and relationships (structure, not implementation)
 - **Error handling strategy** and exception hierarchy design
 - **Configuration requirements** and environment setup
-- **BDD feature files** with scenarios mapped to acceptance criteria
+- **BDD feature files** with scenarios mapped to acceptance criteria, reference to BDD `*.feature` files
 
 ### DO NOT Include:
 - **Complete method implementations** (provide signatures and contracts only)
@@ -158,6 +158,7 @@ Feature: [Feature name from user story]
 - **Production-ready code blocks** that can be copied directly
 - **Library versions** this is handles during implemenation via `uv`
 - **BDD step definition implementations** (provide interfaces and expectations only)
+- **BDD examples in implementation design** (they are documented in `*.feature` files)
 
 ## File Management
 - Create `[package_name]_implementation_spec.md` per package
