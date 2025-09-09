@@ -18,6 +18,8 @@
 
 **Dependencies**: None
 
+**User Stories**: design/user_stories/receipt_processing_engine.md
+
 ## Feature: File Management System
 **Code**: FILE_MGMT_B7C4  
 **Status**: NEW
@@ -33,6 +35,8 @@
 - Support for manual file organization by users
 
 **Dependencies**: None
+
+**User Stories**: design/user_stories/file_management_system.md
 
 ## Feature: CSV Data Staging
 **Code**: CSV_STAGING_C9D3  
