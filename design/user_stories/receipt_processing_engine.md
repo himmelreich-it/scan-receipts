@@ -1,25 +1,26 @@
 # User Stories: Receipt Processing Engine (RECEIPT_PROCESS_A8F5)
 
 ## Feature Overview
-Core automated receipt processing system that handles file intake, AI-powered data extraction using Anthropic's Claude API, and structured data output. Now includes advanced duplicate detection across multiple contexts (done folder, failed folder, and current session), date extraction validation, and enhanced error handling.
+Core automated receipt processing system that handles file intake, AI-powered data extraction using Anthropic's Claude API, and structured data output. Now includes duplicate detection against imported folder and current session cache, date extraction validation, and enhanced error handling with confidence scoring.
 
-## Change Summary (Updated from OUTDATED status)
+## Change Summary (Updated from IMPLEMENTED to OUTDATED status)
 **Updated Stories:**
-- **RECEIPT_ANALYSIS_A1B2**: Added date validation requirements (not future, not older than 1 year), enhanced currency handling
-- **FILE_VALIDATION_C3D4**: Changed error handling to move failed files to failed folder with error logs instead of CSV entries
-- **DUPLICATE_DETECTION_E5F6**: Enhanced to include done folder scanning and comprehensive duplicate detection, excludes failed folder from duplicate checks
+- **RECEIPT_ANALYSIS_A1B2**: Changed from IMPLEMENTED to OUTDATED - Updated date validation (not future, not older than 1 year), Claude API confidence scoring requirements
+- **FILE_VALIDATION_C3D4**: Changed from IMPLEMENTED to OUTDATED - Enhanced error handling specifications and success criteria enforcement
+- **DUPLICATE_DETECTION_E5F6**: Changed from IMPLEMENTED to OUTDATED - Changed from "done folder" to "imported folder" for duplicate detection, session-based duplicate prevention
 
 **Key Changes:**
-- Date validation with specific range requirements
-- Failed folder management with error logging
-- Comprehensive duplicate detection against done folder
-- Enhanced error handling with file movement instead of CSV error entries
+- Duplicate detection now against imported folder (not done folder)
+- Date validation: not future, not older than 1 year from current date
+- Confidence scoring (0-100) from Claude API response
+- Enhanced error handling with success criteria enforcement
+- Session-based duplicate prevention during current processing run
 
 ## User Stories
 
 ### Story Title: Core Receipt Analysis and Data Extraction
 **Code**: RECEIPT_ANALYSIS_A1B2  
-**Status**: IMPLEMENTED  
+**Status**: OUTDATED  
 **Functional Description**: Complete AI-powered analysis of receipt files using Claude API to extract structured financial data including amounts, taxes, descriptions, currencies, dates, and confidence scores with enhanced date validation  
 **Acceptance Criteria**: 
 - When valid receipt file (PDF, JPG, PNG) is processed, Claude Sonnet 4 API extracts amount, tax, tax_percentage, description, currency, date, and confidence fields
@@ -38,7 +39,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: File Format Validation and Error Handling
 **Code**: FILE_VALIDATION_C3D4  
-**Status**: IMPLEMENTED  
+**Status**: OUTDATED  
 **Functional Description**: Validates input file formats and handles various error scenarios including unreadable files, API failures, and corrupted data while ensuring processing continuity and failed folder management  
 **Acceptance Criteria**: 
 - When file format is PDF, JPG, or PNG, system proceeds with processing
@@ -56,7 +57,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: Duplicate Detection and Management
 **Code**: DUPLICATE_DETECTION_E5F6  
-**Status**: IMPLEMENTED  
+**Status**: OUTDATED  
 
 ## Implementation Results
 - Files created: tests/bdd/features/duplicate_detection.feature, tests/bdd/steps/duplicate_detection_steps.py, tests/bdd/environment.py
@@ -64,20 +65,20 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - Tests created: 14 BDD scenarios with comprehensive step definitions covering all acceptance criteria
 - BDD scenarios: 14 passed, 0 failed, 0 skipped (100% pass rate)
 - All acceptance criteria: PASS - All duplicate detection functionality validated through BDD tests
-**Functional Description**: Prevents reprocessing of duplicate files using comprehensive file hash comparison against done folder and current processing session, providing clear user feedback about skipped duplicates  
+**Functional Description**: Prevents reprocessing of duplicate files using comprehensive file hash comparison against imported folder and current processing session, providing clear user feedback about skipped duplicates  
 **Acceptance Criteria**: 
-- When processing session starts, system scans done folder and generates hash database of all existing files
+- When processing session starts, system scans imported folder and generates hash database of all existing files
 - When file is processed, system generates file hash for duplicate detection
-- When file hash matches existing hash in done folder, system skips file and logs "Duplicate file skipped: [filename] (matches file in done folder)" to console
+- When file hash matches existing hash in imported folder, system skips file and logs "Duplicate file skipped: [filename] (matches file in imported folder)" to console
 - When file hash matches hash from current processing session, system skips file and logs "Duplicate file skipped: [filename] (matches [original_filename] in current session)" to console
 - When duplicate is detected, system does not send file to API or create CSV entry
 - When duplicate detection occurs, system continues processing next file without interruption
 - When file hash is generated, it is stored with extracted data for future duplicate comparison within session
 - When checking duplicates, system does NOT check failed folder (allows retry of previously failed files)
-**Technical Notes**: Implement file hashing algorithm (SHA-256 recommended), efficient hash comparison, done folder scanning at session start, clear duplicate logging  
+**Technical Notes**: Implement file hashing algorithm (SHA-256 recommended), efficient hash comparison, imported folder scanning at session start, clear duplicate logging  
 **Dependencies**: None  
-**Data Requirements**: Generates and stores file hash for each processed receipt, maintains hash database from done folder, maintains hash comparison during processing session  
-**Error Scenarios**: Hash generation failures, hash comparison errors, done folder access errors, logging failures  
+**Data Requirements**: Generates and stores file hash for each processed receipt, maintains hash database from imported folder, maintains hash comparison during processing session  
+**Error Scenarios**: Hash generation failures, hash comparison errors, imported folder access errors, logging failures  
 
 ## Implementation Notes
 - Use Claude Sonnet 4 API (claude-sonnet-4-20250514) with thinking enabled
@@ -85,7 +86,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - Failed files are moved to failed folder with error logs instead of creating CSV entries
 - Console logging should provide clear progress updates and error information
 - File hash generation required for duplicate detection functionality
-- Done folder scanning at session start for comprehensive duplicate detection
+- Imported folder scanning at session start for comprehensive duplicate detection
 - Failed folder NOT checked for duplicates (allows retry of previously failed files)
 - Date validation: not future, not older than 1 year from current date
 - Processing should continue after individual file errors
