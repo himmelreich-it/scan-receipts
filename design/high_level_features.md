@@ -75,6 +75,8 @@
 **Description**: Complete terminal-based user interface providing menu-driven interaction, step-by-step workflow control, and comprehensive status monitoring. Manages the entire receipt processing workflow with user control at each stage and clear feedback on system state.
 **Implementation Scope**:
 - Startup screen showing file counts (incoming, failed) and staging status
+- Configuration validation on startup
+- Automatic folder creation for missing directories
 - Fixed menu with four options: Run Analysis, Import to XLSX, View Staging Table, Exit
 - Three main workflow options with appropriate error messages when unavailable
 - Real-time progress display during AI analysis with file-by-file updates
@@ -94,12 +96,12 @@
 - Environment variable management for all folder paths
 - INCOMING_RECEIPTS_FOLDER, SCANNED_FOLDER, IMPORTED_FOLDER, FAILED_FOLDER configuration
 - XLSX_OUTPUT_FILE and CSV_STAGING_FILE path management
-- Configuration validation on startup
-- Automatic folder creation for missing directories
 - Error handling for invalid paths or permission issues
 - Default value handling where appropriate
 
 **Dependencies**: None
+
+**User Stories**: design/user_stories/configuration_management.md
 
 ## Feature: Data Validation and Quality Assurance
 **Code**: DATA_VALIDATION_V7W8  
