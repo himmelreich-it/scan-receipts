@@ -9,10 +9,9 @@ Generate detailed implementation specifications for Python applications from use
 - Read user stories and extract implementation requirements
 - Identify Python packages needing creation/modification
 - Map acceptance criteria to technical needs
-- Verify existing implementation design, if existing this is an update
-- If applicable, analyze existing code to minimize change impact
-- Verify existing related code
-- Analyze potential duplicate functionality and plan using DRY principles
+- If any of the stories is OUTDATED, this indicates an update:
+  - Read existing implementation design and compare against requirements
+  - Analyze existing code to minimize change impact
 
 ### Phase 2: Interactive Technical Planning
 Ask focused questions about missing technical context:
@@ -178,8 +177,8 @@ Before including any specification detail:
 3. Does this provide sufficient guidance without over-specifying implementation?
 4. Does this preserve interfaces used by dependent stories?
 5. Are interface contracts clear enough for independent implementation?
-6. Do we follow DRY-principles, or have we introduced duplication?
-6. Do BDD scenarios directly map to acceptance criteria?
+6. Do we follow coding principles as given in the instructions?
+7. Do BDD scenarios directly map to acceptance criteria?
 
 ## Example Interactive Flow
 ```

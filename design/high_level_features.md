@@ -9,14 +9,14 @@
 - Integration with Anthropic Claude API for data extraction
 - Required field extraction (Amount, Currency, Date) with validation
 - Optional field extraction (Tax, Tax Percentage, Description)
-- Hash-based duplicate detection against imported folder
+- Hash-based duplicate detection against imported folder (using FILE_MGMT_B7C4 hash service)
 - Session-based duplicate prevention during current processing run
 - Date extraction validation with failure handling for invalid dates
 - Confidence scoring (0-100) for extraction quality
 - Error handling for unreadable files, API failures, and corrupted files
 - Success criteria enforcement for required fields
 
-**Dependencies**: None
+**Dependencies**: Hard - File Management System [FILE_MGMT_B7C4] for file hash generation
 
 **User Stories**: design/user_stories/receipt_processing_engine.md
 

@@ -15,51 +15,59 @@ class DuplicateDetectionAdapter(DuplicateDetectionPort):
 
     def __init__(self):
         """Initialize with empty hash databases."""
-        self.done_folder_hashes: Set[str] = set()
+        self.imported_folder_hashes: Set[str] = set()
         self.session_hashes: Dict[str, str] = {}  # hash -> original filename
 
-    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
-        """Scan done folder and build hash database.
+    def initialize_imported_folder_hashes(self, imported_folder: Path) -> None:
+        """Scan imported folder and build hash database.
 
         Process:
-        1. Scan all files in done folder
+        1. Scan all files in imported folder
         2. Generate SHA-256 hash for each file
         3. Store in hash database for duplicate checking
         """
         try:
-            if not done_folder.exists():
-                logger.info(f"Done folder does not exist: {done_folder}")
+            if not imported_folder.exists():
+                logger.info(f"Imported folder does not exist: {imported_folder}")
                 return
 
             hash_count = 0
-            for file_path in done_folder.iterdir():
+            for file_path in imported_folder.iterdir():
                 if file_path.is_file():
                     try:
                         file_hash = self._generate_file_hash(file_path)
-                        self.done_folder_hashes.add(file_hash)
+                        self.imported_folder_hashes.add(file_hash)
                         hash_count += 1
                     except Exception as e:
                         logger.warning(f"Failed to hash file {file_path}: {e}")
                         continue
 
             logger.info(
-                f"Loaded {hash_count} file hashes from done folder: {done_folder}"
+                f"Loaded {hash_count} file hashes from imported folder: {imported_folder}"
             )
 
         except Exception as e:
-            logger.error(f"Failed to initialize done folder hashes: {e}")
+            logger.error(f"Failed to initialize imported folder hashes: {e}")
             raise
+
+    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
+        """Legacy method: Scan done folder and build hash database.
+        
+        This method is deprecated. Use initialize_imported_folder_hashes instead.
+        For backward compatibility, this calls the new method.
+        """
+        return self.initialize_imported_folder_hashes(done_folder)
 
     def is_duplicate(self, file_hash: str) -> bool:
         """Check if file hash is a duplicate.
 
         Checks against:
-        1. Done folder hash database
+        1. Imported folder hash database
         2. Current session hash database
         """
-        # Check against done folder hashes
-        if file_hash in self.done_folder_hashes:
-            logger.debug(f"Duplicate found in done folder: {file_hash}")
+        # Check against imported folder hashes
+        if file_hash in self.imported_folder_hashes:
+            logger.debug(f"Duplicate found in imported folder: {file_hash}")
             return True
 
         # Check against current session hashes
