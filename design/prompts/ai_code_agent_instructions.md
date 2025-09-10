@@ -80,6 +80,7 @@ logging.warning(
 ### 5. Validate
 - Run `npx pyright` to verify all pylance errors and fix
 - Run `uv run ruff check src` to check src folder for Ruff errors and fix
+- For small warnings which are difficult to fix, add pyright ignore comment to remove the error
 
 After all checks pass, make sure tests are still passing:
 - Run new tests first
