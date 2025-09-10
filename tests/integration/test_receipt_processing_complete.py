@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from unittest.mock import AsyncMock, Mock
 from decimal import Decimal
+from typing import Any, Dict, Tuple, Generator
 
 from receipt_processing_engine.domain.entities import ProcessingStatus
 
@@ -14,13 +15,13 @@ class TestReceiptProcessingComplete:
     """Test complete receipt processing feature across all user stories."""
     
     @pytest.fixture
-    def temp_directory(self):
+    def temp_directory(self) -> Generator[str, None, None]:
         """Create temporary directory for test files."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir
     
     @pytest.fixture
-    def test_files(self, temp_directory):
+    def test_files(self, temp_directory: str) -> Dict[str, str]:
         """Create test receipt files."""
         # Create valid test files
         jpg_file = Path(temp_directory) / "receipt1.jpg"
@@ -42,12 +43,12 @@ class TestReceiptProcessingComplete:
         }
     
     @pytest.fixture
-    def csv_file(self, temp_directory):
+    def csv_file(self, temp_directory: str) -> str:
         """Create temporary CSV file for testing."""
         return str(Path(temp_directory) / "test_receipts.csv")
     
     @pytest.fixture
-    def mock_ai_adapter(self):
+    def mock_ai_adapter(self) -> Mock:
         """Create mock AI adapter that returns valid responses."""
         adapter = Mock()
         adapter.extract_receipt_data = AsyncMock()
@@ -66,7 +67,7 @@ class TestReceiptProcessingComplete:
         return adapter
     
     @pytest.fixture
-    def processing_system(self, temp_directory):
+    def processing_system(self, temp_directory: str) -> Tuple[Any, Any]:
         """Create complete processing system with mocked AI for testing."""
         from unittest.mock import Mock, AsyncMock
         from receipt_processing_engine.application.use_cases import ProcessReceiptUseCase
@@ -105,15 +106,15 @@ class TestReceiptProcessingComplete:
         
         # Create a mock CSV adapter for compatibility with tests
         class MockCsvAdapter:
-            def reset(self): pass
-            def get_processed_hashes(self): return []
+            def reset(self) -> None: pass
+            def get_processed_hashes(self) -> list[Any]: return []
         
         return processor, MockCsvAdapter()
     
     @pytest.mark.asyncio
-    async def test_complete_workflow_story_1_to_3(self, processing_system, test_files, temp_directory):
+    async def test_complete_workflow_story_1_to_3(self, processing_system: Tuple[Any, Any], test_files: Dict[str, str], temp_directory: str) -> None:
         """Test: Complete workflow from file validation through duplicate detection."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # Create input folder and copy test files
         input_folder = Path(temp_directory) / "input"
@@ -156,9 +157,9 @@ class TestReceiptProcessingComplete:
     
     @pytest.mark.skip(reason="Outdated test - needs refactoring for current architecture")
     @pytest.mark.asyncio
-    async def test_user_story_acceptance_criteria(self, processing_system, test_files, mock_ai_adapter):
+    async def test_user_story_acceptance_criteria(self, processing_system: Tuple[Any, Any], test_files: Dict[str, str], mock_ai_adapter: Mock) -> None:
         """Test: Copy exact acceptance criteria for each story."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # RECEIPT_ANALYSIS_A1B2 acceptance criteria
         # "When valid receipt file (PDF, JPG, PNG) is processed, Claude API extracts required fields"
@@ -198,9 +199,9 @@ class TestReceiptProcessingComplete:
     
     @pytest.mark.skip(reason="Outdated test - needs refactoring for current architecture")
     @pytest.mark.asyncio
-    async def test_csv_output_integration(self, processing_system, test_files, csv_file):
+    async def test_csv_output_integration(self, processing_system: Tuple[Any, Any], test_files: Dict[str, str], csv_file: str) -> None:
         """Test: CSV output matches expected format across all stories."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # Process files
         await use_case.execute(test_files['jpg'])
@@ -227,9 +228,9 @@ class TestReceiptProcessingComplete:
     
     @pytest.mark.skip(reason="Outdated test - needs refactoring for current architecture") 
     @pytest.mark.asyncio
-    async def test_error_handling_across_stories(self, processing_system, test_files, mock_ai_adapter):
+    async def test_error_handling_across_stories(self, processing_system: Tuple[Any, Any], test_files: Dict[str, str], mock_ai_adapter: Mock) -> None:
         """Test: Error handling workflow across story boundaries."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # Test API failure handling
         mock_ai_adapter.extract_receipt_data.side_effect = Exception("Network timeout")
@@ -256,9 +257,9 @@ class TestReceiptProcessingComplete:
     
     @pytest.mark.skip(reason="Outdated test - needs refactoring for current architecture")
     @pytest.mark.asyncio
-    async def test_hash_generation_consistency(self, processing_system, test_files):
+    async def test_hash_generation_consistency(self, processing_system: Tuple[Any, Any], test_files: Dict[str, str]) -> None:
         """Test: File hash generation is consistent for duplicate detection."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # Process same file multiple times
         result1 = await use_case.execute(test_files['jpg'])
@@ -274,9 +275,9 @@ class TestReceiptProcessingComplete:
         assert result1.file_hash == result2.file_hash == result3.file_hash
     
     @pytest.mark.skip(reason="Outdated test - needs refactoring for current architecture")
-    def test_feature_boundaries_and_integration(self, processing_system):
+    def test_feature_boundaries_and_integration(self, processing_system: Tuple[Any, Any]) -> None:
         """Test: Feature boundaries and integration points work correctly."""
-        use_case, csv_adapter = processing_system
+        use_case, _csv_adapter = processing_system
         
         # Verify all components are properly integrated
         assert use_case.ai_extraction_port is not None
@@ -285,7 +286,7 @@ class TestReceiptProcessingComplete:
         assert use_case.duplicate_detector_port is not None
         
         # Verify repository starts with no processed hashes
-        initial_hashes = csv_adapter.get_processed_hashes()
+        initial_hashes = _csv_adapter.get_processed_hashes()
         assert len(initial_hashes) == 0
         
         # Verify duplicate detector can generate hashes

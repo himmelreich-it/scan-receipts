@@ -2,7 +2,8 @@
 
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from typing import Any, List, Dict
+from unittest.mock import patch, MagicMock
 
 from file_management.adapters import FileSystemAdapter
 from file_management.models import FileErrorCode
@@ -56,11 +57,11 @@ class TestFourFolderStructureManagement:
         assert test_file.exists()
         assert test_file.read_text() == "test content"
     
-    def test_clear_scanned_folder_preserving_others(self):
+    def test_clear_scanned_folder_preserving_others(self) -> None:
         """Test: When analysis begins, clear scanned folder completely while preserving other folders"""
         # Create folders with test files
         folders = ["incoming", "scanned", "imported", "failed"]
-        test_files = {}
+        test_files: Dict[str, Path] = {}
         
         for folder_name in folders:
             folder_path = self.temp_dir / folder_name
@@ -81,11 +82,11 @@ class TestFourFolderStructureManagement:
             assert test_files[folder_name].exists()
             assert test_files[folder_name].read_text() == f"content from {folder_name}"
     
-    def test_validate_folder_structure_exists_and_writable(self):
+    def test_validate_folder_structure_exists_and_writable(self) -> None:
         """Test: When system checks folder structure, validate all four folders exist and are writable"""
         # Create all folders
         folders = ["incoming", "scanned", "imported", "failed"]
-        results = []
+        results: List[Any] = []
         
         for folder_name in folders:
             folder_path = self.temp_dir / folder_name
@@ -109,7 +110,7 @@ class TestFourFolderStructureManagement:
             
             assert result.success is False
             assert result.error_code == FileErrorCode.FOLDER_PERMISSION_DENIED
-            assert str(folder_path) in result.error_message
+            assert str(folder_path) in (result.error_message or "")
             assert result.folder_path == folder_path
     
     def test_folder_not_writable(self):
@@ -123,7 +124,7 @@ class TestFourFolderStructureManagement:
             
             assert result.success is False
             assert result.error_code == FileErrorCode.FOLDER_NOT_WRITABLE
-            assert str(folder_path) in result.error_message
+            assert str(folder_path) in (result.error_message or "")
             assert result.folder_path == folder_path
     
     def test_incoming_folder_missing_files_continues_without_error(self):
@@ -181,7 +182,7 @@ class TestFourFolderStructureManagement:
         
         assert result.success is False
         assert result.error_code == FileErrorCode.INVALID_PATH
-        assert "not a directory" in result.error_message.lower()
+        assert "not a directory" in (result.error_message or "").lower()
         assert result.folder_path == file_path
     
     def test_clear_nonexistent_folder(self):
@@ -212,7 +213,7 @@ class TestFourFolderStructureManagement:
         assert test_folder.exists()  # Folder itself should remain
     
     @patch('os.path.exists')
-    def test_disk_space_full_error(self, mock_exists):
+    def test_disk_space_full_error(self, mock_exists: MagicMock) -> None:
         """Test handling of disk space full error"""
         mock_exists.return_value = False
         folder_path = self.temp_dir / "space_test"
@@ -226,4 +227,4 @@ class TestFourFolderStructureManagement:
             
             assert result.success is False
             assert result.error_code == FileErrorCode.DISK_SPACE_FULL
-            assert "disk space" in result.error_message.lower()
+            assert "disk space" in (result.error_message or "").lower()

@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import Mock, AsyncMock
 from decimal import Decimal
+from typing import Tuple
 from receipt_processing_engine.application.use_cases import (
     ProcessReceiptUseCase, ExtractDataUseCase
 )
@@ -14,7 +15,7 @@ class TestProcessReceiptUseCase:
     """Test ProcessReceiptUseCase."""
     
     @pytest.fixture
-    def mock_ports(self):
+    def mock_ports(self) -> Tuple[Mock, Mock, Mock]:
         """Create mock ports for testing."""
         ai_port = Mock()
         ai_port.extract_data = AsyncMock()
@@ -33,13 +34,13 @@ class TestProcessReceiptUseCase:
         return ai_port, file_port, dup_port
     
     @pytest.fixture
-    def use_case(self, mock_ports):
+    def use_case(self, mock_ports: Tuple[Mock, Mock, Mock]) -> ProcessReceiptUseCase:
         """Create ProcessReceiptUseCase with mocked dependencies."""
         ai_port, file_port, dup_port = mock_ports
         return ProcessReceiptUseCase(ai_port, file_port, dup_port)
     
     @pytest.mark.asyncio
-    async def test_successful_processing(self, use_case, mock_ports):
+    async def test_successful_processing(self, use_case: ProcessReceiptUseCase, mock_ports: Tuple[Mock, Mock, Mock]) -> None:
         """Test: Successful receipt processing workflow."""
         from pathlib import Path
         ai_port, file_port, dup_port = mock_ports
@@ -75,7 +76,7 @@ class TestProcessReceiptUseCase:
         dup_port.add_to_session.assert_called_once()
     
     @pytest.mark.asyncio
-    async def test_duplicate_file_skipped(self, use_case, mock_ports):
+    async def test_duplicate_file_skipped(self, use_case: ProcessReceiptUseCase, mock_ports: Tuple[Mock, Mock, Mock]) -> None:
         """Test: Duplicate file is skipped without processing."""
         from pathlib import Path
         ai_port, file_port, dup_port = mock_ports
@@ -100,10 +101,10 @@ class TestProcessReceiptUseCase:
         dup_port.add_to_session.assert_not_called()
     
     @pytest.mark.asyncio
-    async def test_unsupported_file_format(self, use_case, mock_ports):
+    async def test_unsupported_file_format(self, use_case: ProcessReceiptUseCase, mock_ports: Tuple[Mock, Mock, Mock]) -> None:
         """Test: Unsupported file format handled as error."""
         from pathlib import Path
-        ai_port, file_port, dup_port = mock_ports
+        ai_port, file_port, _dup_port = mock_ports
         
         # Setup invalid format
         test_file = Path("/test/receipt.txt")
@@ -125,10 +126,10 @@ class TestProcessReceiptUseCase:
         file_port.move_file_to_failed.assert_called_once_with(test_file, "Unsupported file format")
     
     @pytest.mark.asyncio
-    async def test_api_extraction_failure(self, use_case, mock_ports):
+    async def test_api_extraction_failure(self, use_case: ProcessReceiptUseCase, mock_ports: Tuple[Mock, Mock, Mock]) -> None:
         """Test: API extraction failure handled as error."""
         from pathlib import Path
-        ai_port, file_port, dup_port = mock_ports
+        ai_port, file_port, _dup_port = mock_ports
         
         # Setup valid format but API failure
         test_file = Path("/test/receipt.jpg")
@@ -142,7 +143,7 @@ class TestProcessReceiptUseCase:
         assert len(results) == 1
         result = results[0]
         assert result.processing_status == ProcessingStatus.FAILED
-        assert "API failure: API Error" in result.error_message
+        assert "API failure: API Error" in (result.error_message or "")
         
         # Verify file moved to failed folder
         file_port.move_file_to_failed.assert_called_once()
@@ -153,19 +154,19 @@ class TestExtractDataUseCase:
     """Test ExtractDataUseCase."""
     
     @pytest.fixture
-    def ai_port(self):
+    def ai_port(self) -> Mock:
         """Create mock AI port."""
         port = Mock()
         port.extract_data = AsyncMock()
         return port
     
     @pytest.fixture
-    def use_case(self, ai_port):
+    def use_case(self, ai_port: Mock) -> ExtractDataUseCase:
         """Create ExtractDataUseCase with mocked AI port."""
         return ExtractDataUseCase(ai_port)
     
     @pytest.mark.asyncio
-    async def test_successful_extraction(self, use_case, ai_port):
+    async def test_successful_extraction(self, use_case: ExtractDataUseCase, ai_port: Mock) -> None:
         """Test: Successful data extraction from API."""
         from pathlib import Path
         # Setup mock response
@@ -189,7 +190,7 @@ class TestExtractDataUseCase:
         assert result.confidence.score == 85
     
     @pytest.mark.asyncio
-    async def test_missing_required_fields(self, use_case, ai_port):
+    async def test_missing_required_fields(self, use_case: ExtractDataUseCase, ai_port: Mock) -> None:
         """Test: Missing required fields in API response."""
         from pathlib import Path
         # Setup incomplete response
@@ -203,7 +204,7 @@ class TestExtractDataUseCase:
             await use_case.extract_and_validate(Path("/test/receipt.jpg"))
     
     @pytest.mark.asyncio
-    async def test_invalid_confidence_score(self, use_case, ai_port):
+    async def test_invalid_confidence_score(self, use_case: ExtractDataUseCase, ai_port: Mock) -> None:
         """Test: Invalid confidence score in API response."""
         from pathlib import Path
         # Setup invalid confidence
