@@ -2,14 +2,18 @@
 
 import hashlib
 import logging
+import re
 import shutil
+import unicodedata
 from pathlib import Path
 
 from file_management.models import (
     FileErrorCode,
     FileOperationResult,
     FolderValidationResult,
-    HashResult
+    HashResult,
+    FileMovementRequest,
+    FileMovementResult
 )
 from file_management.ports import FileSystemPort
 
@@ -383,3 +387,166 @@ class FileSystemAdapter(FileSystemPort):
         except (PermissionError, OSError):
             # If we can't access the folder, return empty list
             return []
+    
+    def move_to_scanned(self, request: FileMovementRequest) -> FileMovementResult:
+        """Move file from incoming to scanned with naming convention."""
+        try:
+            # Clean the description for filesystem safety
+            clean_desc = self.clean_description(request.description)
+            
+            # Build target filename: {yyyyMMdd}-{description}.{ext}
+            file_extension = request.source_path.suffix
+            target_filename = f"{request.date}-{clean_desc}{file_extension}"
+            target_path = request.target_folder / target_filename
+            
+            # Copy file (preserve original in incoming)
+            result = self.copy_file(request.source_path, target_path)
+            
+            if result.success:
+                return FileMovementResult(
+                    success=True,
+                    source_path=request.source_path,
+                    target_path=target_path
+                )
+            else:
+                return FileMovementResult(
+                    success=False,
+                    source_path=request.source_path,
+                    error_code=result.error_code,
+                    error_message=result.error_message
+                )
+                
+        except Exception as e:
+            return FileMovementResult(
+                success=False,
+                source_path=request.source_path,
+                error_code=FileErrorCode.DISK_IO_ERROR,
+                error_message=f"Unexpected error moving to scanned: {e}"
+            )
+    
+    def move_to_imported(self, request: FileMovementRequest) -> FileMovementResult:
+        """Move file from scanned to imported with numbered naming convention."""
+        try:
+            if request.sequence_number is None:
+                return FileMovementResult(
+                    success=False,
+                    source_path=request.source_path,
+                    error_code=FileErrorCode.INVALID_PATH,
+                    error_message="Sequence number is required for imported files"
+                )
+            
+            # Clean the description for filesystem safety
+            clean_desc = self.clean_description(request.description)
+            
+            # Build target filename: {number}-{yyyyMMdd}-{description}.{ext}
+            file_extension = request.source_path.suffix
+            target_filename = f"{request.sequence_number}-{request.date}-{clean_desc}{file_extension}"
+            target_path = request.target_folder / target_filename
+            
+            # Move file (remove from source)
+            result = self.move_file(request.source_path, target_path)
+            
+            if result.success:
+                return FileMovementResult(
+                    success=True,
+                    source_path=request.source_path,
+                    target_path=target_path
+                )
+            else:
+                return FileMovementResult(
+                    success=False,
+                    source_path=request.source_path,
+                    error_code=result.error_code,
+                    error_message=result.error_message
+                )
+                
+        except Exception as e:
+            return FileMovementResult(
+                success=False,
+                source_path=request.source_path,
+                error_code=FileErrorCode.DISK_IO_ERROR,
+                error_message=f"Unexpected error moving to imported: {e}"
+            )
+    
+    def copy_to_failed(self, request: FileMovementRequest) -> FileMovementResult:
+        """Copy file to failed folder with original filename."""
+        try:
+            # Use original filename
+            target_filename = request.source_path.name
+            target_path = request.target_folder / target_filename
+            
+            # Copy file (preserve original)
+            result = self.copy_file(request.source_path, target_path)
+            
+            if result.success:
+                return FileMovementResult(
+                    success=True,
+                    source_path=request.source_path,
+                    target_path=target_path
+                )
+            else:
+                return FileMovementResult(
+                    success=False,
+                    source_path=request.source_path,
+                    error_code=result.error_code,
+                    error_message=result.error_message
+                )
+                
+        except Exception as e:
+            return FileMovementResult(
+                success=False,
+                source_path=request.source_path,
+                error_code=FileErrorCode.DISK_IO_ERROR,
+                error_message=f"Unexpected error copying to failed: {e}"
+            )
+    
+    def clean_description(self, description: str) -> str:
+        """Clean description for filesystem safety."""
+        if not description or not description.strip():
+            return "unknown"
+        
+        # Trim whitespace
+        cleaned = description.strip()
+        
+        # Convert non-latin characters to latin equivalents
+        cleaned = self._transliterate_to_latin(cleaned)
+        
+        # Replace unsafe filesystem characters with underscores
+        unsafe_chars = r'[/\\:*?"<>|]'
+        cleaned = re.sub(unsafe_chars, '_', cleaned)
+        
+        # Collapse multiple consecutive spaces/underscores to single underscore
+        cleaned = re.sub(r'[\s_]+', '_', cleaned)
+        
+        # Truncate to 15 characters
+        cleaned = cleaned[:15]
+        
+        # Handle edge cases
+        if not cleaned or cleaned == '_' * len(cleaned):
+            return "document"
+        
+        return cleaned
+    
+    def _transliterate_to_latin(self, text: str) -> str:
+        """Convert non-latin characters to closest latin equivalents."""
+        # Normalize to NFD (decomposed form)
+        normalized = unicodedata.normalize('NFD', text)
+        
+        # Remove combining characters (accents, diacritics)
+        ascii_text = ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+        
+        # Handle specific character mappings that NFD doesn't cover
+        char_mappings = {
+            'ñ': 'n', 'Ñ': 'N',
+            'ß': 'ss',
+            'æ': 'ae', 'Æ': 'AE',
+            'œ': 'oe', 'Œ': 'OE',
+            'ø': 'o', 'Ø': 'O',
+            'ð': 'd', 'Ð': 'D',
+            'þ': 'th', 'Þ': 'TH',
+        }
+        
+        for foreign_char, latin_char in char_mappings.items():
+            ascii_text = ascii_text.replace(foreign_char, latin_char)
+        
+        return ascii_text

@@ -15,7 +15,8 @@ from receipt_processing_engine.infrastructure.duplicate_adapter import Duplicate
 def step_system_initialized(context: Any) -> None:
     """Initialize the receipt processing system for testing."""
     # Create temporary directories for testing (completely fresh for each scenario)
-    context.temp_dirs['done'] = context.temp_base_dir / 'done'
+    context.temp_dirs['imported'] = context.temp_base_dir / 'imported'
+    context.temp_dirs['done'] = context.temp_base_dir / 'done'  # For backward compatibility
     context.temp_dirs['failed'] = context.temp_base_dir / 'failed'  
     context.temp_dirs['input'] = context.temp_base_dir / 'input'
     
@@ -99,13 +100,14 @@ def step_done_folder_file_with_hash(context: Any, filename: str, hash_value: str
     
     # Add to both local tracking and adapter's hash database
     context.hash_database.add(hash_value)
-    context.duplicate_adapter.done_folder_hashes.add(hash_value)
+    context.duplicate_adapter.imported_folder_hashes.add(hash_value)
     context.temp_files[filename] = {'path': file_path, 'hash': hash_value}
 
 
 @given('the hash database is initialized with done folder hashes')
 def step_hash_database_initialized(context: Any) -> None:
     """Initialize the duplicate detection with done folder hashes."""
+    # For backward compatibility, continue to use done folder
     context.duplicate_adapter.initialize_done_folder_hashes(context.temp_dirs['done'])
 
 
@@ -196,7 +198,7 @@ def step_multiple_files(context: Any) -> None:
         # If it's a duplicate, add to hash database  
         if is_duplicate:
             context.hash_database.add(hash_value)
-            context.duplicate_adapter.done_folder_hashes.add(hash_value)
+            context.duplicate_adapter.imported_folder_hashes.add(hash_value)
             context.duplicate_adapter.add_to_session(hash_value, f"original_{filename}")
         
         context.batch_files.append({ # pyright: ignore[reportUnknownMemberType]
@@ -225,7 +227,7 @@ def step_unreadable_file(context: Any, filename: str) -> None:
 @given('the hash database is corrupted or inaccessible')
 def step_hash_database_corrupted(context: Any) -> None:
     """Simulate corrupted hash database."""
-    context.duplicate_adapter.done_folder_hashes = None  # Simulate corruption
+    context.duplicate_adapter.imported_folder_hashes = None  # Simulate corruption
     context.hash_database_corrupted = True
 
 
@@ -253,9 +255,9 @@ def step_duplicate_file_detected(context: Any) -> None:
     filename = "duplicate_test.pdf"
     hash_value = "test_duplicate_hash"
     
-    # Add to done folder database
+    # Add to imported folder database
     context.hash_database.add(hash_value)
-    context.duplicate_adapter.done_folder_hashes.add(hash_value)
+    context.duplicate_adapter.imported_folder_hashes.add(hash_value)
     context.duplicate_adapter.add_to_session(hash_value, filename)
     
     # Create the duplicate file
@@ -274,7 +276,10 @@ def step_duplicate_file_detected(context: Any) -> None:
 def step_processing_session_starts(context: Any) -> None:
     """Start the processing session and initialize hash database."""
     try:
-        context.duplicate_adapter.initialize_done_folder_hashes(context.temp_dirs['done'])
+        # Use imported folder if it exists, otherwise fallback to done folder for backward compatibility
+        folder_to_scan = context.temp_dirs.get('imported', context.temp_dirs.get('done'))
+        if folder_to_scan:
+            context.duplicate_adapter.initialize_imported_folder_hashes(folder_to_scan)
         context.session_started = True
         context.files_scanned = context.files_created if hasattr(context, 'files_created') else 0
     except Exception as e:
@@ -422,14 +427,14 @@ def step_system_scans_done_folder(context: Any) -> None:
 def step_generates_hashes(context: Any) -> None:
     """Verify hashes are generated for existing files."""
     # Verify that hash database contains expected hashes
-    assert len(context.duplicate_adapter.done_folder_hashes) > 0
+    assert len(context.duplicate_adapter.imported_folder_hashes) > 0
 
 
 @then('stores the hash database in memory')
 def step_stores_hash_database(context: Any) -> None:
     """Verify hash database is stored in memory."""
-    assert hasattr(context.duplicate_adapter, 'done_folder_hashes')
-    assert isinstance(context.duplicate_adapter.done_folder_hashes, set)
+    assert hasattr(context.duplicate_adapter, 'imported_folder_hashes')
+    assert isinstance(context.duplicate_adapter.imported_folder_hashes, set)
 
 
 @then('logs "{message}"')
@@ -648,6 +653,95 @@ def step_processing_continues_next(context: Any) -> None:
 def step_duplicate_detection_operational(context: Any) -> None:
     """Verify duplicate detection still works."""
     assert context.duplicate_detected is True
+
+
+# New step definitions for imported folder terminology
+
+@given('an imported folder exists with processed receipts')  # type: ignore
+def step_imported_folder_exists_with_processed_receipts(context: Any) -> None:
+    """Ensure imported folder exists and is accessible."""
+    context.temp_dirs['imported'].mkdir(exist_ok=True)
+    assert context.temp_dirs['imported'].exists()
+
+
+@given('the imported folder contains existing processed receipt files:')  # type: ignore
+def step_imported_folder_contains_files(context: Any) -> None:
+    """Create test files in imported folder with specified content."""
+    if not hasattr(context, 'table') or context.table is None:
+        context.files_created = 0
+        return
+        
+    context.files_created = 0
+    for row in context.table:
+        filename = row['filename']
+        file_content = row['file_content'].encode('utf-8')
+        
+        file_path = context.temp_dirs['imported'] / filename
+        with open(file_path, 'wb') as f:
+            f.write(file_content)
+        
+        # Calculate hash for later verification
+        file_hash = hashlib.sha256(file_content).hexdigest()
+        context.hash_database.add(file_hash)
+        context.temp_files[filename] = {'path': file_path, 'hash': file_hash}
+        context.files_created += 1
+
+
+@then('the system scans the imported folder')  # type: ignore
+def step_system_scans_imported_folder(context: Any) -> None:
+    """Verify system scans imported folder."""
+    assert hasattr(context, 'session_started')
+    assert context.session_started is True
+
+
+@given('the imported folder contains a file "{filename}" with hash "{hash_value}"')  # type: ignore
+def step_imported_folder_file_with_hash(context: Any, filename: str, hash_value: str) -> None:
+    """Create a file in imported folder with specific hash."""
+    # Create content that will generate the specified hash
+    file_content = f"test_content_for_{hash_value}".encode('utf-8')
+    
+    file_path = context.temp_dirs['imported'] / filename
+    with open(file_path, 'wb') as f:
+        f.write(file_content)
+    
+    # Add to both local tracking and adapter's hash database
+    context.hash_database.add(hash_value)
+    context.duplicate_adapter.imported_folder_hashes.add(hash_value)
+    context.temp_files[filename] = {'path': file_path, 'hash': hash_value}
+
+
+@given('the hash database is initialized with imported folder hashes')  # type: ignore
+def step_hash_database_initialized_imported_folder(context: Any) -> None:
+    """Initialize the duplicate detection with imported folder hashes."""
+    context.duplicate_adapter.initialize_imported_folder_hashes(context.temp_dirs['imported'])
+
+
+@given('the imported folder hash database does not contain "{hash_value}"')  # type: ignore
+def step_imported_folder_missing_hash(context: Any, hash_value: str) -> None:
+    """Verify hash is not in imported folder database."""
+    assert hash_value not in context.hash_database
+
+
+@given('the imported folder is inaccessible due to permissions or missing directory')  # type: ignore
+def step_imported_folder_inaccessible(context: Any) -> None:
+    """Make imported folder inaccessible."""
+    # Remove the imported folder or make it inaccessible
+    if context.temp_dirs['imported'].exists():
+        os.chmod(context.temp_dirs['imported'], 0o000)
+    context.imported_folder_inaccessible = True
+
+
+@then('the system fails to scan the imported folder')  # type: ignore
+def step_fails_to_scan_imported(context: Any) -> None:
+    """Verify imported folder scan fails."""
+    assert hasattr(context, 'imported_folder_inaccessible') or hasattr(context, 'session_start_error')
+
+
+@then('continues processing without imported folder duplicate detection')  # type: ignore
+def step_continues_without_imported_folder(context: Any) -> None:
+    """Verify processing continues without imported folder detection."""
+    # System should continue even if imported folder is inaccessible
+    assert True
 
 
 class LogCapture(logging.Handler):

@@ -28,7 +28,7 @@ Feature: File Movement and Naming Convention Pipeline
   Scenario Outline: Handle file operation errors
     Given a file operation encounters "<error_condition>"
     When I attempt the file operation
-    Then I should receive error code "<error_code>"
+    Then I should receive file operation error code "<error_code>"
     And the error should include relevant file path information
     
     Examples:

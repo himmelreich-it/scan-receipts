@@ -2,7 +2,13 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from file_management.models import FileOperationResult, HashResult, FolderValidationResult
+from file_management.models import (
+    FileOperationResult,
+    HashResult,
+    FolderValidationResult,
+    FileMovementRequest,
+    FileMovementResult
+)
 
 
 class FileSystemPort(ABC):
@@ -75,4 +81,48 @@ class FileSystemPort(ABC):
             
         Returns:
             List of matching file paths
+        """
+        
+    @abstractmethod
+    def move_to_scanned(self, request: FileMovementRequest) -> FileMovementResult:
+        """Move file from incoming to scanned with naming convention.
+        
+        Args:
+            request: File movement request with source, target, description, and date
+            
+        Returns:
+            FileMovementResult with operation status and target path
+        """
+        
+    @abstractmethod
+    def move_to_imported(self, request: FileMovementRequest) -> FileMovementResult:
+        """Move file from scanned to imported with numbered naming convention.
+        
+        Args:
+            request: File movement request with source, target, description, date, and sequence
+            
+        Returns:
+            FileMovementResult with operation status and target path
+        """
+        
+    @abstractmethod
+    def copy_to_failed(self, request: FileMovementRequest) -> FileMovementResult:
+        """Copy file to failed folder with original filename.
+        
+        Args:
+            request: File movement request with source and target folder
+            
+        Returns:
+            FileMovementResult with operation status and target path
+        """
+        
+    @abstractmethod
+    def clean_description(self, description: str) -> str:
+        """Clean description for filesystem safety.
+        
+        Args:
+            description: Raw description text
+            
+        Returns:
+            Cleaned description suitable for filenames
         """

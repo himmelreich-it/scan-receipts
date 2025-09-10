@@ -78,13 +78,24 @@ class DuplicateDetectionPort(ABC):
     """Port for duplicate detection services."""
 
     @abstractmethod
+    def initialize_imported_folder_hashes(self, imported_folder: Path) -> None:
+        """Scan imported folder and build hash database.
+
+        Args:
+            imported_folder: Path to imported folder to scan
+        """
+        pass
+
     def initialize_done_folder_hashes(self, done_folder: Path) -> None:
-        """Scan done folder and build hash database.
+        """Legacy method: Scan done folder and build hash database.
+        
+        This method is deprecated. Use initialize_imported_folder_hashes instead.
 
         Args:
             done_folder: Path to done folder to scan
         """
-        pass
+        # Call the new method for backward compatibility
+        return self.initialize_imported_folder_hashes(done_folder)
 
     @abstractmethod
     def is_duplicate(self, file_hash: str) -> bool:
