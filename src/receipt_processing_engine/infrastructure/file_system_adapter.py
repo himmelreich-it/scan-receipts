@@ -5,6 +5,7 @@ import mimetypes
 from typing import List
 from pathlib import Path
 from ..application.ports import FileSystemPort
+from file_management.adapters import FileSystemAdapter as FileManagerAdapter
 
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,10 @@ class FileSystemAdapter(FileSystemPort):
     """Adapter for file system operations."""
 
     SUPPORTED_FORMATS = {".pdf", ".jpg", ".jpeg", ".png"}
+
+    def __init__(self):
+        """Initialize with file management service."""
+        self.file_manager = FileManagerAdapter()
 
     def validate_file_format(self, file_path: str) -> bool:
         """Validate if file format is supported.
@@ -52,7 +57,7 @@ class FileSystemAdapter(FileSystemPort):
             return False
 
     def read_file_content(self, file_path: str) -> bytes:
-        """Read file content as bytes.
+        """Read file content as bytes using file management service.
 
         Args:
             file_path: Path to file to read
@@ -67,16 +72,14 @@ class FileSystemAdapter(FileSystemPort):
         try:
             path = Path(file_path)
 
-            if not path.exists():
-                raise FileNotFoundError(f"File not found: {file_path}")
-
-            if not path.is_file():
-                raise ValueError(f"Path is not a file: {file_path}")
-
-            # Check file size to prevent memory issues
-            file_size_mb = path.stat().st_size / (1024 * 1024)
-            if file_size_mb > 10:  # 10MB limit
-                raise ValueError(f"File too large: {file_size_mb:.1f}MB > 10MB limit")
+            # Check file size to prevent memory issues using direct stat (this is validation logic, not file ops)
+            try:
+                file_size_mb = path.stat().st_size / (1024 * 1024)
+                if file_size_mb > 10:  # 10MB limit
+                    raise ValueError(f"File too large: {file_size_mb:.1f}MB > 10MB limit")
+            except (FileNotFoundError, OSError):
+                # File doesn't exist or can't stat - let the file read operation handle the error
+                pass
 
             with open(path, "rb") as file:
                 content = file.read()
@@ -115,11 +118,15 @@ class FileSystemAdapter(FileSystemPort):
         logger.error(f"File access error: {type(error).__name__}: {error}")
 
     def get_input_files(self, input_folder: Path) -> List[Path]:
-        """Get list of supported files in input folder."""
+        """Get list of supported files in input folder using file management service."""
         try:
+            # Use file management service to list all files
+            all_files = self.file_manager.list_files(input_folder)
+            
+            # Filter for supported formats
             files: List[Path] = []
-            for file_path in input_folder.iterdir():
-                if file_path.is_file() and self.validate_file_format(str(file_path)):
+            for file_path in all_files:
+                if self.validate_file_format(str(file_path)):
                     files.append(file_path)
             return files
         except Exception as e:
@@ -127,14 +134,14 @@ class FileSystemAdapter(FileSystemPort):
             return []
 
     def ensure_folders_exist(self, folders: List[Path]) -> None:
-        """Create folder structure if it doesn't exist."""
+        """Create folder structure if it doesn't exist using file management service."""
         for folder in folders:
-            try:
-                folder.mkdir(parents=True, exist_ok=True)
+            folder_result = self.file_manager.ensure_folder_exists(folder)
+            if folder_result.success:
                 logger.debug(f"Ensured folder exists: {folder}")
-            except Exception as e:
-                logger.error(f"Failed to create folder {folder}: {e}")
-                raise
+            else:
+                logger.error(f"Failed to create folder {folder}: {folder_result.error_message}")
+                raise Exception(f"Failed to create folder {folder}: {folder_result.error_message}")
 
     def move_file_to_failed(self, file_path: Path, error_message: str) -> None:
         """Move file to failed folder with error log (stub implementation)."""

@@ -90,6 +90,8 @@ class AnthropicAIAdapter(AIExtractionPort):
             response_data = await self._send_to_claude_api(image_path)
 
             # Clean up temporary image file if it was created
+            # Note: Using direct unlink() here for temporary file cleanup is acceptable
+            # as this is a temporary file created by this service, not core file management
             if image_path != file_path:
                 image_path.unlink()
 

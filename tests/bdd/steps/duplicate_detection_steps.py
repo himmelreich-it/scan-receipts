@@ -328,7 +328,7 @@ def step_processing_file_from_input(context: Any, filename: str, hash_value: str
         f.write(file_content)
     
     # Generate actual hash
-    actual_hash = context.duplicate_adapter._generate_file_hash(file_path)
+    actual_hash = context.duplicate_adapter.generate_file_hash(file_path)
     context.duplicate_detected = context.duplicate_adapter.is_duplicate(actual_hash)
     context.current_file = {'path': file_path, 'name': filename, 'hash': actual_hash}
 
@@ -338,7 +338,7 @@ def step_generates_file_hash(context: Any) -> None:
     """Generate hash for current file."""
     try:
         file_path = context.current_file['path']
-        context.generated_hash = context.duplicate_adapter._generate_file_hash(file_path)
+        context.generated_hash = context.duplicate_adapter.generate_file_hash(file_path)
         context.hash_generation_success = True
     except Exception as e:
         context.hash_generation_error = str(e)
@@ -383,7 +383,7 @@ def step_attempts_hash_generation(context: Any) -> None:
     """Attempt to generate hash (may fail)."""
     try:
         file_path = context.current_file['path']
-        context.generated_hash = context.duplicate_adapter._generate_file_hash(file_path)
+        context.generated_hash = context.duplicate_adapter.generate_file_hash(file_path)
         context.hash_generation_success = True
     except Exception as e:
         context.hash_generation_error = str(e)

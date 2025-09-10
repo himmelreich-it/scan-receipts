@@ -24,14 +24,14 @@ from .infrastructure.duplicate_adapter import DuplicateDetectionAdapter
 
 def create_receipt_processor(
     api_key: str,
-    done_folder: Path,
+    imported_folder: Path,
     failed_folder: Path,
 ) -> ProcessReceiptUseCase:
     """Factory function to create configured receipt processor.
 
     Args:
         api_key: Anthropic API key for Claude integration
-        done_folder: Path to folder containing successfully processed receipts
+        imported_folder: Path to folder containing successfully processed receipts
         failed_folder: Path to folder for failed receipts with error logs
 
     Returns:
@@ -39,7 +39,7 @@ def create_receipt_processor(
     """
     # Initialize infrastructure adapters
     ai_adapter = AnthropicAIAdapter(api_key)
-    file_adapter = FileSystemAdapter(done_folder, failed_folder)
+    file_adapter = FileSystemAdapter(imported_folder, failed_folder)
     duplicate_adapter = DuplicateDetectionAdapter()
 
     # Create and return use case with dependencies
