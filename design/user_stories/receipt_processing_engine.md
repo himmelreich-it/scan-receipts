@@ -34,7 +34,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - When confidence score is low, system continues processing without additional validation
 **Technical Notes**: Use Claude Sonnet 4 (claude-sonnet-4-20250514) with thinking enabled, handle API rate limiting, implement proper JSON schema validation, add date range validation (not future, not older than 1 year)  
 **Dependencies**: None  
-**Data Requirements**: Extracts structured data: amount (float), tax (float), tax_percentage (float), description (string), currency (string), date (string), confidence (integer 0-100), generates file hash for duplicate detection  
+**Data Requirements**: Extracts structured data: amount (float), tax (float), tax_percentage (float), description (string), currency (string), date (string), confidence (integer 0-100), uses FILE_MGMT_B7C4 service for file hash generation for duplicate detection  
 **Error Scenarios**: API failures, malformed JSON responses, missing required fields, network timeouts, rate limit exceeded, date validation failures  
 
 ### Story Title: File Format Validation and Error Handling
@@ -57,7 +57,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: Duplicate Detection and Management
 **Code**: DUPLICATE_DETECTION_E5F6  
-**Status**: IMPLEMENTED  
+**Status**: OUTDATED  
 
 ## Implementation Results
 - Files created: tests/bdd/features/duplicate_detection.feature, tests/bdd/steps/duplicate_detection_steps.py, tests/bdd/environment.py
@@ -77,9 +77,9 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - When duplicate detection occurs, system continues processing next file without interruption
 - When file hash is generated, it is stored with extracted data for future duplicate comparison within session
 - When checking duplicates, system does NOT check failed folder (allows retry of previously failed files)
-**Technical Notes**: Implement file hashing algorithm (SHA-256 recommended), efficient hash comparison, imported folder scanning at session start, clear duplicate logging  
-**Dependencies**: None  
-**Data Requirements**: Generates and stores file hash for each processed receipt, maintains hash database from imported folder, maintains hash comparison during processing session  
+**Technical Notes**: Use FILE_MGMT_B7C4 hash service for SHA-256 file hashing, efficient hash comparison, imported folder scanning at session start, clear duplicate logging  
+**Dependencies**: Hard - File Management System [FILE_MGMT_B7C4] for file hash generation  
+**Data Requirements**: Uses file hash service for each processed receipt, maintains hash database from imported folder, maintains hash comparison during processing session  
 **Error Scenarios**: Hash generation failures, hash comparison errors, imported folder access errors, logging failures  
 
 ## Implementation Notes
@@ -87,7 +87,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - Implement structured JSON schema validation for API responses
 - Failed files are moved to failed folder with error logs instead of creating CSV entries
 - Console logging should provide clear progress updates and error information
-- File hash generation required for duplicate detection functionality
+- File hash generation provided by FILE_MGMT_B7C4 service for duplicate detection functionality
 - Imported folder scanning at session start for comprehensive duplicate detection
 - Failed folder NOT checked for duplicates (allows retry of previously failed files)
 - Date validation: not future, not older than 1 year from current date
@@ -95,7 +95,7 @@ Core automated receipt processing system that handles file intake, AI-powered da
 - Single currency assumption per receipt, accept any currency code found by AI
 
 ## Dependencies
-None - This is a foundational feature with no dependencies on other features.
+Hard - File Management System [FILE_MGMT_B7C4] for file hash generation used in duplicate detection.
 
 ## Implementation Reference
 **Implementation Specification**: [receipt_processing_engine_implementation_spec.md](../implementation/receipt_processing_engine_implementation_spec.md)

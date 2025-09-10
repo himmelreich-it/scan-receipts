@@ -1,5 +1,73 @@
 # Python Coding Best Practices for AI Agents
 
+## Core Design Principles
+
+### DRY (Don't Repeat Yourself)
+- Extract common patterns into reusable functions or classes
+- Use configuration files or constants for repeated values
+- Create utility functions for repeated logic blocks
+- Leverage inheritance and composition to avoid code duplication
+- Use decorators for cross-cutting concerns (logging, validation, caching)
+
+```python
+# Good: Extract common validation logic
+def validate_file_path(path: str) -> Path:
+    """Common file validation logic used across modules."""
+    file_path = Path(path)
+    if not file_path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+    return file_path
+
+# Good: Use constants for repeated values
+class Config:
+    MAX_FILE_SIZE = 10_000_000  # 10MB
+    SUPPORTED_FORMATS = ['.jpg', '.png', '.pdf']
+```
+
+### SOLID Principles
+- **Single Responsibility**: Each class/function should have one reason to change
+- **Open/Closed**: Open for extension, closed for modification
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+### Composition Over Inheritance
+- Prefer composition and dependency injection
+- Use protocols/interfaces for loose coupling
+- Avoid deep inheritance hierarchies
+
+```python
+from typing import Protocol
+
+class ImageProcessor(Protocol):
+    def process(self, image_path: str) -> str: ...
+
+class ReceiptParser:
+    def __init__(self, processor: ImageProcessor):
+        self.processor = processor  # Composition over inheritance
+```
+
+### Fail Fast and Explicit
+- Validate inputs early and explicitly
+- Use type hints and runtime validation
+- Prefer explicit error handling over silent failures
+
+### Immutability Where Possible
+- Use dataclasses with `frozen=True` for value objects
+- Prefer immutable data structures for shared state
+- Use `Final` type hints for constants
+
+```python
+from dataclasses import dataclass
+from typing import Final
+
+@dataclass(frozen=True)
+class Receipt:
+    total: float
+    vendor: str
+    date: str
+
+MAX_RETRIES: Final[int] = 3
+```
+
 ## Code Style and Formatting
 
 ### PEP 8 Compliance
@@ -85,19 +153,59 @@ from .utils import validate_input
 - **Subpackages**: Create only when >7-10 modules or distinct functional areas
 - **Absolute local imports** Always assume we run from the src folder, base absolute import paths on this assumption
 
-## Agent Decision Making
-- When multiple approaches are valid, prioritize readability over performance unless specified
-- Default to more explicit code over clever shortcuts
-- If requirements are ambiguous, ask for clarification rather than assuming
-- Always explain significant architectural decisions in comments
-- Generate complete, runnable code blocks with necessary imports
+## Configuration Management
+- Externalize configuration from code
+- Use environment-specific config files
+- Validate configuration at startup
+- Use environment variables for sensitive configuration
+
+```python
+from dataclasses import dataclass
+from typing import Optional
+import os
+
+@dataclass(frozen=True)
+class AppConfig:
+    api_key: str
+    max_file_size: int = 10_000_000
+    debug: bool = False
+    
+    @classmethod
+    def from_env(cls) -> 'AppConfig':
+        api_key = os.getenv('API_KEY')
+        if not api_key:
+            raise ValueError("API_KEY environment variable required")
+        
+        return cls(
+            api_key=api_key,
+            max_file_size=int(os.getenv('MAX_FILE_SIZE', 10_000_000)),
+            debug=os.getenv('DEBUG', 'false').lower() == 'true'
+        )
+```
+
+## Resource Management
+- Always use context managers for file/network operations
+- Clean up resources explicitly
+- Handle cleanup in error scenarios
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def managed_resource(resource_path: str):
+    resource = acquire_resource(resource_path)
+    try:
+        yield resource
+    finally:
+        resource.cleanup()
+```
 
 ## Type Hints
 - Use type hints for all function parameters and return types
 - Import types from `typing` module when needed
 - Include type information even for obvious cases to aid code clarity
 ```python
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Final, Protocol
 
 def process_receipts(receipts: List[Receipt]) -> Dict[str, float]:
     return {}
@@ -151,6 +259,13 @@ def extract_total(receipt_text: str) -> Optional[float]:
     """
     pass
 ```
+
+## Agent Decision Making
+- When multiple approaches are valid, prioritize readability over performance unless specified
+- Default to more explicit code over clever shortcuts
+- If requirements are ambiguous, ask for clarification rather than assuming
+- Always explain significant architectural decisions in comments
+- Generate complete, runnable code blocks with necessary imports
 
 ## Testing Strategy
 - Generate tests that validate the functional specification requirements
