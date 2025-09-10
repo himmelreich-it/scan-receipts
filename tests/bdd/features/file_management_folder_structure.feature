@@ -32,7 +32,7 @@ Feature: Four-Folder Structure Management and Validation
       | imported    |
       | failed      |
 
-  Scenario: Validate folder write permissions
+  Scenario Outline: Validate folder write permissions
     Given all folders exist
     But folder "<folder_name>" is not writable
     When I validate folder permissions

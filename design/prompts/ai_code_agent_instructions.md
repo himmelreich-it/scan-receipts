@@ -78,11 +78,17 @@ logging.warning(
   ```
 
 ### 5. Validate
+- Run `npx pyright` to verify all pylance errors and fix
+- Run `uv run ruff check src` to check src folder for Ruff errors and fix
+
+After all checks pass, make sure tests are still passing:
 - Run new tests first
 - Run all existing tests
 - Run BDD scenarios: `behave tests/bdd/`
 - **HALT** if any tests fail after corrections
 - Verify acceptance criteria are met exactly as written
+
+After fixing tests, re-run analyzers to make sure latest code still passes: pyright & ruff.
 
 ### 6. Update Documentation
 - Add `**Status:**: IMPLEMENTED  ` below user story name

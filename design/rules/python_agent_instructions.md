@@ -102,6 +102,7 @@ from typing import List, Dict, Optional, Union
 def process_receipts(receipts: List[Receipt]) -> Dict[str, float]:
     return {}
 ```
+- Include type hints in test code as well
 
 ## Error Handling
 - Use specific exception types rather than bare `except:`
