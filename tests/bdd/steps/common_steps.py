@@ -3,12 +3,13 @@ Common BDD step definitions shared across features.
 Handles shared setup and initialization steps.
 """
 import os
+from typing import Any
 from behave import given, when, then
 from receipt_processing_engine import create_receipt_processor
 
 
 @given('the receipt processing system is initialized') # ignore
-def step_system_initialized(context):
+def step_system_initialized(context: Any) -> None:
     """Initialize the actual receipt processing system for testing."""
     if not hasattr(context, 'system'):
         # Use a test API key (can be fake for testing)
@@ -38,18 +39,18 @@ def step_system_initialized(context):
 
 
 @given('the failed folder exists for error handling')
-def step_failed_folder_exists(context):
+def step_failed_folder_exists(context: Any) -> None:
     """Create failed folder for error handling."""
     if not hasattr(context, 'temp_dirs'):
         context.temp_dirs = {}
     
     failed_folder = context.temp_base_dir / 'failed'
     failed_folder.mkdir(parents=True, exist_ok=True)
-    context.temp_dirs['failed'] = failed_folder
+    context.temp_dirs['failed'] = failed_folder  # type: ignore
 
 
 @then('processing should continue with next file')
-def step_processing_continues(context):
+def step_processing_continues(context: Any) -> None:
     """Verify processing continues after error."""
     # In the real system, processing continues by design - no exception thrown
     context.processing_continued = True
@@ -57,7 +58,7 @@ def step_processing_continues(context):
 
 
 @then('the system should continue processing remaining files')
-def step_continue_remaining_files(context):
+def step_continue_remaining_files(context: Any) -> None:
     """Verify remaining files continue to be processed."""
     # Same as continue with next file
     if not hasattr(context, 'processing_continued'):
@@ -66,14 +67,14 @@ def step_continue_remaining_files(context):
 
 
 @then('processing should not be interrupted')
-def step_not_interrupted(context):
+def step_not_interrupted(context: Any) -> None:
     """Verify processing is not interrupted by errors."""
     # The real system is designed to handle errors gracefully
     assert not hasattr(context, 'processing_interrupted')
 
 
 @when('the Claude API request times out')
-def step_api_timeout(context):
+def step_api_timeout(context: Any) -> None:
     """Simulate API timeout error."""
     context.api_error = "network timeout"
     context.api_failure = True
@@ -89,7 +90,7 @@ def step_api_timeout(context):
 
 
 @when('the Claude API returns rate limit exceeded error')
-def step_rate_limit_error(context):
+def step_rate_limit_error(context: Any) -> None:
     """Simulate rate limit error."""
     context.api_error = 'Rate limit exceeded'
     context.api_failure = True
@@ -97,7 +98,7 @@ def step_rate_limit_error(context):
 
 
 @when('the Claude API service is unavailable')
-def step_service_unavailable(context):
+def step_service_unavailable(context: Any) -> None:
     """Simulate API service unavailable."""
     context.api_error = "service unavailable"
     context.api_failure = True
@@ -113,7 +114,7 @@ def step_service_unavailable(context):
 
 
 @then('the system should move the file to failed folder')
-def step_move_to_failed(context):
+def step_move_to_failed(context: Any) -> None:
     """Verify file is moved to failed folder."""
     # In the real system, failed files are automatically moved
     failed_path = context.temp_dirs['failed'] / context.current_filename
@@ -127,7 +128,7 @@ def step_move_to_failed(context):
 
 
 @then('the system should create error log "{error_message}"')
-def step_create_error_log(context, error_message):
+def step_create_error_log(context: Any, error_message: str) -> None:
     """Verify error log is created with specific message."""
     # In the real system, error logs are created automatically when files fail
     error_log_path = context.temp_dirs['failed'] / f"{context.current_filename}.error.log"
