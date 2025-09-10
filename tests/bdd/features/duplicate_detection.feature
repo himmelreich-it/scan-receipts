@@ -5,29 +5,29 @@ Feature: Duplicate Detection and Management
 
   Background:
     Given a receipt processing system is initialized
-    And a done folder exists with processed receipts
+    And an imported folder exists with processed receipts
     And a failed folder exists with failed receipts
     And an input folder exists with receipts to process
 
-  Scenario: Initialize done folder hash database at session start
-    Given the done folder contains existing processed receipt files:
+  Scenario: Initialize imported folder hash database at session start
+    Given the imported folder contains existing processed receipt files:
       | filename        | file_content  |
       | receipt1.pdf    | binary_data_1 |
       | receipt2.jpg    | binary_data_2 |
       | receipt3.png    | binary_data_3 |
     When the processing session starts
-    Then the system scans the done folder
+    Then the system scans the imported folder
     And generates SHA-256 hashes for all existing files
     And stores the hash database in memory
-    And logs "Scanned done folder: found 3 existing files for duplicate detection"
+    And logs "Scanned imported folder: found 3 existing files for duplicate detection"
 
-  Scenario: Skip duplicate file that matches done folder
-    Given the done folder contains a file "original_receipt.pdf" with hash "abc123hash"
-    And the hash database is initialized with done folder hashes
+  Scenario: Skip duplicate file that matches imported folder
+    Given the imported folder contains a file "original_receipt.pdf" with hash "abc123hash"
+    And the hash database is initialized with imported folder hashes
     When processing a file "duplicate_receipt.pdf" with the same hash "abc123hash"
     Then the system detects the file as a duplicate
     And skips processing without sending to API
-    And logs "Duplicate file skipped: duplicate_receipt.pdf (matches file in done folder)"
+    And logs "Duplicate file skipped: duplicate_receipt.pdf (matches file in imported folder)"
     And continues processing the next file
     And does not create a CSV entry for the duplicate
 
@@ -42,7 +42,7 @@ Feature: Duplicate Detection and Management
 
   Scenario: Process file from failed folder (no duplicate check against failed folder)
     Given the failed folder contains a file "failed_receipt.pdf" with hash "ghi789hash"
-    And the done folder hash database does not contain "ghi789hash"
+    And the imported folder hash database does not contain "ghi789hash"
     And the current session has not processed "ghi789hash"
     When processing a file "retry_receipt.pdf" with hash "ghi789hash" from the input folder
     Then the system does not check the failed folder for duplicates
@@ -99,13 +99,13 @@ Feature: Duplicate Detection and Management
     And continues processing the file as non-duplicate
     And reports the error for investigation
 
-  Scenario: Handle done folder access error at session start
-    Given the done folder is inaccessible due to permissions or missing directory
+  Scenario: Handle imported folder access error at session start
+    Given the imported folder is inaccessible due to permissions or missing directory
     When the processing session starts
-    Then the system fails to scan the done folder
-    And logs "Done folder access error: cannot initialize duplicate detection"
+    Then the system fails to scan the imported folder
+    And logs "Imported folder access error: cannot initialize duplicate detection"
     And initializes with empty hash database
-    And continues processing without done folder duplicate detection
+    And continues processing without imported folder duplicate detection
 
   Scenario: Handle logging failure during duplicate detection
     Given the logging system is unavailable or failing
