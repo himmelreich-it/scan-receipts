@@ -9,6 +9,9 @@ Generate detailed implementation specifications for Python applications from use
 - Read user stories and extract implementation requirements
 - Identify Python packages needing creation/modification
 - Map acceptance criteria to technical needs
+- Verify existing implementation design, if existing this is an update
+- If applicable, analyze existing code to minimize change impact
+- Verify existing related code
 
 ### Phase 2: Interactive Technical Planning
 Ask focused questions about missing technical context:

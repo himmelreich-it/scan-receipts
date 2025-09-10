@@ -212,8 +212,8 @@ class DuplicateDetectionPort(ABC):
     """Port for duplicate detection services."""
     
     @abstractmethod
-    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
-        """Scan done folder and build hash database."""
+    def initialize_imported_folder_hashes(self, imported_folder: Path) -> None:
+        """Scan imported folder and build hash database."""
         
     @abstractmethod
     def is_duplicate(self, file_hash: str) -> bool:
@@ -244,7 +244,7 @@ class ProcessReceiptUseCase:
         """Process all receipts in input folder.
         
         Workflow:
-        1. Initialize duplicate detection with done folder
+        1. Initialize duplicate detection with imported folder
         2. Get list of input files
         3. Process each file through validation pipeline
         4. Return list of processed receipts
@@ -322,7 +322,7 @@ class AnthropicAIAdapter(AIExtractionPort):
 class FileSystemAdapter(FileSystemPort):
     """Adapter for file system operations."""
     
-    def __init__(self, done_folder: Path, failed_folder: Path):
+    def __init__(self, imported_folder: Path, failed_folder: Path):
         """Initialize with folder paths."""
         
     def ensure_folders_exist(self, folders: List[Path]) -> None:
@@ -358,11 +358,11 @@ class DuplicateDetectionAdapter(DuplicateDetectionPort):
     def __init__(self):
         """Initialize with empty hash databases."""
         
-    def initialize_done_folder_hashes(self, done_folder: Path) -> None:
-        """Scan done folder and build hash database.
+    def initialize_imported_folder_hashes(self, imported_folder: Path) -> None:
+        """Scan imported folder and build hash database.
         
         Process:
-        1. Scan all files in done folder
+        1. Scan all files in imported folder
         2. Generate SHA-256 hash for each file
         3. Store in hash database for duplicate checking
         """
@@ -371,7 +371,7 @@ class DuplicateDetectionAdapter(DuplicateDetectionPort):
         """Check if file hash is a duplicate.
         
         Checks against:
-        1. Done folder hash database
+        1. Imported folder hash database
         2. Current session hash database
         """
         
@@ -421,7 +421,7 @@ async def main():
     # Initialize receipt processor with configuration
     processor = create_receipt_processor(
         api_key=os.getenv('ANTHROPIC_API_KEY'),
-        done_folder=Path(os.getenv('DONE_FOLDER')),
+        imported_folder=Path(os.getenv('IMPORTED_FOLDER')),
         failed_folder=Path(os.getenv('FAILED_FOLDER'))
     )
     
@@ -445,7 +445,7 @@ from .infrastructure.duplicate_adapter import DuplicateDetectionAdapter
 
 def create_receipt_processor(
     api_key: str,
-    done_folder: Path,
+    imported_folder: Path,
     failed_folder: Path
 ) -> ProcessReceiptUseCase:
     """Factory function to create configured receipt processor."""
@@ -465,7 +465,7 @@ __all__ = [
 ### Environment Variables
 ```bash
 ANTHROPIC_API_KEY=your_api_key_here
-DONE_FOLDER=/path/to/done/folder
+IMPORTED_FOLDER=/path/to/imported/folder
 FAILED_FOLDER=/path/to/failed/folder
 INPUT_RECEIPTS_FOLDER=/path/to/input/folder
 ```
@@ -877,8 +877,8 @@ dependencies = [
 
 ### Scenario Coverage
 **DUPLICATE_DETECTION_E5F6 Acceptance Criteria Mapping**:
-- `Initialize done folder hash database at session start` → "When processing session starts, system scans done folder and generates hash database"
-- `Skip duplicate file that matches done folder` → "When file hash matches existing hash in done folder, system skips file and logs message"
+- `Initialize imported folder hash database at session start` → "When processing session starts, system scans imported folder and generates hash database"
+- `Skip duplicate file that matches imported folder` → "When file hash matches existing hash in imported folder, system skips file and logs message"
 - `Skip duplicate file that matches current session` → "When file hash matches hash from current processing session, system skips file and logs message"
 - `Process file from failed folder (no duplicate check)` → "When checking duplicates, system does NOT check failed folder"
 - `Generate and store file hash` → "When file is processed, system generates file hash" and "When file hash is generated, it is stored"
@@ -886,7 +886,7 @@ dependencies = [
 - `Hash generation for different file types` → Parameterized testing for PDF/JPG/PNG formats
 - `Handle hash generation failure` → "Hash generation failures" error scenario
 - `Handle hash comparison error` → "Hash comparison errors" error scenario  
-- `Handle done folder access error` → "Done folder access errors" error scenario
+- `Handle imported folder access error` → "Imported folder access errors" error scenario
 - `Handle logging failure` → "Logging failures" error scenario
 
 ### Test Data Requirements
@@ -903,7 +903,7 @@ dependencies = [
 
 **Session State Test Data**:
 - Current session hash tracking with filename mappings
-- Done folder hash database with existing file hashes
+- Imported folder hash database with existing file hashes
 - Failed folder files excluded from duplicate checking
 
 ### Step Definition Interfaces
@@ -914,25 +914,25 @@ dependencies = [
 @given('a receipt processing system is initialized')
 def step_system_initialized(context): pass
 
-@given('a done folder exists with processed receipts')  
-def step_done_folder_exists(context): pass
+@given('an imported folder exists with processed receipts')  
+def step_imported_folder_exists(context): pass
 
-@given('the done folder contains existing processed receipt files')
-def step_done_folder_contains_files(context): pass
+@given('the imported folder contains existing processed receipt files')
+def step_imported_folder_contains_files(context): pass
 
 # Hash database initialization steps
 @when('the processing session starts')
 def step_processing_session_starts(context): pass
 
-@then('the system scans the done folder')
-def step_system_scans_done_folder(context): pass
+@then('the system scans the imported folder')
+def step_system_scans_imported_folder(context): pass
 
 @then('generates SHA-256 hashes for all existing files')
 def step_generates_hashes(context): pass
 
 # Duplicate detection steps
-@given('the done folder contains a file "{filename}" with hash "{hash_value}"')
-def step_done_folder_file_with_hash(context, filename, hash_value): pass
+@given('the imported folder contains a file "{filename}" with hash "{hash_value}"')
+def step_imported_folder_file_with_hash(context, filename, hash_value): pass
 
 @when('processing a file "{filename}" with the same hash "{hash_value}"')
 def step_processing_file_with_hash(context, filename, hash_value): pass
@@ -1017,8 +1017,8 @@ def step_hash_comparison_fails(context): pass
 @then('continues processing the file as non-duplicate')
 def step_processes_as_non_duplicate(context): pass
 
-@given('the done folder is inaccessible due to permissions or missing directory')
-def step_done_folder_inaccessible(context): pass
+@given('the imported folder is inaccessible due to permissions or missing directory')
+def step_imported_folder_inaccessible(context): pass
 
 @then('initializes with empty hash database')
 def step_initializes_empty_database(context): pass
@@ -1049,5 +1049,25 @@ def step_logging_fails_continues(context): pass
 **Error Classification**: Exception type mapping to business error categories
 **API Response Validation**: JSON schema validation before domain object creation
 **Processing Workflow**: Sequential file processing with error isolation and continuation
+
+## Update Summary
+
+This implementation specification has been updated to reflect the latest user story changes:
+
+### Key Changes Made:
+1. **Folder Naming**: Updated all references from "done folder" to "imported folder" throughout the specification
+2. **API Interfaces**: Updated `DuplicateDetectionPort.initialize_done_folder_hashes()` to `initialize_imported_folder_hashes()`
+3. **Configuration**: Updated environment variables from `DONE_FOLDER` to `IMPORTED_FOLDER`
+4. **BDD Tests**: Updated duplicate_detection.feature file to use "imported folder" terminology
+5. **Documentation**: Updated all technical notes and step definitions to reflect imported folder usage
+
+### Architecture Preservation:
+- Maintained existing hexagonal architecture structure
+- Preserved all existing component interfaces and contracts
+- No breaking changes to domain layer or application layer logic
+- Only infrastructure layer terminology updates
+
+### Status Update:
+All three user stories (RECEIPT_ANALYSIS_A1B2, FILE_VALIDATION_C3D4, DUPLICATE_DETECTION_E5F6) are now aligned with the updated requirements and ready for implementation with the imported folder approach.
 
 This specification provides sufficient technical guidance for implementing the Receipt Processing Engine while maintaining clear separation between domain logic and infrastructure concerns.
