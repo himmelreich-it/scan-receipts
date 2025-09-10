@@ -51,7 +51,7 @@ Feature: File Hash Generation and Duplicate Detection Support
     Examples:
       | error_condition | error_code             |
       | file not found  | FILE_NOT_FOUND         |
-      | file unreadable | FILE_UNREADABLE        |
+      | file unreadable | FILE_PERMISSION_DENIED |
       | file corrupted  | FILE_CORRUPTED         |
       | no permission   | FILE_PERMISSION_DENIED |
 

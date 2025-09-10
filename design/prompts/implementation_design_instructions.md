@@ -10,7 +10,7 @@ Generate detailed implementation specifications for Python applications from use
 - Identify Python packages needing creation/modification
 - Map acceptance criteria to technical needs
 - If any of the stories is OUTDATED, this indicates an update:
-  - Reda existing implementation design and compare against requirements
+  - Read existing implementation design and compare against requirements
   - Analyze existing code to minimize change impact
 
 ### Phase 2: Interactive Technical Planning
@@ -177,7 +177,8 @@ Before including any specification detail:
 3. Does this provide sufficient guidance without over-specifying implementation?
 4. Does this preserve interfaces used by dependent stories?
 5. Are interface contracts clear enough for independent implementation?
-6. Do BDD scenarios directly map to acceptance criteria?
+6. Do we follow coding principles as given in the instructions?
+7. Do BDD scenarios directly map to acceptance criteria?
 
 ## Example Interactive Flow
 ```
