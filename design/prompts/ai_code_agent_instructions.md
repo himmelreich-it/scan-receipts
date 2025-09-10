@@ -226,6 +226,7 @@ PLACEHOLDER_CONFIG = {
 5. User story marked **IMPLEMENTED**
 6. No breaking changes to existing code
 7. All missing dependencies properly logged with references
+8. Feature marked **IMPLEMENTED** when all user stories of this feature are implemented, otherwise keep the current state
 
 ## Output Requirements
 - **Implementation Summary**: What was built (only features in acceptance criteria)
