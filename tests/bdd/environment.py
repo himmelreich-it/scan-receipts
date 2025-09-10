@@ -6,9 +6,10 @@ import tempfile
 import shutil
 import logging
 from pathlib import Path
+from typing import Any
 
 
-def before_all(context):
+def before_all(context: Any) -> None:
     """Set up before all scenarios."""
     # Configure logging for tests
     logging.basicConfig(
@@ -20,7 +21,7 @@ def before_all(context):
     context.original_cwd = Path.cwd()
 
 
-def before_scenario(context, scenario):
+def before_scenario(context: Any, scenario: Any) -> None:
     """Set up before each scenario."""
     # Clean up any previous scenario data
     if hasattr(context, 'cleanup_paths'):
@@ -39,7 +40,7 @@ def before_scenario(context, scenario):
     context.log_messages = []
 
 
-def cleanup_previous_scenario(context):
+def cleanup_previous_scenario(context: Any) -> None:
     """Clean up resources from previous scenario."""
     # Reset file permissions FIRST before cleanup
     if hasattr(context, 'temp_dirs'):
@@ -81,7 +82,7 @@ def cleanup_previous_scenario(context):
             pass  # Handler already removed or doesn't exist
 
 
-def restore_permissions(temp_dirs):
+def restore_permissions(temp_dirs: dict[str, Path]) -> None:
     """Restore normal permissions to all temp directories and files."""
     import os
     
@@ -110,13 +111,13 @@ def restore_permissions(temp_dirs):
                 pass  # Best effort restoration
 
 
-def after_scenario(context, scenario):
+def after_scenario(context: Any, scenario: Any) -> None:
     """Clean up after each scenario."""
     # Use the same cleanup function for consistency
     cleanup_previous_scenario(context)
 
 
-def after_all(context):
+def after_all(context: Any) -> None:
     """Clean up after all scenarios."""
     # Restore original working directory
     if hasattr(context, 'original_cwd'):

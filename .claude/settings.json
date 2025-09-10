@@ -2,19 +2,19 @@
   "permissions": {
     "defaultMode": "default",
     "allow": [
-      "Bash(uv run pytest *)",
-      "Bash(uv run ruff *)",
-      "Bash(uv run behave *)",
-      "Bash(PYTHONPATH=src uv run behave *)",
-      "Bash(ls *)",
+      "Bash(uv run pytest :*)",
+      "Bash(uv run ruff :*)",
+      "Bash(uv run behave :*)",
+      "Bash(PYTHONPATH=src uv run behave :*)",
+      "Bash(ls :*)",
       "Bash(npx pyright)"
     ],
     "ask": [
-        "Bash(rm *)",
-        "Bash(mv *)",
-        "Bash(mkdir *)",
-        "Bash(touch *)",
-        "Bash(rmdir *)"
+        "Bash(rm :*)",
+        "Bash(mv :*)",
+        "Bash(mkdir :*)",
+        "Bash(touch :*)",
+        "Bash(rmdir :*)"
     ],
     "deny": [
       "Bash(curl:*)",

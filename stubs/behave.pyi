@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar, Any, Union
+from typing import Callable, TypeVar, Any
 from typing_extensions import ParamSpec
 
 _P = ParamSpec('_P')

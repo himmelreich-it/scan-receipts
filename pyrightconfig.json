@@ -3,7 +3,7 @@
     "typeCheckingMode": "strict",
     "pythonVersion": "3.13",
     "pythonPath": ".venv/bin/python",
-    "include": ["src"],
+    "include": ["src", "tests", "stubs"],
     "reportMissingImports": "error",
     "reportMissingTypeStubs": "warning"
 }

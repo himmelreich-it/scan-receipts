@@ -1,13 +1,11 @@
 """Unit tests for FOLDER_MGMT_A8D2: Four-Folder Structure Management and Validation."""
 
-import pytest
 import tempfile
-import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from file_management.adapters import FileSystemAdapter
-from file_management.models import FileErrorCode, FolderValidationResult
+from file_management.models import FileErrorCode
 
 
 class TestFourFolderStructureManagement:
