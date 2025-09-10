@@ -56,3 +56,23 @@ class FolderValidationResult:
     is_writable: bool = False
     error_code: Optional[FileErrorCode] = None
     error_message: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class FileMovementRequest:
+    """Request for file movement between folders."""
+    source_path: Path
+    target_folder: Path
+    description: str
+    date: str  # Format: yyyyMMdd
+    sequence_number: Optional[int] = None  # For imported files
+
+
+@dataclass(frozen=True)
+class FileMovementResult:
+    """Result of file movement operation."""
+    success: bool
+    source_path: Path
+    target_path: Optional[Path] = None
+    error_code: Optional[FileErrorCode] = None
+    error_message: Optional[str] = None
