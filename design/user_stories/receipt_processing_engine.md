@@ -57,14 +57,16 @@ Core automated receipt processing system that handles file intake, AI-powered da
 
 ### Story Title: Duplicate Detection and Management
 **Code**: DUPLICATE_DETECTION_E5F6  
-**Status**: OUTDATED  
+**Status**: IMPLEMENTED  
 
 ## Implementation Results
 - Files created: tests/bdd/features/duplicate_detection.feature, tests/bdd/steps/duplicate_detection_steps.py, tests/bdd/environment.py
-- Dependencies mocked: None (using actual implementation)
+- Files updated: src/receipt_processing_engine/infrastructure/duplicate_adapter.py, src/receipt_processing_engine/application/ports.py
+- Dependencies mocked: None (using actual implementation)  
 - Tests created: 14 BDD scenarios with comprehensive step definitions covering all acceptance criteria
 - BDD scenarios: 14 passed, 0 failed, 0 skipped (100% pass rate)
 - All acceptance criteria: PASS - All duplicate detection functionality validated through BDD tests
+- Key changes implemented: Updated from "done folder" to "imported folder" terminology with backward compatibility
 **Functional Description**: Prevents reprocessing of duplicate files using comprehensive file hash comparison against imported folder and current processing session, providing clear user feedback about skipped duplicates  
 **Acceptance Criteria**: 
 - When processing session starts, system scans imported folder and generates hash database of all existing files
