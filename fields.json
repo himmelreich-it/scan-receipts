@@ -1,0 +1,138 @@
+{
+    "fields": [
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07K_8",
+            "name": "Title",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LAE",
+            "name": "Assignees",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTSSF_lAHOAFj3C84BC05fzg07LAM",
+            "name": "Status",
+            "options": [
+                {
+                    "id": "f75ad846",
+                    "name": "Backlog"
+                },
+                {
+                    "id": "61e4505c",
+                    "name": "Ready"
+                },
+                {
+                    "id": "47fc9ee4",
+                    "name": "In progress"
+                },
+                {
+                    "id": "df73e18b",
+                    "name": "In review"
+                },
+                {
+                    "id": "98236657",
+                    "name": "Done"
+                }
+            ],
+            "type": "ProjectV2SingleSelectField"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LAY",
+            "name": "Labels",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LAg",
+            "name": "Linked pull requests",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LAo",
+            "name": "Milestone",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LAw",
+            "name": "Repository",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LA4",
+            "name": "Reviewers",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LBA",
+            "name": "Parent issue",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07LBE",
+            "name": "Sub-issues progress",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTSSF_lAHOAFj3C84BC05fzg07VY4",
+            "name": "Priority",
+            "options": [
+                {
+                    "id": "79628723",
+                    "name": "P0"
+                },
+                {
+                    "id": "0a877460",
+                    "name": "P1"
+                },
+                {
+                    "id": "da944a9c",
+                    "name": "P2"
+                }
+            ],
+            "type": "ProjectV2SingleSelectField"
+        },
+        {
+            "id": "PVTSSF_lAHOAFj3C84BC05fzg07VY8",
+            "name": "Size",
+            "options": [
+                {
+                    "id": "6c6483d2",
+                    "name": "XS"
+                },
+                {
+                    "id": "f784b110",
+                    "name": "S"
+                },
+                {
+                    "id": "7515a9f1",
+                    "name": "M"
+                },
+                {
+                    "id": "817d0097",
+                    "name": "L"
+                },
+                {
+                    "id": "db339eb2",
+                    "name": "XL"
+                }
+            ],
+            "type": "ProjectV2SingleSelectField"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07VZA",
+            "name": "Estimate",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07VZE",
+            "name": "Start date",
+            "type": "ProjectV2Field"
+        },
+        {
+            "id": "PVTF_lAHOAFj3C84BC05fzg07VZI",
+            "name": "End date",
+            "type": "ProjectV2Field"
+        }
+    ],
+    "totalCount": 15
+}

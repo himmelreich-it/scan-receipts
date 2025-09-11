@@ -24,8 +24,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 ## Code Quality
 - Run linting: `uv run ruff check`
 - Run formatting: `uv run ruff format`
-- Run type checking: `uv run mypy src/`
-- Run type checking: `uv run mypy tests/`
+- Run type checking: `npx pyright`
 
 ## Design and Implement Next Feature
 When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file
@@ -34,3 +33,12 @@ When the user instructs "design and implement next feature", we walk the user th
 3. Create Implementation Design Documentation (with the user stories file just created)
 4. Implement Feature (with the user stories file just created)
 5. Integrate Implemented Feature (just created feature)
+
+## Github CLI
+- Tickets can be found in Github and the `gh` cli is available
+- Tickets can be created by `gh issue create --title "$title" --body "$body" --project "project_name"`
+- Working on a ticket requires creating a branch for given ticket: `gh issue develop $number --checkout`
+- Once tickets are done, a pr is created: `gh pr create --title "$title" --body "$body" --project "project_name"`
+- Tickets need to be assigned to the project given:
+  - project_number: 2
+  - project_name: scan-receipts
