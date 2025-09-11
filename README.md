@@ -60,3 +60,5 @@ Integrates the completed feature into the system. Use when feature implementatio
 ## Architecture
 
 Follow hexagonal architecture principles in `design/rules/hexagonal_architecture_guide.md` and Python standards in `design/rules/python_agent_instructions.md`.
+
+Show using: `npx likec4 start`

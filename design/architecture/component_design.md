@@ -21,7 +21,7 @@ The application layer orchestrates domain operations and defines ports for exter
 - **Validate Results Use Case**: Applies business rules and validation to extracted data
 
 #### Ports (Interfaces)
-- **Receipt Repository Port**: Interface for receipt data persistence operations
+- **(deprecated: file operations) Receipt Repository Port**: Interface for receipt data persistence operations 
 - **AI Extraction Port**: Interface for AI-powered data extraction services
 - **File System Port**: Interface for file operations and management
 - **XLSX Integration Port**: Interface for XLSX file operations and data import
