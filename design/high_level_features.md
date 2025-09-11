@@ -16,7 +16,7 @@
 - Error handling for unreadable files, API failures, and corrupted files
 - Success criteria enforcement for required fields
 
-**Dependencies**: Hard - File Management System [FILE_MGMT_B7C4] for file hash generation
+**Dependencies**: Hard - File Management System [FILE_MGMT_B7C4] for file hash generation, Hard - CSV Data Staging [CSV_STAGING_C9D3] for storing results
 
 **User Stories**: design/user_stories/receipt_processing_engine.md
 
@@ -51,7 +51,7 @@
 - Data validation and integrity checks
 - Only successful extractions included (no failed or duplicate entries)
 
-**Dependencies**: Hard - Receipt Processing Engine [RECEIPT_PROCESS_A8F5]
+**Dependencies**: None
 
 ## Feature: XLSX Integration System
 **Code**: XLSX_INTEGRATION_X1Y2  
