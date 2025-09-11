@@ -38,19 +38,19 @@ class ProcessReceiptUseCase:
         self.duplicate_detection = duplicate_detection
 
     async def process_receipts(
-        self, input_folder: Path, done_folder: Path
+        self, input_folder: Path, imported_folder: Path
     ) -> List[Receipt]:
         """Process all receipts in input folder.
 
         Workflow:
-        1. Initialize duplicate detection with done folder
+        1. Initialize duplicate detection with imported folder
         2. Get list of input files
         3. Process each file through validation pipeline
         4. Return list of processed receipts
         """
         try:
-            # Initialize duplicate detection with done folder
-            self.duplicate_detection.initialize_done_folder_hashes(done_folder)
+            # Initialize duplicate detection with imported folder
+            self.duplicate_detection.initialize_imported_folder_hashes(imported_folder)
 
             # Get list of input files
             input_files = self.file_system.get_input_files(input_folder)

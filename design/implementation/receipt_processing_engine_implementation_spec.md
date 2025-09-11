@@ -244,10 +244,11 @@ class ProcessReceiptUseCase:
         """Process all receipts in input folder.
         
         Workflow:
-        1. Initialize duplicate detection with imported folder
+        1. Initialize duplicate detection with imported folder using FILE_MGMT_B7C4
         2. Get list of input files
-        3. Process each file through validation pipeline
-        4. Return list of processed receipts
+        3. Process each file through validation pipeline with confidence scoring
+        4. Apply enhanced date validation (not future, not older than 1 year)
+        5. Return list of processed receipts
         """
         
     async def _process_single_receipt(self, file_path: Path) -> Receipt:
@@ -266,10 +267,10 @@ class ExtractDataUseCase:
         """Extract data from receipt and validate business rules.
         
         Process:
-        1. Extract data using AI service
-        2. Validate date using business rules
-        3. Validate required fields
-        4. Return validated extraction result
+        1. Extract data using AI service with confidence scoring
+        2. Validate date using enhanced business rules (not future, not older than 1 year)
+        3. Validate required fields are present
+        4. Return validated extraction result with confidence score
         """
 ```
 
@@ -1052,22 +1053,29 @@ def step_logging_fails_continues(context): pass
 
 ## Update Summary
 
-This implementation specification has been updated to reflect the latest user story changes:
+This implementation specification has been updated to reflect the OUTDATED user story requirements:
 
 ### Key Changes Made:
-1. **Folder Naming**: Updated all references from "done folder" to "imported folder" throughout the specification
-2. **API Interfaces**: Updated `DuplicateDetectionPort.initialize_done_folder_hashes()` to `initialize_imported_folder_hashes()`
-3. **Configuration**: Updated environment variables from `DONE_FOLDER` to `IMPORTED_FOLDER`
-4. **BDD Tests**: Updated duplicate_detection.feature file to use "imported folder" terminology
-5. **Documentation**: Updated all technical notes and step definitions to reflect imported folder usage
+1. **FILE_MGMT_B7C4 Integration**: Updated duplicate detection to use FILE_MGMT_B7C4 hash service instead of internal hash generation
+2. **Enhanced Date Validation**: Added specific date validation rules (not future, not older than 1 year) with exact error messages 
+3. **Confidence Scoring**: Integrated Claude API confidence scoring (0-100) throughout extraction workflow
+4. **Improved Error Messages**: Added specific error message formats matching user story requirements
+5. **Session-based Duplicate Logging**: Enhanced duplicate detection to distinguish between imported folder and session-based duplicates
+6. **Dependency Updates**: Added file_management package dependency and updated factory functions
 
-### Architecture Preservation:
-- Maintained existing hexagonal architecture structure
-- Preserved all existing component interfaces and contracts
-- No breaking changes to domain layer or application layer logic
-- Only infrastructure layer terminology updates
+### Architecture Changes:
+- **FileSystemAdapter**: Now delegates hash generation to FILE_MGMT_B7C4 service
+- **DuplicateDetectionAdapter**: Uses FILE_MGMT_B7C4 for hash generation, enhanced duplicate detection return values
+- **DateValidationPolicy**: Enhanced with specific error message requirements
+- **ProcessingConfig**: Added confidence score constants and configurable date validation
+- **AnthropicAIAdapter**: Enhanced to handle confidence scoring from Claude API
+
+### User Story Alignment:
+- **RECEIPT_ANALYSIS_A1B2**: Enhanced with confidence scoring, specific date validation, and Claude Sonnet 4 requirements
+- **FILE_VALIDATION_C3D4**: Updated with enhanced error handling and success criteria enforcement  
+- **DUPLICATE_DETECTION_E5F6**: Updated to use FILE_MGMT_B7C4 and enhanced session-based duplicate prevention
 
 ### Status Update:
-All three user stories (RECEIPT_ANALYSIS_A1B2, FILE_VALIDATION_C3D4, DUPLICATE_DETECTION_E5F6) are now aligned with the updated requirements and ready for implementation with the imported folder approach.
+All three OUTDATED user stories are now updated to meet the enhanced requirements with FILE_MGMT_B7C4 integration, confidence scoring, and improved date validation.
 
-This specification provides sufficient technical guidance for implementing the Receipt Processing Engine while maintaining clear separation between domain logic and infrastructure concerns.
+This specification provides comprehensive technical guidance for implementing the Receipt Processing Engine with all required enhancements while maintaining hexagonal architecture principles.

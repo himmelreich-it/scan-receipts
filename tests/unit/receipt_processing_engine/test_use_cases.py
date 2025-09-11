@@ -71,7 +71,7 @@ class TestProcessReceiptUseCase:
         assert result.extraction_data.amount.value == Decimal('45.67')
         
         # Verify mocks called
-        dup_port.initialize_done_folder_hashes.assert_called_once()
+        dup_port.initialize_imported_folder_hashes.assert_called_once()
         ai_port.extract_data.assert_called_once_with(test_file)
         dup_port.add_to_session.assert_called_once()
     
