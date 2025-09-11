@@ -3,6 +3,7 @@
     "defaultMode": "default",
     "allow": [
       "Bash(uv run pytest :*)",
+      "Bash(uv run pytest)",
       "Bash(uv run ruff :*)",
       "Bash(uv run behave :*)",
       "Bash(PYTHONPATH=src uv run behave :*)",
