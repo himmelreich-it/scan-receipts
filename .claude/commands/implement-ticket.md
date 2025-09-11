@@ -8,5 +8,5 @@ The user would like the agent to implement github ticket given in $ARGUMENTS :
 - Run Code Quality Checks and Testing Commands
 
 Once done:
-- Update Github ticket with label "IMPLEMENTED"
+- Update Github ticket with label "implemented"
 - Create PR to main using Github CLI
