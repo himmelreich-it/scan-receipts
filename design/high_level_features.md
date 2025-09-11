@@ -2,7 +2,7 @@
 
 ## Feature: Receipt Processing Engine
 **Code**: RECEIPT_PROCESS_A8F5  
-**Status**: OUTDATED
+**Status**: NEW
 **Description**: Core automated receipt processing system that handles file intake, AI-powered data extraction using Anthropic's Claude API, and structured data output. Now includes duplicate detection against imported folder and current session cache, date extraction validation, and enhanced error handling with confidence scoring.
 **Implementation Scope**:
 - File format support (PDF, JPG, PNG)
@@ -69,24 +69,7 @@
 
 **Dependencies**: Hard - CSV Data Staging [CSV_STAGING_C9D3], File Management System [FILE_MGMT_B7C4]
 
-## Feature: Terminal User Interface and Workflow Control
-**Code**: TUI_WORKFLOW_T3U4  
-**Status**: NEW
-**Description**: Complete terminal-based user interface providing menu-driven interaction, step-by-step workflow control, and comprehensive status monitoring. Manages the entire receipt processing workflow with user control at each stage and clear feedback on system state.
-**Implementation Scope**:
-- Startup screen showing file counts (incoming, failed) and staging status
-- Configuration validation on startup
-- Automatic folder creation for missing directories
-- Fixed menu with four options: Run Analysis, Import to XLSX, View Staging Table, Exit
-- Three main workflow options with appropriate error messages when unavailable
-- Real-time progress display during AI analysis with file-by-file updates
-- Staging table display with formatted data preview
-- Validation status display for staging readiness
-- User confirmation for destructive actions (clearing scanned folder)
-- Error handling with user-friendly messages and recovery options
-- Progress tracking with counts and statistics
 
-**Dependencies**: Soft - Receipt Processing Engine [RECEIPT_PROCESS_A8F5], File Management System [FILE_MGMT_B7C4], CSV Data Staging [CSV_STAGING_C9D3], XLSX Integration System [XLSX_INTEGRATION_X1Y2]
 
 ## Feature: Configuration Management
 **Code**: CONFIG_MGMT_F5G6  
