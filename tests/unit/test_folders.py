@@ -4,10 +4,9 @@ import csv
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from unittest.mock import MagicMock, patch
 
 import pytest  # type: ignore[import-untyped]
+from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
 from scan_receipts.folders import (
     StagingInfo,
@@ -20,10 +19,10 @@ from scan_receipts.folders import (
 class TestCreateFolders:
     """Test folder creation functionality."""
     
-    def test_create_folders_success(self):
+    def test_create_folders_success(self, mocker: MockerFixture) -> None:
         """Test successful creation of all required folders."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            config = MagicMock()
+            config = mocker.MagicMock()
             config.incoming_folder = Path(tmpdir) / "incoming"
             config.scanned_folder = Path(tmpdir) / "scanned"
             config.imported_folder = Path(tmpdir) / "imported"
@@ -36,10 +35,10 @@ class TestCreateFolders:
             assert config.imported_folder.exists()
             assert config.failed_folder.exists()
     
-    def test_create_folders_with_nested_paths(self):
+    def test_create_folders_with_nested_paths(self, mocker: MockerFixture) -> None:
         """Test creation of folders with nested parent paths."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            config = MagicMock()
+            config = mocker.MagicMock()
             config.incoming_folder = Path(tmpdir) / "deep" / "nested" / "incoming"
             config.scanned_folder = Path(tmpdir) / "deep" / "nested" / "scanned"
             config.imported_folder = Path(tmpdir) / "deep" / "nested" / "imported"
@@ -52,10 +51,10 @@ class TestCreateFolders:
             assert config.imported_folder.exists()
             assert config.failed_folder.exists()
     
-    def test_create_folders_existing_folders(self):
+    def test_create_folders_existing_folders(self, mocker: MockerFixture) -> None:
         """Test that existing folders are not affected."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            config = MagicMock()
+            config = mocker.MagicMock()
             config.incoming_folder = Path(tmpdir) / "incoming"
             config.scanned_folder = Path(tmpdir) / "scanned"
             config.imported_folder = Path(tmpdir) / "imported"
@@ -70,12 +69,12 @@ class TestCreateFolders:
             assert test_file.exists()
             assert test_file.read_text() == "test content"
     
-    @patch("scan_receipts.folders.Path.mkdir")
-    def test_create_folders_permission_error(self, mock_mkdir: Any) -> None:
+    def test_create_folders_permission_error(self, mocker: MockerFixture) -> None:
         """Test error handling when folder creation fails due to permissions."""
+        mock_mkdir = mocker.patch("scan_receipts.folders.Path.mkdir")
         mock_mkdir.side_effect = PermissionError("Permission denied")
         
-        config = MagicMock()
+        config = mocker.MagicMock()
         config.incoming_folder = Path("/tmp/incoming")
         config.scanned_folder = Path("/tmp/scanned")
         config.imported_folder = Path("/tmp/imported")
