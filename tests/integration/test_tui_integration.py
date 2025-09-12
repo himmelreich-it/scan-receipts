@@ -28,7 +28,7 @@ class TestTUIIntegration:
             }
             
             with patch.dict(os.environ, env_vars, clear=True):
-                config = AppConfig.from_env()
+                config = AppConfig.from_env(load_dotenv_file=False)
                 create_folders(config)
                 
                 assert config.incoming_folder.exists()
@@ -91,7 +91,7 @@ class TestTUIIntegration:
         """Test that application fails fast with missing environment variables."""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError) as exc_info:
-                AppConfig.from_env()
+                AppConfig.from_env(load_dotenv_file=False)
             
             error_msg = str(exc_info.value)
             assert "Missing environment variables:" in error_msg

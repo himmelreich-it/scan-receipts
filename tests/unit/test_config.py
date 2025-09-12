@@ -24,7 +24,7 @@ class TestAppConfig:
         }
         
         with patch.dict(os.environ, env_vars, clear=True):
-            config = AppConfig.from_env()
+            config = AppConfig.from_env(load_dotenv_file=False)
             
             assert config.incoming_folder == Path("/tmp/incoming")
             assert config.scanned_folder == Path("/tmp/scanned")
@@ -45,7 +45,7 @@ class TestAppConfig:
         
         with patch.dict(os.environ, env_vars, clear=True):
             with pytest.raises(ValueError) as exc_info:
-                AppConfig.from_env()
+                AppConfig.from_env(load_dotenv_file=False)
             
             assert "Missing environment variables: XLSX_OUTPUT_FILE" in str(exc_info.value)
     
@@ -59,7 +59,7 @@ class TestAppConfig:
         
         with patch.dict(os.environ, env_vars, clear=True):
             with pytest.raises(ValueError) as exc_info:
-                AppConfig.from_env()
+                AppConfig.from_env(load_dotenv_file=False)
             
             error_msg = str(exc_info.value)
             assert "Missing environment variables:" in error_msg
@@ -71,7 +71,7 @@ class TestAppConfig:
         """Test configuration loading fails when all variables are missing."""
         with patch.dict(os.environ, {}, clear=True):
             with pytest.raises(ValueError) as exc_info:
-                AppConfig.from_env()
+                AppConfig.from_env(load_dotenv_file=False)
             
             error_msg = str(exc_info.value)
             for var in REQUIRED_ENV_VARS:
@@ -89,7 +89,7 @@ class TestAppConfig:
         }
         
         with patch.dict(os.environ, env_vars, clear=True):
-            config = AppConfig.from_env()
+            config = AppConfig.from_env(load_dotenv_file=False)
             
             with pytest.raises(AttributeError):
                 config.incoming_folder = Path("/new/path")  # type: ignore
