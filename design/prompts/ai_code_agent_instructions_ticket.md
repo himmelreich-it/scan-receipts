@@ -159,7 +159,7 @@ class TestFeatureComplete:
 - Architecture conflicts preventing story integration
 
 **Output Requirements:**
-- Complete feature summary with architecture overview
+- Complete feature summary with architecture overview in comment in ticket, do not update the current ticket description
 - Implementation map (files to stories), test results (unit/integration/BDD/end-to-end)
 - Integration validation, feature validation status
 - File structure with all created/modified files

@@ -1,0 +1,131 @@
+"""Terminal User Interface adapter for receipt processing."""
+
+import signal
+import sys
+from typing import Any, Never
+
+from rich import print as rprint
+from rich.panel import Panel
+from rich.text import Text
+
+from core.domain.configuration import AppConfig
+from core.use_cases.import_to_xlsx import ImportToXLSXUseCase
+from core.use_cases.process_receipt import ProcessReceiptUseCase
+from core.use_cases.view_staging import ViewStagingUseCase
+from ports.file_system import FileSystemPort
+
+
+class TerminalUI:
+    """Terminal User Interface adapter."""
+    
+    def __init__(
+        self,
+        file_system: FileSystemPort,
+        process_receipt_use_case: ProcessReceiptUseCase,
+        import_to_xlsx_use_case: ImportToXLSXUseCase,
+        view_staging_use_case: ViewStagingUseCase
+    ):
+        self.file_system = file_system
+        self.process_receipt_use_case = process_receipt_use_case
+        self.import_to_xlsx_use_case = import_to_xlsx_use_case
+        self.view_staging_use_case = view_staging_use_case
+    
+    def signal_handler(self, sig: int, frame: Any) -> None:
+        """Handle Ctrl+C gracefully."""
+        print("\nGoodbye")
+        sys.exit(0)
+    
+    def display_header(self) -> None:
+        """Display the application header."""
+        rprint(Panel.fit("Receipt Processor", border_style="cyan"))
+    
+    def display_status(self, config: AppConfig) -> None:
+        """Display system status information.
+        
+        Args:
+            config: Application configuration.
+        """
+        input_count = self.file_system.count_receipt_files(config.incoming_folder)
+        failed_count = self.file_system.count_receipt_files(config.failed_folder)
+        staging_info = self.view_staging_use_case.execute(config)
+        
+        rprint(f"Input Folder: {input_count} files")
+        rprint(f"Failed Folder: {failed_count} files")
+        
+        if staging_info:
+            rprint(f"Staging: {staging_info}")
+        else:
+            rprint("Staging: No staging data")
+        
+        rprint()
+    
+    def display_menu(self) -> None:
+        """Display the main menu options."""
+        rprint()
+        rprint("Available Actions:")
+        rprint("[1] Run Analysis")
+        rprint("[2] Import to XLSX")
+        rprint("[3] View Staging Table")
+        rprint("[4] Exit")
+        rprint()
+    
+    def handle_menu_choice(self, choice: str, config: AppConfig) -> bool:
+        """Handle user menu selection.
+        
+        Args:
+            choice: User's menu choice.
+            config: Application configuration.
+            
+        Returns:
+            True to continue, False to exit.
+        """
+        if choice == "1":
+            self.process_receipt_use_case.execute(config)
+            rprint("Analysis completed.")
+            return True
+        elif choice == "2":
+            self.import_to_xlsx_use_case.execute(config)
+            rprint("Import completed.")
+            return True
+        elif choice == "3":
+            staging_info = self.view_staging_use_case.execute(config)
+            if staging_info:
+                rprint(f"Staging data: {staging_info}")
+            else:
+                rprint("No staging data available.")
+            return True
+        elif choice == "4":
+            rprint("Goodbye")
+            return False
+        else:
+            rprint(Text("Invalid choice. Please enter 1-4.", style="red"))
+            return True
+    
+    def run(self, config: AppConfig) -> Never:
+        """Run the terminal UI.
+        
+        Args:
+            config: Application configuration.
+        """
+        signal.signal(signal.SIGINT, self.signal_handler)
+        
+        try:
+            self.file_system.create_folders(config)
+        except OSError as e:
+            rprint(Text(str(e), style="red"))
+            sys.exit(1)
+        
+        self.display_header()
+        
+        while True:
+            self.display_status(config)
+            self.display_menu()
+            
+            try:
+                choice = input("Enter your choice (1-4): ").strip()
+            except EOFError:
+                rprint("\nGoodbye")
+                sys.exit(0)
+            
+            if not self.handle_menu_choice(choice, config):
+                sys.exit(0)
