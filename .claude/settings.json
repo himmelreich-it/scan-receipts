@@ -17,13 +17,13 @@
       "Bash(gh pr comment:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(mkdir :*)",
+      "Bash(mv :*)",
+      "Bash(touch :*)"    
     ],
     "ask": [
         "Bash(rm :*)",
-        "Bash(mv :*)",
-        "Bash(mkdir :*)",
-        "Bash(touch :*)",
         "Bash(rmdir :*)"
     ],
     "deny": [
