@@ -1,8 +1,6 @@
 """BDD test environment configuration."""
 
-import sys
 from typing import Any
-from pathlib import Path
 
 
 def before_scenario(context: Any, scenario: Any) -> None:
