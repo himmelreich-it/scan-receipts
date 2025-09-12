@@ -10,9 +10,9 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 
 
 ## Testing Commands
-- Run unit tests: `uv run pytest tests/unit/`
-- Run integration tests: `uv run pytest tests/integration/`
-- Run BDD tests: `PYTHONPATH=src uv run behave tests/bdd`
+- Run unit tests: `uv run --env-file .env.testing pytest tests/unit/`
+- Run integration tests: `uv run --env-file .env.testing pytest tests/integration/`
+- Run BDD tests: `uv run --env-file .env.testing behave tests/bdd`
 - Run all tests: `uv run pytest`
 - Run with coverage: `uv run pytest --cov=src`
 - Do NOT run tests using `python` or `uv python` command directly, for testing, create and remove a file rather than passing python code to the command line.
