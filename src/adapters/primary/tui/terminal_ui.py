@@ -6,6 +6,7 @@ from typing import Any, Never
 
 from rich import print as rprint
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 
 from core.domain.configuration import AppConfig
@@ -69,6 +70,57 @@ class TerminalUI:
         rprint("[4] Exit")
         rprint()
     
+    def display_staging_table(self, config: AppConfig) -> None:
+        """Display the staging table contents.
+        
+        Args:
+            config: Application configuration.
+        """
+        staging_data = self.view_staging_use_case.get_full_table(config)
+        
+        if staging_data is None:
+            rprint(Text("Error reading staging table.", style="red"))
+            return
+        
+        if not staging_data.exists:
+            rprint("receipts.csv does not exist")
+            return
+        
+        if staging_data.is_empty:
+            rprint("receipts.csv is empty")
+            return
+        
+        # Create a rich table
+        table = Table(title=f"Staging Table: {staging_data.file_path.name}")
+        
+        # Add columns
+        table.add_column("Amount", style="cyan")
+        table.add_column("Tax", style="cyan")
+        table.add_column("TaxPercentage", style="cyan")
+        table.add_column("Description", style="green")
+        table.add_column("Currency", style="yellow")
+        table.add_column("Date", style="magenta")
+        table.add_column("Confidence", style="blue")
+        table.add_column("Hash", style="dim")
+        table.add_column("DoneFilename", style="white")
+        
+        # Add rows
+        for receipt in staging_data.receipts:
+            table.add_row(
+                receipt.amount,
+                receipt.tax,
+                receipt.tax_percentage,
+                receipt.description,
+                receipt.currency,
+                receipt.date,
+                receipt.confidence,
+                receipt.hash[:8] + "..." if len(receipt.hash) > 8 else receipt.hash,
+                receipt.done_filename
+            )
+        
+        rprint(table)
+        rprint(f"\nTotal entries: {len(staging_data.receipts)}")
+    
     def handle_menu_choice(self, choice: str, config: AppConfig) -> bool:
         """Handle user menu selection.
         
@@ -88,11 +140,7 @@ class TerminalUI:
             rprint("Import completed.")
             return True
         elif choice == "3":
-            staging_info = self.view_staging_use_case.execute(config)
-            if staging_info:
-                rprint(f"Staging data: {staging_info}")
-            else:
-                rprint("No staging data available.")
+            self.display_staging_table(config)
             return True
         elif choice == "4":
             rprint("Goodbye")
