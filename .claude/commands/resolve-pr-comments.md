@@ -7,6 +7,7 @@ The user would like the agent to resolve GitHub PR comments given in $ARGUMENTS:
 Workflow:
 1. Fetch PR details: `gh pr view $PR_NUMBER --json title,body,author,files`
 2. Get unresolved comments: `gh pr view $PR_NUMBER --comments`
+3. Get unresolved inline comments using `gh api...`
 3. For each comment: evaluate critically → implement/modify/reject → reply with reasoning
 4. Run quality checks: `npx pyright` and `uv run ruff check src`
 5. Run tests and validate no regressions

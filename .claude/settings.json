@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "defaultMode": "default",
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(uv run pytest :*)",
       "Bash(uv run pytest)",

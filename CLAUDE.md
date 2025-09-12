@@ -12,6 +12,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 ## Testing Commands
 - Run unit tests: `uv run pytest tests/unit/`
 - Run integration tests: `uv run pytest tests/integration/`
+- Run BDD tests: `PYTHONPATH=src uv run behave tests/bdd`
 - Run all tests: `uv run pytest`
 - Run with coverage: `uv run pytest --cov=src`
 
