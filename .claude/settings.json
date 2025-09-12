@@ -11,7 +11,7 @@
       "Bash(ls :*)",
       "Bash(npx pyright)",
       "Bash(gh issue view:*)",
-      "Bash(gh issue view:*)",
+      "Bash(gh issue edit:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr comment:*)",
       "Bash(git add:*)",

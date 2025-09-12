@@ -38,6 +38,7 @@ Produce a refined ticket with:
 ## Do's and Don'ts
 - Do **not** create comprehensive tickets
 - **Create concise tickets, be brief**
+- **DO NOT START WORKING ON THE TICKET**
 
 Begin by reviewing the provided ticket and requirements, then start the refinement conversation.
 
