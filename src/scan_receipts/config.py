@@ -29,8 +29,11 @@ class AppConfig:
     xlsx_output_file: Path
     
     @classmethod
-    def from_env(cls) -> "AppConfig":
+    def from_env(cls, load_dotenv_file: bool = True) -> "AppConfig":
         """Load configuration from environment variables.
+        
+        Args:
+            load_dotenv_file: Whether to load .env file. Set to False in tests.
         
         Returns:
             AppConfig instance with validated paths.
@@ -38,7 +41,8 @@ class AppConfig:
         Raises:
             ValueError: If required environment variables are missing.
         """
-        load_dotenv()
+        if load_dotenv_file:
+            load_dotenv()
         
         missing_vars: List[str] = []
         for var in REQUIRED_ENV_VARS:

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import pytest
+import pytest  # type: ignore[import-untyped]
 
 from scan_receipts.folders import (
     StagingInfo,
@@ -81,10 +81,10 @@ class TestCreateFolders:
         config.imported_folder = Path("/tmp/imported")
         config.failed_folder = Path("/tmp/failed")
         
-        with pytest.raises(OSError) as exc_info:
+        with pytest.raises(OSError) as exc_info:  # type: ignore[attr-defined]
             create_folders(config)
         
-        assert "Failed to create folder" in str(exc_info.value)
+        assert "Failed to create folder" in str(exc_info.value)  # type: ignore[attr-defined]
 
 
 class TestCountReceiptFiles:

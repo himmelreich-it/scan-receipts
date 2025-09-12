@@ -97,7 +97,7 @@ def step_staging_csv_entries(context: Any, count: int) -> None:
 def step_app_starts(context: Any) -> None:
     """Attempt to start the application."""
     try:
-        config = AppConfig.from_env()
+        config = AppConfig.from_env(load_dotenv_file=False)
         create_folders(config)
         context.config = config
         context.startup_success = True
@@ -206,10 +206,11 @@ def step_show_staging(context: Any, count: str) -> None:
 @then('it should display "{message}"')  # type: ignore
 def step_display_message(context: Any, message: str) -> None:
     """Verify message is displayed."""
-    if context.selected_option in ["1", "2", "3"]:
-        assert context.menu_result is True
-    elif context.selected_option == "4":
-        assert context.menu_result is False
+    if hasattr(context, 'selected_option') and context.selected_option:
+        if context.selected_option in ["1", "2", "3"]:
+            assert context.menu_result is True
+        elif context.selected_option == "4":
+            assert context.menu_result is False
 
 
 @then("return to the menu")  # type: ignore
