@@ -47,6 +47,9 @@ Integrates the completed feature into the system. Use when feature implementatio
 - `uv sync` - Install dependencies
 - `uv venv` - Create virtual environment
 
+**Running the Application:**
+- `uv run python -m scan_receipts.main` - Run the TUI interface
+
 **Testing:**
 - `uv run pytest tests/unit/` - Unit tests
 - `uv run pytest tests/integration/` - Integration tests

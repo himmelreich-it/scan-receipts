@@ -41,6 +41,7 @@ src/mypackage/
 - External users: `from mypackage import Receipt` (package level only)
 - Internal modules: `from mypackage.models import Receipt` (absolute paths)
 - Always assume running from `src/` folder
+- Apply "API flattening" or "namespace flattening" pattern
 
 ## Configuration & Resources
 ```python
@@ -83,6 +84,7 @@ def process_file(path: str) -> None:
 - Google/NumPy docstring format with examples, assumptions, performance notes
 - Test functional spec requirements only (happy path + explicit error cases)
 - Use pytest, meaningful test names, realistic fixtures
+- Document the API of a package in the ``__init__.py` as part of the API/namespace flattening pattern
 - Configure pytest.ini with pythonpath, no `src` in test imports
 
 ```python
