@@ -6,7 +6,7 @@ import signal
 import tempfile
 from pathlib import Path
 from typing import Any
-from unittest.mock import patch
+from unittest import mock
 
 from behave import given, then, when  # type: ignore
 
@@ -18,7 +18,7 @@ from scan_receipts.main import handle_menu_choice, signal_handler
 @given("no environment variables are set")  # type: ignore
 def step_no_env_vars(context: Any) -> None:
     """Clear all environment variables."""
-    context.env_patch = patch.dict(os.environ, {}, clear=True)
+    context.env_patch = mock.patch.dict(os.environ, {}, clear=True)
     context.env_patch.start()
 
 
@@ -34,7 +34,7 @@ def step_all_env_vars(context: Any) -> None:
         "CSV_STAGING_FILE": f"{context.tmpdir}/receipts.csv",
         "XLSX_OUTPUT_FILE": f"{context.tmpdir}/output.xlsx",
     }
-    context.env_patch = patch.dict(os.environ, context.env_vars, clear=True)
+    context.env_patch = mock.patch.dict(os.environ, context.env_vars, clear=True)
     context.env_patch.start()
 
 
@@ -134,7 +134,7 @@ def step_invalid_input(context: Any, input_text: str) -> None:
 @when("the user presses Ctrl+C")  # type: ignore
 def step_ctrl_c(context: Any) -> None:
     """Simulate Ctrl+C signal."""
-    with patch('sys.exit') as mock_exit:
+    with mock.patch('sys.exit') as mock_exit:
         signal_handler(signal.SIGINT, None)
         context.exit_called = mock_exit.called
 

@@ -4,9 +4,9 @@ import csv
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest  # type: ignore[import-untyped]
+from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
 from scan_receipts.config import AppConfig
 from scan_receipts.folders import count_receipt_files, create_folders, get_staging_info
@@ -15,7 +15,7 @@ from scan_receipts.folders import count_receipt_files, create_folders, get_stagi
 class TestTUIIntegration:
     """Integration tests for TUI components."""
     
-    def test_full_configuration_and_folder_creation(self):
+    def test_full_configuration_and_folder_creation(self, mocker: MockerFixture) -> None:
         """Test complete configuration loading and folder creation flow."""
         with tempfile.TemporaryDirectory() as tmpdir:
             env_vars = {
@@ -27,14 +27,14 @@ class TestTUIIntegration:
                 "XLSX_OUTPUT_FILE": f"{tmpdir}/output.xlsx",
             }
             
-            with patch.dict(os.environ, env_vars, clear=True):
-                config = AppConfig.from_env(load_dotenv_file=False)
-                create_folders(config)
+            mocker.patch.dict(os.environ, env_vars, clear=True)
+            config = AppConfig.from_env(load_dotenv_file=False)
+            create_folders(config)
                 
-                assert config.incoming_folder.exists()
-                assert config.scanned_folder.exists()
-                assert config.imported_folder.exists()
-                assert config.failed_folder.exists()
+            assert config.incoming_folder.exists()
+            assert config.scanned_folder.exists()
+            assert config.imported_folder.exists()
+            assert config.failed_folder.exists()
     
     def test_startup_display_with_no_data(self):
         """Test startup display when no files or staging data exist."""
@@ -87,20 +87,20 @@ class TestTUIIntegration:
             assert staging_info is not None
             assert staging_info.entry_count == 8
     
-    def test_environment_validation_fail_fast(self):
+    def test_environment_validation_fail_fast(self, mocker: MockerFixture) -> None:
         """Test that application fails fast with missing environment variables."""
-        with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
-                AppConfig.from_env(load_dotenv_file=False)
+        mocker.patch.dict(os.environ, {}, clear=True)
+        with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
+            AppConfig.from_env(load_dotenv_file=False)
             
-            error_msg = str(exc_info.value)  # type: ignore[attr-defined]
-            assert "Missing environment variables:" in error_msg
-            assert "INCOMING_RECEIPTS_FOLDER" in error_msg
-            assert "SCANNED_FOLDER" in error_msg
-            assert "IMPORTED_FOLDER" in error_msg
-            assert "FAILED_FOLDER" in error_msg
-            assert "CSV_STAGING_FILE" in error_msg
-            assert "XLSX_OUTPUT_FILE" in error_msg
+        error_msg = str(exc_info.value)  # type: ignore[attr-defined]
+        assert "Missing environment variables:" in error_msg
+        assert "INCOMING_RECEIPTS_FOLDER" in error_msg
+        assert "SCANNED_FOLDER" in error_msg
+        assert "IMPORTED_FOLDER" in error_msg
+        assert "FAILED_FOLDER" in error_msg
+        assert "CSV_STAGING_FILE" in error_msg
+        assert "XLSX_OUTPUT_FILE" in error_msg
     
     def test_folder_creation_with_permissions_error(self):
         """Test error handling when folder creation fails."""

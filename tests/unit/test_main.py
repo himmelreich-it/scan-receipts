@@ -1,7 +1,6 @@
 """Unit tests for main TUI module."""
 
-from typing import Any
-from unittest.mock import patch
+from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
 from scan_receipts.main import handle_menu_choice, signal_handler
 
@@ -9,9 +8,9 @@ from scan_receipts.main import handle_menu_choice, signal_handler
 class TestSignalHandler:
     """Test signal handling."""
     
-    @patch('sys.exit')
-    def test_signal_handler_exits(self, mock_exit: Any) -> None:
+    def test_signal_handler_exits(self, mocker: MockerFixture) -> None:
         """Test that signal handler calls sys.exit."""
+        mock_exit = mocker.patch('sys.exit')
         signal_handler(2, None)
         mock_exit.assert_called_once_with(0)
 
