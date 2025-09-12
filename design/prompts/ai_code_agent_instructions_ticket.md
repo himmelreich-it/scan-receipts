@@ -9,7 +9,9 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 
 ### 1. Analysis & Planning
 - **Dependency Mapping**: Create complete dependency graph, determine implementation order using topological sort
-- **Architecture Review**: Use implementation specification to understand system design and integration points
+- **Architecture Review**: 
+  - Use Architectural documentation to plan design, in case the architecture does not cater for current feature, HALT and report in the ticket
+  - Use implementation specification to understand system design and integration points
 - **Testing Strategy**: Plan unit, integration, BDD, and end-to-end tests for complete feature
 
 ### 2. Implementation & Dependencies
@@ -31,7 +33,7 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 - **Unit**: Individual story components
 - **Integration**: Story interactions  
 - **Feature**: Complete workflows spanning multiple stories
-- **BDD**: End-to-end scenarios using `behave` from project root with `src` as `PYTHONPATH`
+- **BDD**: End-to-end scenarios using `behave`
 - **Regression**: Ensure updates don't break existing functionality
 
 #### Validation Process:
