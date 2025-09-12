@@ -2,6 +2,9 @@
 
 A terminal user interface for processing receipts from scanned documents.
 Validates configuration, manages folders, and provides an interactive menu.
+
+This package provides backward compatibility while the new hexagonal architecture
+is located in the src/ root level.
 """
 
 from scan_receipts.config import AppConfig
