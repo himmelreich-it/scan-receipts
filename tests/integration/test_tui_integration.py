@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
+import pytest  # type: ignore[import-untyped]
 
 from scan_receipts.config import AppConfig
 from scan_receipts.folders import count_receipt_files, create_folders, get_staging_info
@@ -90,10 +90,10 @@ class TestTUIIntegration:
     def test_environment_validation_fail_fast(self):
         """Test that application fails fast with missing environment variables."""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
                 AppConfig.from_env(load_dotenv_file=False)
             
-            error_msg = str(exc_info.value)
+            error_msg = str(exc_info.value)  # type: ignore[attr-defined]
             assert "Missing environment variables:" in error_msg
             assert "INCOMING_RECEIPTS_FOLDER" in error_msg
             assert "SCANNED_FOLDER" in error_msg
@@ -113,7 +113,7 @@ class TestTUIIntegration:
             xlsx_output_file=Path("/tmp/output.xlsx"),
         )
         
-        with pytest.raises(OSError) as exc_info:
+        with pytest.raises(OSError) as exc_info:  # type: ignore[attr-defined]
             create_folders(config)
         
-        assert "Failed to create folder" in str(exc_info.value)
+        assert "Failed to create folder" in str(exc_info.value)  # type: ignore[attr-defined]

@@ -26,24 +26,32 @@ def before_scenario(context: Any, scenario: Any) -> None:
     }
     
     # Initialize _origin to track attribute origins for behave context
-    from behave.runner import ContextMode  # type: ignore
+    try:
+        from behave.runner import ContextMode  # type: ignore[import-untyped]
+        user_mode = ContextMode.USER  # type: ignore[attr-defined]
+        behave_mode = ContextMode.BEHAVE  # type: ignore[attr-defined]
+    except ImportError:
+        # Fallback for type checking or if behave not available
+        user_mode = "USER"  # type: ignore[assignment]
+        behave_mode = "BEHAVE"  # type: ignore[assignment]
+    
     context._origin = {
-        'config': ContextMode.USER,
-        'tmpdir': ContextMode.USER,
-        'startup_success': ContextMode.USER,
-        'startup_error': ContextMode.USER,
-        'input_count': ContextMode.USER,
-        'failed_count': ContextMode.USER,
-        'staging_info': ContextMode.USER,
-        'menu_result': ContextMode.USER,
-        'selected_option': ContextMode.USER,
-        'invalid_input': ContextMode.USER,
-        'exit_called': ContextMode.USER,
-        'env_patch': ContextMode.USER,
-        'env_vars': ContextMode.USER,
-        'tags': ContextMode.BEHAVE,  # Required by behave runner
-        'text': ContextMode.BEHAVE,  # Required by behave runner
-        'table': ContextMode.BEHAVE,  # Required by behave runner
+        'config': user_mode,
+        'tmpdir': user_mode,
+        'startup_success': user_mode,
+        'startup_error': user_mode,
+        'input_count': user_mode,
+        'failed_count': user_mode,
+        'staging_info': user_mode,
+        'menu_result': user_mode,
+        'selected_option': user_mode,
+        'invalid_input': user_mode,
+        'exit_called': user_mode,
+        'env_patch': user_mode,
+        'env_vars': user_mode,
+        'tags': behave_mode,  # Required by behave runner
+        'text': behave_mode,  # Required by behave runner
+        'table': behave_mode,  # Required by behave runner
     }
 
 

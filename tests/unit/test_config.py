@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
+import pytest  # type: ignore[import-untyped]
 
 from scan_receipts.config import AppConfig, REQUIRED_ENV_VARS
 
@@ -44,10 +44,10 @@ class TestAppConfig:
         }
         
         with patch.dict(os.environ, env_vars, clear=True):
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
                 AppConfig.from_env(load_dotenv_file=False)
             
-            assert "Missing environment variables: XLSX_OUTPUT_FILE" in str(exc_info.value)
+            assert "Missing environment variables: XLSX_OUTPUT_FILE" in str(exc_info.value)  # type: ignore[attr-defined]
     
     def test_from_env_missing_multiple_variables(self):
         """Test configuration loading fails when multiple variables are missing."""
@@ -58,10 +58,10 @@ class TestAppConfig:
         }
         
         with patch.dict(os.environ, env_vars, clear=True):
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
                 AppConfig.from_env(load_dotenv_file=False)
             
-            error_msg = str(exc_info.value)
+            error_msg = str(exc_info.value)  # type: ignore[attr-defined]
             assert "Missing environment variables:" in error_msg
             assert "SCANNED_FOLDER" in error_msg
             assert "FAILED_FOLDER" in error_msg
@@ -70,10 +70,10 @@ class TestAppConfig:
     def test_from_env_all_missing(self):
         """Test configuration loading fails when all variables are missing."""
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
                 AppConfig.from_env(load_dotenv_file=False)
             
-            error_msg = str(exc_info.value)
+            error_msg = str(exc_info.value)  # type: ignore[attr-defined]
             for var in REQUIRED_ENV_VARS:
                 assert var in error_msg
     
@@ -91,5 +91,5 @@ class TestAppConfig:
         with patch.dict(os.environ, env_vars, clear=True):
             config = AppConfig.from_env(load_dotenv_file=False)
             
-            with pytest.raises(AttributeError):
+            with pytest.raises(AttributeError):  # type: ignore[attr-defined]
                 config.incoming_folder = Path("/new/path")  # type: ignore
