@@ -21,42 +21,48 @@ def before_scenario(context: Any, scenario: Any) -> None:
         'env_patch': ("", 1, "", ""),
         'env_vars': ("", 1, "", ""),
         'tags': ("", 1, "", ""),  # Required by behave runner
-        'text': ("", 1, "", ""),  # Required by behave runner
+        'text': ("", 1, "", ""),  # Required by behave runner  
         'table': ("", 1, "", ""),  # Required by behave runner
     }
     
     # Initialize _origin to track attribute origins for behave context
-    try:
-        from behave.runner import ContextMode  # type: ignore[import-untyped]
-        user_mode = ContextMode.USER  # type: ignore[attr-defined]
-        behave_mode = ContextMode.BEHAVE  # type: ignore[attr-defined]
-    except ImportError:
-        # Fallback for type checking or if behave not available
-        user_mode = "USER"  # type: ignore[assignment]
-        behave_mode = "BEHAVE"  # type: ignore[assignment]
-    
+    # Use string literals instead of ContextMode to avoid type issues
     context._origin = {
-        'config': user_mode,
-        'tmpdir': user_mode,
-        'startup_success': user_mode,
-        'startup_error': user_mode,
-        'input_count': user_mode,
-        'failed_count': user_mode,
-        'staging_info': user_mode,
-        'menu_result': user_mode,
-        'selected_option': user_mode,
-        'invalid_input': user_mode,
-        'exit_called': user_mode,
-        'env_patch': user_mode,
-        'env_vars': user_mode,
-        'tags': behave_mode,  # Required by behave runner
-        'text': behave_mode,  # Required by behave runner
-        'table': behave_mode,  # Required by behave runner
+        'config': "USER",
+        'tmpdir': "USER",
+        'startup_success': "USER",
+        'startup_error': "USER",
+        'input_count': "USER",
+        'failed_count': "USER",
+        'staging_info': "USER",
+        'menu_result': "USER",
+        'selected_option': "USER",
+        'invalid_input': "USER",
+        'exit_called': "USER",
+        'env_patch': "USER",
+        'env_vars': "USER",
+        'tags': "BEHAVE",  # Required by behave runner
+        'text': "BEHAVE",  # Required by behave runner
+        'table': "BEHAVE",  # Required by behave runner
     }
 
 
 def after_scenario(context: Any, scenario: Any) -> None:
     """Clean up after each scenario."""
     # Stop any environment patching
-    if hasattr(context, 'env_patch') and context.env_patch:
-        context.env_patch.stop()
+    try:
+        if hasattr(context, 'env_patch') and context.env_patch and hasattr(context.env_patch, 'stop'):
+            context.env_patch.stop()
+    except Exception:
+        pass  # Ignore cleanup errors
+    
+    # Clean up temporary directories
+    try:
+        if hasattr(context, 'tmpdir') and context.tmpdir:
+            import shutil
+            from pathlib import Path
+            tmpdir_path = Path(context.tmpdir)
+            if tmpdir_path.exists():
+                shutil.rmtree(tmpdir_path)
+    except Exception:
+        pass  # Ignore cleanup errors
