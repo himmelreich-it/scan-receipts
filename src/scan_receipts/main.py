@@ -46,8 +46,8 @@ def display_status(config: AppConfig) -> None:
 
 def display_menu() -> None:
     """Display the main menu options."""
-    rprint("Available Actions:")
     rprint()
+    rprint("Available Actions:")
     rprint("[1] Run Analysis")
     rprint("[2] Import to XLSX")
     rprint("[3] View Staging Table")
