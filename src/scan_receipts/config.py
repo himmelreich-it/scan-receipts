@@ -40,7 +40,7 @@ class AppConfig:
         """
         load_dotenv()
         
-        missing_vars = []
+        missing_vars: List[str] = []
         for var in REQUIRED_ENV_VARS:
             if not os.getenv(var):
                 missing_vars.append(var)

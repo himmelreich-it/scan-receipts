@@ -2,7 +2,7 @@
 
 import signal
 import sys
-from typing import Any, NoReturn
+from typing import Any, Never
 
 from rich import print as rprint
 from rich.panel import Panel
@@ -47,6 +47,7 @@ def display_status(config: AppConfig) -> None:
 def display_menu() -> None:
     """Display the main menu options."""
     rprint("Available Actions:")
+    rprint()
     rprint("[1] Run Analysis")
     rprint("[2] Import to XLSX")
     rprint("[3] View Staging Table")
@@ -80,7 +81,7 @@ def handle_menu_choice(choice: str) -> bool:
         return True
 
 
-def main() -> NoReturn:
+def main() -> Never:
     """Main entry point for the TUI application."""
     signal.signal(signal.SIGINT, signal_handler)
     

@@ -5,12 +5,18 @@
       "Bash(uv run pytest :*)",
       "Bash(uv run pytest)",
       "Bash(uv run ruff :*)",
+      "Bash(python -m ruff check:*)",
       "Bash(uv run behave :*)",
       "Bash(PYTHONPATH=src uv run behave :*)",
       "Bash(ls :*)",
       "Bash(npx pyright)",
       "Bash(gh issue view:*)",
-      "Bash(gh issue view:*)"
+      "Bash(gh issue view:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "ask": [
         "Bash(rm :*)",

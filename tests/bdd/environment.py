@@ -1,7 +1,9 @@
 """BDD test environment configuration."""
 
+from typing import Any
 
-def before_scenario(context, scenario):
+
+def before_scenario(context: Any, scenario: Any) -> None:
     """Initialize context attributes before each scenario."""
     # Use _record to track available attributes
     context._record = {
