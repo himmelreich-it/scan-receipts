@@ -146,9 +146,10 @@ class TestFeatureComplete:
 **Success Criteria:**
 1. All stories marked **IMPLEMENTED**, outdated stories successfully updated
 2. Complete feature works end-to-end, all story interactions validated
-3. Comprehensive testing passes (unit, integration, BDD, feature tests), **ALL TESTS MUST PASS**
+3. Comprehensive testing passes (unit, integration, BDD, feature tests), **ALL TESTS MUST PASS, INCLUDING CLEANUP**
 4. Code quality follows Python guidelines, documentation complete
 5. No breaking changes, feature ready for production
+6. All linting checks pass for source and tests
 
 **Halt Conditions:**
 - Circular dependencies, incomplete feature specification, integration failures

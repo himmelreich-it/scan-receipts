@@ -15,6 +15,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Run BDD tests: `PYTHONPATH=src uv run behave tests/bdd`
 - Run all tests: `uv run pytest`
 - Run with coverage: `uv run pytest --cov=src`
+- Do NOT run tests using `python` or `uv python` command directly, for testing, create and remove a file rather than passing python code to the command line.
 
 ## Development Setup
 - Use `uv` for dependency management

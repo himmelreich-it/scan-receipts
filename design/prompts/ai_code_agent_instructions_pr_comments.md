@@ -80,4 +80,5 @@ Considered alternatives: [brief summary]
 - All unresolved comments addressed appropriately
 - Technical replies explaining all decisions
 - Code quality maintained/improved
-- All tests pass
+- All tests pass, all clean-up of scenarios are good
+- All linting checks pass for source and tests

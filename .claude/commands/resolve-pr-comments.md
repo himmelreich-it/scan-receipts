@@ -11,7 +11,7 @@ Workflow:
 3. For each comment: evaluate critically → implement/modify/reject → reply with reasoning
 4. Run quality checks: `npx pyright` and `uv run ruff check src`
 5. Run tests and validate no regressions
-6. Push changes if any were made
+6. Commit and Push changes if any were made, otherwise you are not done
 
 Key Requirements:
 - Be critical - don't blindly implement suggestions

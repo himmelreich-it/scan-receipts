@@ -20,4 +20,6 @@ dependencies = [
     "rich>=14.1.0",
 ]
 
-
+[tool.behave]
+paths = ["tests/bdd"]
+pythonpath = ["src", "scan_receipts"]
