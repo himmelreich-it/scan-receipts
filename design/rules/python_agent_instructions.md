@@ -82,7 +82,7 @@ def process_file(path: str) -> None:
 
 ## Documentation & Testing
 - Use `pytest`, not `unittest`
-- Use pytest mocks not `unittest.mock`
+- Use `pytest_mock` mocks not `unittest.mock`
 - Google/NumPy docstring format with examples, assumptions, performance notes
 - Test functional spec requirements only (happy path + explicit error cases)
 - Use pytest, meaningful test names, realistic fixtures
