@@ -24,8 +24,8 @@
       "Bash(tree:*)"
     ],
     "ask": [
-        "Bash(rm :*)",
-        "Bash(rmdir :*)"
+      "Bash(rm :*)",
+      "Bash(rmdir :*)"
     ],
     "deny": [
       "Bash(curl:*)",
