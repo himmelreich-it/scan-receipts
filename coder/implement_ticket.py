@@ -1,7 +1,7 @@
 
 import sys
-
-import asyncio    
+import logging
+import asyncio
 import json
 import uuid
 from pathlib import Path
@@ -38,6 +38,39 @@ MAX_RETRIES = 3
 ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 
 ALLOWED_DIRS = ["src", "data", "tests"]
+
+# Logger instance
+logger = logging.getLogger(__name__)
+
+def configure_logging(ticket_number: str) -> None:
+    """Configure logging with both console and file handlers."""
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+    # Create logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)
+
+    # Clear any existing handlers
+    root_logger.handlers.clear()
+
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+
+    # File handler
+    log_file = f"{ticket_number}-implementation.log"
+    file_handler = logging.FileHandler(log_file, mode='w')
+    file_handler.setLevel(logging.DEBUG)
+    file_formatter = logging.Formatter(log_format)
+    file_handler.setFormatter(file_formatter)
+
+    # Add handlers to logger
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+    logger.info(f"Logging configured. Writing to {log_file}")
 
 async def handle_response(client: ClaudeSDKClient) -> str:
     """Handle and display messages from Claude SDK client."""
@@ -76,22 +109,22 @@ def handle_message(msg: Message) -> str:
         return ""
     
     elif isinstance(msg, ResultMessage):  # type: ignore
-        print("Session ended")
-        print(f"Duration: {msg.duration_ms}ms, API Duration: {msg.duration_api_ms}ms")
-        print(f"Turns: {msg.num_turns}, Error: {msg.is_error}")
-        print(f"Total Cost: ${msg.total_cost_usd:.5f}" if msg.total_cost_usd else "Total Cost: N/A")
-        print(f"Usage: {json.dumps(msg.usage, indent=2)}" if msg.usage else "Usage: N/A")
-        print (f"Result: {msg.result}" if msg.result else "Result: N/A")
+        logger.info("Session ended")
+        logger.info(f"Duration: {msg.duration_ms}ms, API Duration: {msg.duration_api_ms}ms")
+        logger.info(f"Turns: {msg.num_turns}, Error: {msg.is_error}")
+        logger.info(f"Total Cost: ${msg.total_cost_usd:.5f}" if msg.total_cost_usd else "Total Cost: N/A")
+        logger.debug(f"Usage: {json.dumps(msg.usage, indent=2)}" if msg.usage else "Usage: N/A")
+        logger.debug(f"Result: {msg.result}" if msg.result else "Result: N/A")
         return msg.result if msg.result else ""
     
     else:
-        print(f"Unknown message type: {type(msg)}")
+        logger.warning(f"Unknown message type: {type(msg)}")
         return ""
 
 
 async def prepare_github(client: ClaudeSDKClient, session_id: str, retry: int = 0) -> bool:
     """Prepare GitHub repository."""
-    print("Preparing GitHub repository...")
+    logger.info("Preparing GitHub repository...")
 
     prompt = load_prompt("prepare")
 
@@ -101,18 +134,18 @@ async def prepare_github(client: ClaudeSDKClient, session_id: str, retry: int = 
 
     if "GITHUB PREPARED" not in response.upper():
         if retry >= MAX_RETRIES:
-            print("Max retries reached. Exiting preparation.")
+            logger.error("Max retries reached. Exiting preparation.")
             return False
-        
-        print(f"Preparation incomplete, retrying... (attempt {retry + 1})")
-        await prepare_github(client, session_id = session_id, retry=retry + 1)
+
+        logger.warning(f"Preparation incomplete, retrying... (attempt {retry + 1})")
+        return await prepare_github(client, session_id=session_id, retry=retry + 1)
 
     return True
 
 
 async def implement_ticket_code(client: ClaudeSDKClient, session_id: str) -> str:
     """Implement the ticket code."""
-    print("Implementing ticket code...")
+    logger.info("Implementing ticket code...")
 
     prompt = load_prompt("code")
 
@@ -125,7 +158,7 @@ async def implement_ticket_code(client: ClaudeSDKClient, session_id: str) -> str
 
 async def check_completion(client: ClaudeSDKClient, session_id: str) -> tuple[bool, str]:
     """Check if all tasks are complete."""
-    print("Checking task completion...")
+    logger.info("Checking task completion...")
 
     prompt = load_prompt("check")
 
@@ -139,7 +172,7 @@ async def check_completion(client: ClaudeSDKClient, session_id: str) -> tuple[bo
 
 async def complete_implementation(client: ClaudeSDKClient, session_id: str, retry: int = 0) -> bool:
     """Finalize the implementation."""
-    print("Finalizing implementation...")
+    logger.info("Finalizing implementation...")
 
     prompt = load_prompt("check")
 
@@ -149,21 +182,21 @@ async def complete_implementation(client: ClaudeSDKClient, session_id: str, retr
 
     if "IMPLEMENTATION COMPLETED" not in response.upper():
         if retry >= MAX_RETRIES:
-            print("Max retries reached. Exiting completion.")
+            logger.error("Max retries reached. Exiting completion.")
             return False
-        
-        print(f"Completion incomplete, completing implementation (attempt {retry + 1})")
+
+        logger.warning(f"Completion incomplete, completing implementation (attempt {retry + 1})")
         prompt = load_prompt("complete_remaining")
         await client.query(prompt=prompt, session_id=session_id)
         response = await handle_response(client)
-        
-        await complete_implementation(client, session_id=session_id, retry=retry + 1)
+
+        return await complete_implementation(client, session_id=session_id, retry=retry + 1)
 
     return True
 
 async def finish_implementation(client: ClaudeSDKClient, session_id: str, retry: int = 0) -> bool:
     """Finish the implementation."""
-    print("Finishing implementation...")
+    logger.info("Finishing implementation...")
 
     prompt = load_prompt("finish")
 
@@ -173,19 +206,23 @@ async def finish_implementation(client: ClaudeSDKClient, session_id: str, retry:
 
     if "IMPLEMENTATION FINALIZED" not in response.upper():
         if retry >= MAX_RETRIES:
-            print("Max retries reached. Exiting finishing.")
+            logger.error("Max retries reached. Exiting finishing.")
             return False
-        
-        print(f"Finishing incomplete, retrying... (attempt {retry + 1})")
-        await finish_implementation(client, session_id=session_id, retry=retry + 1)
+
+        logger.warning(f"Finishing incomplete, retrying... (attempt {retry + 1})")
+        return await finish_implementation(client, session_id=session_id, retry=retry + 1)
 
     return True
 
 
-async def implement_ticket(ticket_number: str):    
+async def implement_ticket(ticket_number: str):
     """Main function to implement ticket using Claude Code SDK."""
+    # Configure logging for this ticket
+    configure_logging(ticket_number)
+    logger.info(f"Starting ticket implementation for ticket #{ticket_number}")
 
     session_id = str(uuid.uuid4())
+    logger.debug(f"Session ID: {session_id}")
     
     # async def create_message_stream():
     #     """Generate a stream of messages."""
@@ -202,34 +239,34 @@ async def implement_ticket(ticket_number: str):
             github_result = await prepare_github(client, session_id)
 
             if not github_result:
-                print("GitHub preparation failed. Exiting.")
+                logger.error("GitHub preparation failed. Exiting.")
                 return
-            
-            print("GitHub prepared successfully. Proceeding with ticket implementation...")
+
+            logger.info("GitHub prepared successfully. Proceeding with ticket implementation...")
 
             implementation_result = await implement_ticket_code(client, session_id)
 
-            print("Ticket implementation completed.")
-            print(implementation_result)
+            logger.info("Ticket implementation completed.")
+            logger.debug(f"Implementation result: {implementation_result}")
 
             complete_implementation_result = await complete_implementation(client, session_id)
 
             if complete_implementation_result:
-                print("✓ Implementation finalized successfully")
+                logger.info("✓ Implementation finalized successfully")
             else:
-                print("✗ Implementation finalization failed")
+                logger.error("✗ Implementation finalization failed")
                 return
 
             finish_implementation_result = await finish_implementation(client, session_id)
 
             if finish_implementation_result:
-                print("✓ Ticket implementation finished successfully")
+                logger.info("✓ Ticket implementation finished successfully")
             else:
-                print("✗ Ticket implementation finishing failed")
+                logger.error("✗ Ticket implementation finishing failed")
                 return
             
         except CLIConnectionError as e:
-            print(f"Connection error: {e}")
+            logger.error(f"Connection error: {e}", exc_info=True)
     
 
 def load_prompt(step_name: str):
@@ -254,38 +291,14 @@ def define_options() -> ClaudeCodeOptions:
 
 async def main():
     """Main workflow."""
-    print("Starting ticket implementation workflow...")
-
     # get ticket number from input
     if len(sys.argv) < 2:
         print("Usage: python implement_ticket.py <ticket_number>")
         sys.exit(1)
     ticket_number = sys.argv[1]
-    print(f"Implementing ticket number: {ticket_number}")
 
-    
-    # Step 1: Prepare
-    run_step("prepare")
-
-    # Step 2: Code
-    run_step("code")
-
-    # Step 3: Check completion with retries
-    for attempt in range(MAX_RETRIES):
-        is_complete, _ = check_completion()
-
-        if is_complete:
-            print("✓ All tasks complete")
-            break
-        else:
-            print(f"✗ Tasks incomplete (attempt {attempt + 1}/{MAX_RETRIES})")
-            if attempt < MAX_RETRIES - 1:
-                run_step("complete_remaining")
-
-    # Step 4: Finish
-    run_step("finish")
-
-    print("\nWorkflow complete!")
+    # Call the implement_ticket function which handles everything
+    await implement_ticket(ticket_number)
 
 
 if __name__ == "__main__":
