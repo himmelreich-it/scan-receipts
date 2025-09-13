@@ -5,7 +5,7 @@
       "Bash(uv run --env-file .env.testing pytest:*)",
       "Bash(uv run --env-file .env.testing behave:*)",
       "Bash(uv run ruff:*)",
-      "Bash(ls :*)",
+      "Bash(ls:*)",
       "Bash(npx pyright:*)",
       "Bash(gh issue create:*)",
       "Bash(gh issue view:*)",
@@ -21,7 +21,7 @@
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(touch:*)",
-      "Bash(tree:*)",  
+      "Bash(tree:*)"
     ],
     "ask": [
         "Bash(rm :*)",
@@ -30,7 +30,8 @@
     "deny": [
       "Bash(curl:*)",
       "Read(./.env)",
-      "Read(./.env.*)"
+      "Read(./.env.testing)",
+      "Read(./.env.production)"
     ]
   }
 }
