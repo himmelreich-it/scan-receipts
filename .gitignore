@@ -168,3 +168,4 @@ done/
 .env.test
 receipts.csv
 content/**
+coder/claude_coder.py
