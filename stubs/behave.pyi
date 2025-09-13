@@ -1,14 +1,14 @@
 from typing import Callable, TypeVar, Any
 from typing_extensions import ParamSpec
 
-_P = ParamSpec('_P')
-_R = TypeVar('_R')
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 
 # Type for step functions
 StepFunction = Callable[[Any], None]  # 'Any' is the context parameter
 
 def given(step_text: str) -> Callable[[Callable[..., _R]], Callable[..., _R]]: ...
-def when(step_text: str) -> Callable[[Callable[..., _R]], Callable[..., _R]]: ...  
+def when(step_text: str) -> Callable[[Callable[..., _R]], Callable[..., _R]]: ...
 def then(step_text: str) -> Callable[[Callable[..., _R]], Callable[..., _R]]: ...
 
 # Alternative simpler version if the above is too complex:

@@ -6,12 +6,12 @@ from pathlib import Path
 import pytest  # type: ignore[import-untyped]
 from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
-from scan_receipts.config import AppConfig, REQUIRED_ENV_VARS
+from core.domain.configuration import AppConfig, REQUIRED_ENV_VARS
 
 
 class TestAppConfig:
     """Test AppConfig class."""
-    
+
     def test_from_env_with_all_variables(self, mocker: MockerFixture) -> None:
         """Test configuration loading with all required variables present."""
         env_vars = {
@@ -22,17 +22,17 @@ class TestAppConfig:
             "CSV_STAGING_FILE": "/tmp/receipts.csv",
             "XLSX_OUTPUT_FILE": "/tmp/output.xlsx",
         }
-        
+
         mocker.patch.dict(os.environ, env_vars, clear=True)
         config = AppConfig.from_env(load_dotenv_file=False)
-        
+
         assert config.incoming_folder == Path("/tmp/incoming")
         assert config.scanned_folder == Path("/tmp/scanned")
         assert config.imported_folder == Path("/tmp/imported")
         assert config.failed_folder == Path("/tmp/failed")
         assert config.csv_staging_file == Path("/tmp/receipts.csv")
         assert config.xlsx_output_file == Path("/tmp/output.xlsx")
-    
+
     def test_from_env_missing_single_variable(self, mocker: MockerFixture) -> None:
         """Test configuration loading fails when one variable is missing."""
         env_vars = {
@@ -42,13 +42,13 @@ class TestAppConfig:
             "FAILED_FOLDER": "/tmp/failed",
             "CSV_STAGING_FILE": "/tmp/receipts.csv",
         }
-        
+
         mocker.patch.dict(os.environ, env_vars, clear=True)
         with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
             AppConfig.from_env(load_dotenv_file=False)
-        
+
         assert "Missing environment variables: XLSX_OUTPUT_FILE" in str(exc_info.value)  # type: ignore[attr-defined]
-    
+
     def test_from_env_missing_multiple_variables(self, mocker: MockerFixture) -> None:
         """Test configuration loading fails when multiple variables are missing."""
         env_vars = {
@@ -56,27 +56,27 @@ class TestAppConfig:
             "IMPORTED_FOLDER": "/tmp/imported",
             "CSV_STAGING_FILE": "/tmp/receipts.csv",
         }
-        
+
         mocker.patch.dict(os.environ, env_vars, clear=True)
         with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
             AppConfig.from_env(load_dotenv_file=False)
-        
+
         error_msg = str(exc_info.value)  # type: ignore[attr-defined]
         assert "Missing environment variables:" in error_msg
         assert "SCANNED_FOLDER" in error_msg
         assert "FAILED_FOLDER" in error_msg
         assert "XLSX_OUTPUT_FILE" in error_msg
-    
+
     def test_from_env_all_missing(self, mocker: MockerFixture) -> None:
         """Test configuration loading fails when all variables are missing."""
         mocker.patch.dict(os.environ, {}, clear=True)
         with pytest.raises(ValueError) as exc_info:  # type: ignore[attr-defined]
             AppConfig.from_env(load_dotenv_file=False)
-        
+
         error_msg = str(exc_info.value)  # type: ignore[attr-defined]
         for var in REQUIRED_ENV_VARS:
             assert var in error_msg
-    
+
     def test_config_immutability(self, mocker: MockerFixture) -> None:
         """Test that AppConfig is immutable."""
         env_vars = {
@@ -87,9 +87,9 @@ class TestAppConfig:
             "CSV_STAGING_FILE": "/tmp/receipts.csv",
             "XLSX_OUTPUT_FILE": "/tmp/output.xlsx",
         }
-        
+
         mocker.patch.dict(os.environ, env_vars, clear=True)
         config = AppConfig.from_env(load_dotenv_file=False)
-        
+
         with pytest.raises(AttributeError):  # type: ignore[attr-defined]
             config.incoming_folder = Path("/new/path")  # type: ignore

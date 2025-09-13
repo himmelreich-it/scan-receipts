@@ -1,53 +1,138 @@
-"""Unit tests for main TUI module."""
+"""Unit tests for TUI module."""
 
+from unittest.mock import Mock
 from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
-from scan_receipts.main import handle_menu_choice, signal_handler
+from adapters.primary.tui.terminal_ui import TerminalUI
+from core.domain.configuration import AppConfig
 
 
-class TestSignalHandler:
-    """Test signal handling."""
-    
+class TestTerminalUI:
+    """Test TerminalUI class."""
+
     def test_signal_handler_exits(self, mocker: MockerFixture) -> None:
         """Test that signal handler calls sys.exit."""
-        mock_exit = mocker.patch('sys.exit')
-        signal_handler(2, None)
+        mock_exit = mocker.patch("sys.exit")
+
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        tui.signal_handler(2, None)
         mock_exit.assert_called_once_with(0)
 
-
-class TestHandleMenuChoice:
-    """Test menu choice handling."""
-    
-    def test_handle_menu_choice_option_1(self):
+    def test_handle_menu_choice_option_1(self) -> None:
         """Test handling option 1 - Run Analysis."""
-        result = handle_menu_choice("1")
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        config = Mock(spec=AppConfig)
+        result = tui.handle_menu_choice("1", config)
         assert result is True
-    
-    def test_handle_menu_choice_option_2(self):
+        process_receipt_use_case.execute.assert_called_once_with(config)
+
+    def test_handle_menu_choice_option_2(self) -> None:
         """Test handling option 2 - Import to XLSX."""
-        result = handle_menu_choice("2")
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        config = Mock(spec=AppConfig)
+        result = tui.handle_menu_choice("2", config)
         assert result is True
-    
-    def test_handle_menu_choice_option_3(self):
+        import_to_xlsx_use_case.execute.assert_called_once_with(config)
+
+    def test_handle_menu_choice_option_3(self) -> None:
         """Test handling option 3 - View Staging Table."""
-        result = handle_menu_choice("3")
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        config = Mock(spec=AppConfig)
+        result = tui.handle_menu_choice("3", config)
         assert result is True
-    
-    def test_handle_menu_choice_option_4(self):
+
+    def test_handle_menu_choice_option_4(self) -> None:
         """Test handling option 4 - Exit."""
-        result = handle_menu_choice("4")
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        config = Mock(spec=AppConfig)
+        result = tui.handle_menu_choice("4", config)
         assert result is False
-    
-    def test_handle_menu_choice_invalid(self):
+
+    def test_handle_menu_choice_invalid(self) -> None:
         """Test handling invalid menu choice."""
-        result = handle_menu_choice("5")
+        # Create TUI instance with mock dependencies
+        file_system = Mock()
+        process_receipt_use_case = Mock()
+        import_to_xlsx_use_case = Mock()
+        view_staging_use_case = Mock()
+
+        tui = TerminalUI(
+            file_system,
+            process_receipt_use_case,
+            import_to_xlsx_use_case,
+            view_staging_use_case,
+        )
+
+        config = Mock(spec=AppConfig)
+
+        result = tui.handle_menu_choice("5", config)
         assert result is True
-        
-        result = handle_menu_choice("0")
+
+        result = tui.handle_menu_choice("0", config)
         assert result is True
-        
-        result = handle_menu_choice("abc")
+
+        result = tui.handle_menu_choice("abc", config)
         assert result is True
-        
-        result = handle_menu_choice("")
+
+        result = tui.handle_menu_choice("", config)
         assert result is True

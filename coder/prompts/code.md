@@ -85,22 +85,25 @@ PLACEHOLDER_CONFIG = {'default_value': None, 'placeholder_note': 'Implement when
 ```
 
 ### BDD Step Definitions
+* Make sure step definitions are unique
+* Make sure step implementations are unique
+
 ```python
 # tests/bdd/steps/feature_steps.py
 from behave import given, when, then  # type: ignore
 from your_app.main import YourApp
 
 @given('the complete feature is initialized')  # type: ignore
-def step_impl(context):
+def step_complete_feature_is_initialized(context):
     context.app = YourApp()
     context.feature = context.app.get_feature()
 
 @when('user completes workflow spanning multiple stories')  # type: ignore
-def step_impl(context):
+def step_user_completes_workflow(context):
     context.result = context.feature.complete_workflow()
 
 @then('all user stories work together seamlessly')  # type: ignore
-def step_impl(context):
+def step_all_user_stories_work(context):
     assert context.result.all_stories_integrated == True
 ```
 

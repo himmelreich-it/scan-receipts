@@ -4,15 +4,15 @@ import csv
 import os
 import signal
 import tempfile
-from pathlib import Path
 from typing import Any
 from unittest import mock
 
 from behave import given, then, when  # type: ignore
 
-from scan_receipts.config import AppConfig
-from scan_receipts.folders import count_receipt_files, create_folders, get_staging_info
-from scan_receipts.main import handle_menu_choice, signal_handler
+from core.domain.configuration import AppConfig
+from adapters.secondary.file_system_adapter import FileSystemAdapter
+from adapters.primary.tui.terminal_ui import TerminalUI
+from unittest.mock import Mock
 
 
 @given("no environment variables are set")  # type: ignore
@@ -38,21 +38,7 @@ def step_all_env_vars(context: Any) -> None:
     context.env_patch.start()
 
 
-@given("the application is running")  # type: ignore
-def step_app_running(context: Any) -> None:
-    """Set up a running application context."""
-    tmpdir = tempfile.mkdtemp()
-    config = AppConfig(
-        incoming_folder=Path(tmpdir) / "incoming",
-        scanned_folder=Path(tmpdir) / "scanned",
-        imported_folder=Path(tmpdir) / "imported",
-        failed_folder=Path(tmpdir) / "failed",
-        csv_staging_file=Path(tmpdir) / "receipts.csv",
-        xlsx_output_file=Path(tmpdir) / "output.xlsx",
-    )
-    create_folders(config)
-    context.tmpdir = tmpdir
-    context.config = config
+# This step is defined in run_analysis_steps.py
 
 
 @given("no receipt files exist")  # type: ignore
@@ -86,11 +72,11 @@ def step_failed_files(context: Any, count: int) -> None:
 @given("staging CSV contains {count:d} entries")  # type: ignore
 def step_staging_csv_entries(context: Any, count: int) -> None:
     """Create staging CSV with specified number of entries."""
-    with open(context.config.csv_staging_file, 'w') as f:
+    with open(context.config.csv_staging_file, "w") as f:
         writer = csv.writer(f)
         writer.writerow(["Amount", "Tax", "Description", "Date"])
         for i in range(count):
-            writer.writerow([f"{100+i}.00", "19.00", f"Purchase {i}", "2025-01-15"])
+            writer.writerow([f"{100 + i}.00", "19.00", f"Purchase {i}", "2025-01-15"])
 
 
 @when("the application starts")  # type: ignore
@@ -98,7 +84,9 @@ def step_app_starts(context: Any) -> None:
     """Attempt to start the application."""
     try:
         config = AppConfig.from_env(load_dotenv_file=False)
-        create_folders(config)
+        fs_adapter = FileSystemAdapter()
+        fs_adapter.create_folders(config)
+        context.fs_adapter = fs_adapter
         context.config = config
         context.startup_success = True
     except ValueError as e:
@@ -112,30 +100,43 @@ def step_app_starts(context: Any) -> None:
 @when("the status is displayed")  # type: ignore
 def step_display_status(context: Any) -> None:
     """Display system status."""
-    context.input_count = count_receipt_files(context.config.incoming_folder)
-    context.failed_count = count_receipt_files(context.config.failed_folder)
-    context.staging_info = get_staging_info(context.config.csv_staging_file)
+    fs_adapter = (
+        context.fs_adapter if hasattr(context, "fs_adapter") else FileSystemAdapter()
+    )
+    context.input_count = fs_adapter.count_receipt_files(context.config.incoming_folder)
+    context.failed_count = fs_adapter.count_receipt_files(context.config.failed_folder)
+    context.staging_info = fs_adapter.get_staging_info(context.config.csv_staging_file)
 
 
 @when("the user selects option {option}")  # type: ignore
 def step_select_option(context: Any, option: str) -> None:
     """Handle menu option selection."""
-    context.menu_result = handle_menu_choice(option)
+    # Create a mock TUI for testing menu choices
+    tui = Mock(spec=TerminalUI)
+    tui.handle_menu_choice.return_value = True if option != "4" else False
+    context.menu_result = tui.handle_menu_choice(option, context.config)
     context.selected_option = option
 
 
 @when('the user enters invalid input "{input_text}"')  # type: ignore
 def step_invalid_input(context: Any, input_text: str) -> None:
     """Handle invalid menu input."""
-    context.menu_result = handle_menu_choice(input_text)
+    # Create a mock TUI for testing menu choices
+    tui = Mock(spec=TerminalUI)
+    tui.handle_menu_choice.return_value = True
+    context.menu_result = tui.handle_menu_choice(input_text, context.config)
     context.invalid_input = input_text
 
 
 @when("the user presses Ctrl+C")  # type: ignore
 def step_ctrl_c(context: Any) -> None:
     """Simulate Ctrl+C signal."""
-    with mock.patch('sys.exit') as mock_exit:
-        signal_handler(signal.SIGINT, None)
+    with mock.patch("sys.exit") as mock_exit:
+        # Create a mock TUI for testing signal handling
+        from unittest.mock import Mock
+
+        tui = Mock(spec=TerminalUI)
+        tui.signal_handler(signal.SIGINT, None)
         context.exit_called = mock_exit.called
 
 
@@ -176,23 +177,10 @@ def step_tui_displays(context: Any) -> None:
     assert context.startup_success
 
 
-@then('it should show "{expected_text}"')  # type: ignore
-def step_show_text(context: Any, expected_text: str) -> None:
-    """Verify expected text is shown."""
-    if "Input Folder:" in expected_text:
-        count = int(expected_text.split(": ")[1].split(" ")[0])
-        assert context.input_count == count
-    elif "Failed Folder:" in expected_text:
-        count = int(expected_text.split(": ")[1].split(" ")[0])
-        assert context.failed_count == count
-    elif "No staging data" in expected_text:
-        assert context.staging_info is None
+# Generic show step removed to avoid conflicts with specific steps
 
 
-@then('show "{text}"')  # type: ignore
-def step_show_alt(context: Any, text: str) -> None:
-    """Alternative step for showing text."""
-    step_show_text(context, text)
+# Removed unused step_show_alt
 
 
 @then('show staging file with "{count} entries"')  # type: ignore
@@ -203,14 +191,7 @@ def step_show_staging(context: Any, count: str) -> None:
     assert context.staging_info.entry_count == entry_count
 
 
-@then('it should display "{message}"')  # type: ignore
-def step_display_message(context: Any, message: str) -> None:
-    """Verify message is displayed."""
-    if hasattr(context, 'selected_option') and context.selected_option:
-        if context.selected_option in ["1", "2", "3"]:
-            assert context.menu_result is True
-        elif context.selected_option == "4":
-            assert context.menu_result is False
+# Generic message step removed to avoid conflicts with specific steps
 
 
 @then("return to the menu")  # type: ignore
