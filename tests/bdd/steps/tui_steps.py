@@ -10,9 +10,9 @@ from unittest import mock
 
 from behave import given, then, when  # type: ignore
 
-from scan_receipts.config import AppConfig
-from scan_receipts.folders import count_receipt_files, create_folders, get_staging_info
-from scan_receipts.main import handle_menu_choice, signal_handler
+from core.domain.configuration import AppConfig
+from adapters.secondary.file_system_adapter import FileSystemAdapter
+from adapters.primary.tui.terminal_ui import TerminalUI
 
 
 @given("no environment variables are set")  # type: ignore
