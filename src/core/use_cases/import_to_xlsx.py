@@ -12,20 +12,15 @@ logger = logging.getLogger(__name__)
 
 class ImportToXLSXUseCase:
     """Use case for importing staging data to Excel."""
-    
-    def __init__(
-        self,
-        csv: CSVPort, 
-        xlsx: XLSXPort,
-        file_system: FileSystemPort
-    ):
+
+    def __init__(self, csv: CSVPort, xlsx: XLSXPort, file_system: FileSystemPort):
         self.csv = csv
         self.xlsx = xlsx
         self.file_system = file_system
-    
+
     def execute(self, config: AppConfig) -> None:
         """Import staging data to XLSX file.
-        
+
         Args:
             config: Application configuration.
         """

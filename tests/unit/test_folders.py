@@ -8,12 +8,8 @@ from pathlib import Path
 import pytest  # type: ignore[import-untyped]
 from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
-from scan_receipts.folders import (
-    StagingInfo,
-    count_receipt_files,
-    create_folders,
-    get_staging_info,
-)
+from adapters.secondary.file_system_adapter import FileSystemAdapter
+from core.domain.receipt import StagingInfo
 
 
 class TestCreateFolders:
@@ -27,9 +23,10 @@ class TestCreateFolders:
             config.scanned_folder = Path(tmpdir) / "scanned"
             config.imported_folder = Path(tmpdir) / "imported"
             config.failed_folder = Path(tmpdir) / "failed"
-            
-            create_folders(config)
-            
+
+            adapter = FileSystemAdapter()
+            adapter.create_folders(config)
+
             assert config.incoming_folder.exists()
             assert config.scanned_folder.exists()
             assert config.imported_folder.exists()
@@ -44,8 +41,9 @@ class TestCreateFolders:
             config.imported_folder = Path(tmpdir) / "deep" / "nested" / "imported"
             config.failed_folder = Path(tmpdir) / "deep" / "nested" / "failed"
             
-            create_folders(config)
-            
+            adapter = FileSystemAdapter()
+            adapter.create_folders(config)
+
             assert config.incoming_folder.exists()
             assert config.scanned_folder.exists()
             assert config.imported_folder.exists()
@@ -64,14 +62,15 @@ class TestCreateFolders:
             test_file = config.incoming_folder / "test.txt"
             test_file.write_text("test content")
             
-            create_folders(config)
-            
+            adapter = FileSystemAdapter()
+            adapter.create_folders(config)
+
             assert test_file.exists()
             assert test_file.read_text() == "test content"
     
     def test_create_folders_permission_error(self, mocker: MockerFixture) -> None:
         """Test error handling when folder creation fails due to permissions."""
-        mock_mkdir = mocker.patch("scan_receipts.folders.Path.mkdir")
+        mock_mkdir = mocker.patch("pathlib.Path.mkdir")
         mock_mkdir.side_effect = PermissionError("Permission denied")
         
         config = mocker.MagicMock()
@@ -81,7 +80,8 @@ class TestCreateFolders:
         config.failed_folder = Path("/tmp/failed")
         
         with pytest.raises(OSError) as exc_info:  # type: ignore[attr-defined]
-            create_folders(config)
+            adapter = FileSystemAdapter()
+            adapter.create_folders(config)
         
         assert "Failed to create folder" in str(exc_info.value)  # type: ignore[attr-defined]
 
@@ -93,7 +93,8 @@ class TestCountReceiptFiles:
         """Test counting files in an empty folder."""
         with tempfile.TemporaryDirectory() as tmpdir:
             folder = Path(tmpdir)
-            assert count_receipt_files(folder) == 0
+            adapter = FileSystemAdapter()
+            assert adapter.count_receipt_files(folder) == 0
     
     def test_count_receipt_files_with_receipts(self):
         """Test counting various receipt file types."""
@@ -109,7 +110,8 @@ class TestCountReceiptFiles:
             (folder / "photo.jpeg").touch()
             (folder / "photo2.JPEG").touch()
             
-            assert count_receipt_files(folder) == 8
+            adapter = FileSystemAdapter()
+            assert adapter.count_receipt_files(folder) == 8
     
     def test_count_receipt_files_mixed_files(self):
         """Test counting only receipt files, ignoring other types."""
@@ -122,7 +124,8 @@ class TestCountReceiptFiles:
             (folder / "data.csv").touch()
             (folder / "spreadsheet.xlsx").touch()
             
-            assert count_receipt_files(folder) == 2
+            adapter = FileSystemAdapter()
+            assert adapter.count_receipt_files(folder) == 2
     
     def test_count_receipt_files_ignores_subdirectories(self):
         """Test that subdirectories are not counted."""
@@ -135,12 +138,14 @@ class TestCountReceiptFiles:
             (subfolder / "receipt2.pdf").touch()
             (folder / "subfolder.pdf").mkdir()
             
-            assert count_receipt_files(folder) == 1
+            adapter = FileSystemAdapter()
+            assert adapter.count_receipt_files(folder) == 1
     
     def test_count_receipt_files_nonexistent_folder(self):
         """Test counting files in a non-existent folder."""
         folder = Path("/nonexistent/folder")
-        assert count_receipt_files(folder) == 0
+        adapter = FileSystemAdapter()
+        assert adapter.count_receipt_files(folder) == 0
 
 
 class TestGetStagingInfo:
@@ -149,7 +154,8 @@ class TestGetStagingInfo:
     def test_get_staging_info_missing_file(self):
         """Test getting info for non-existent CSV file."""
         csv_path = Path("/nonexistent/file.csv")
-        assert get_staging_info(csv_path) is None
+        adapter = FileSystemAdapter()
+        assert adapter.get_staging_info(csv_path) is None
     
     def test_get_staging_info_empty_csv(self):
         """Test getting info for empty CSV file."""
@@ -157,7 +163,8 @@ class TestGetStagingInfo:
             csv_path = Path(f.name)
         
         try:
-            info = get_staging_info(csv_path)
+            adapter = FileSystemAdapter()
+            info = adapter.get_staging_info(csv_path)
             assert info is not None
             assert info.entry_count == 0
         finally:
@@ -171,7 +178,8 @@ class TestGetStagingInfo:
             writer.writerow(["Amount", "Tax", "Description", "Date"])
         
         try:
-            info = get_staging_info(csv_path)
+            adapter = FileSystemAdapter()
+            info = adapter.get_staging_info(csv_path)
             assert info is not None
             assert info.entry_count == 0
         finally:
@@ -188,7 +196,8 @@ class TestGetStagingInfo:
             writer.writerow(["75.00", "14.25", "Purchase 3", "2025-01-17"])
         
         try:
-            info = get_staging_info(csv_path)
+            adapter = FileSystemAdapter()
+            info = adapter.get_staging_info(csv_path)
             assert info is not None
             assert info.entry_count == 3
             assert info.file_path == csv_path

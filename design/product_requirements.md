@@ -1,14 +1,3 @@
-incoming
-scanned
-imported
-failed
-
-scan is from incoming to scanned, can be redone over and over, gets into a csv including hashes
-import is from scanned to imported, this is the final list
-scan is checking imported, we need the hashes from there, duplicates are checked against scanned and imported before API calls to Claude
-import is giving the files their final name and making sure imported and the xslx are exactly the same
-
-
 # Receipt Processor - High-Level Documentation
 
 ## Overview

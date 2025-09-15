@@ -1,9 +1,8 @@
 """Unit tests for ViewStagingUseCase."""
 
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
-import pytest
 
 from core.domain.configuration import AppConfig
 from core.domain.receipt import ReceiptData, StagingTableData
