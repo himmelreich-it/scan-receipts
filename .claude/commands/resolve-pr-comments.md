@@ -1,26 +1,25 @@
 The user would like the agent to resolve GitHub PR comments given in $ARGUMENTS:
 
-- If no PR number given, ask which PR to review
-- Use `design/prompts/ai_code_agent_instructions_pr_comments.md` as implementation guide  
-- Follow Python coding standards from `design/rules/python_agent_instructions.md`
+- Use subagent git-project-navigator to fetch PR details and comments for PR number $1
+- Use subagent advanced-software-engineer to analyze and address comments using instructions in `coder/prompts/handle-pull-request-comments.md`
+- Use subagent advanced-software-engineer to verify implementation using instructions in `coder/prompts/verify-implementation.md`
+- Use subagent git-project-navigator to commit and push changes if any were made
 
-Workflow:
-1. Fetch PR details: `gh pr view $PR_NUMBER --json title,body,author,files`
-2. Get unresolved comments: `gh pr view $PR_NUMBER --comments`
-3. Get unresolved inline comments using `gh api...`
-3. For each comment: evaluate critically → implement/modify/reject → reply with reasoning
-4. Run quality checks: `npx pyright` and `uv run ruff check src`
-5. Run tests and validate no regressions
-6. Commit and Push changes if any were made, otherwise you are not done
+## Configuration
+- Python coding standards: `coder/rules/python_agent_instructions.md`
+- Project commands: `CLAUDE.md`
+- PR comment handling: `coder/prompts/handle-pull-request-comments.md`
 
-Key Requirements:
-- Be critical - don't blindly implement suggestions
-- Reply to each comment starting with "Claude PR reply: [Action]"
+## Workflow
+1. Fetch PR details including all comments (regular and inline)
+2. Critically evaluate each comment (don't blindly implement)
+3. Implement/modify/reject with technical reasoning
+4. Run quality checks and tests
+5. Commit and push changes if modifications were made
+
+## Key Requirements
+- Be critical - evaluate suggestions thoroughly
+- Reply to each comment with "Claude PR reply: [Action]"
 - Provide technical reasoning for all decisions
-- Only modify code that genuinely improves quality
 - Test all changes thoroughly
-
-Output:
-- Summary of comments addressed
-- Files modified (if any)  
-- Quality check results
+- Only modify code that genuinely improves quality

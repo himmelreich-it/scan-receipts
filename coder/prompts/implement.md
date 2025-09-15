@@ -1,16 +1,21 @@
-# AI Code Agent Instructions - Complete Feature Implementation
+# AI Code Agent Instructions - Feature Implementation
 
 ## System Overview
-Implement all user stories from pre-analyzed documentation as a complete, integrated feature. All planning, dependency analysis, and design decisions have been completed upstream. Your job: plan the complete implementation, resolve all dependencies, code, test, and validate the entire feature.
+Implement user stories from pre-analyzed documentation. All planning, dependency analysis, and design decisions have been completed upstream. Your job: code, test, validate.
 
-**Input Documents**: User Story Documentation, Implementation Specification (architectural design with interface definitions), Python Code Guidelines
+**Input Context**:
+- Ticket information in context, otherwise use `gh` to find ticket number $number
+- Architecture: `design/architecture/hexagonal_design.md`
+- Python coding standards: `coder/rules/python_agent_instructions.md`
+- Project commands and configuration: `CLAUDE.md`
 
 ## Core Workflow
 
 ### 1. Analysis & Planning
-- **Inventory All Stories**: Identify all user stories and mark `Status: OUTDATED` stories needing updates
 - **Dependency Mapping**: Create complete dependency graph, determine implementation order using topological sort
-- **Architecture Review**: Use implementation specification to understand system design and integration points
+- **Architecture Review**: 
+  - Use Architectural documentation to plan design, in case the architecture does not cater for current feature, HALT and report in the ticket
+  - Use implementation specification to understand system design and integration points
 - **Testing Strategy**: Plan unit, integration, BDD, and end-to-end tests for complete feature
 
 ### 2. Implementation & Dependencies
@@ -24,83 +29,59 @@ Implement all user stories from pre-analyzed documentation as a complete, integr
 #### Dependency Resolution:
 - **Internal Dependencies**: Implement real dependencies first, bottom-up approach
 - **External Dependencies**: Use adapter pattern with logging (see Implementation Patterns)
-- **Update OUTDATED Stories**: Analyze changes, modify existing code, update tests, validate dependents
+- **Update Stories**: Analyze changes, modify existing code, update tests, validate dependents
 
 ### 3. Testing & Validation
 
 #### Test Categories:
 - **Unit**: Individual story components
-- **Integration**: Story interactions  
+- **Integration**: Story interactions
 - **Feature**: Complete workflows spanning multiple stories
-- **BDD**: End-to-end scenarios using `behave` from project root with `src` as `PYTHONPATH`
+- **BDD**: End-to-end scenarios using `behave`
 - **Regression**: Ensure updates don't break existing functionality
 
 #### Validation Process:
-1. Run `npx pyright` and fix pylance errors (use `# type: ignore` for difficult warnings)
-2. Run `uv run ruff check src` and fix errors
-3. Run all tests (new, existing, BDD scenarios)
+1. Run type checking and fix errors (see CLAUDE.md for commands)
+2. Run linting and fix errors (see CLAUDE.md for commands)
+3. Run all tests using commands from CLAUDE.md
 4. **HALT** if tests fail after 3 correction attempts
 5. Re-run analyzers after test fixes
 
-#### Error Handling Protocol:
+#### Agent Error Recovery Protocol:
+**Note**: This is for the agent's development workflow, not for the generated code.
+Generated code should follow fail-fast principles from `coder/rules/python_agent_instructions.md`.
+
 1. **First Attempt**: Fix syntax/import errors
-2. **Second Attempt**: Review against acceptance criteria  
+2. **Second Attempt**: Review against acceptance criteria
 3. **Third Attempt**: Simplify to bare minimum
 4. **After Third Failure**: HALT with diagnostics
-
-### 4. Documentation
-- Mark implemented stories: `**Status**: IMPLEMENTED`
-- Update OUTDATED to IMPLEMENTED for successful updates
-- Create implementation summary with: Feature name, stories implemented/updated, files created/modified, architecture overview, public APIs, integration points, test coverage, BDD scenarios, acceptance criteria status
 
 ## Implementation Patterns
 
 ### External Dependencies & Placeholders
-```python
-# External system adapter
-def external_dependency_adapter(*args, **kwargs):
-    """ADAPTER: External dependency not available in current environment"""
-    import logging
-    logging.info(f"Using adapter for external dependency: {external_dependency_adapter.__name__}")
-    return realistic_test_data
-
-# Missing internal feature
-def missing_feature_placeholder(*args, **kwargs):
-    """PLACEHOLDER: Feature not yet implemented - User Story: [US-XXX]"""
-    import logging
-    logging.warning(f"UNIMPLEMENTED_DEPENDENCY: {missing_feature_placeholder.__name__}")
-    return None  # or appropriate default
-
-# Missing class
-class PlaceholderClass:
-    """PLACEHOLDER: Class not yet implemented - User Story: [US-XXX]"""
-    def __init__(self, *args, **kwargs):
-        logging.warning(f"Using placeholder for {self.__class__.__name__}")
-    def expected_method(self, *args, **kwargs):
-        logging.warning(f"Called unimplemented method: {self.expected_method.__name__}")
-        return None
-
-# Missing config
-PLACEHOLDER_CONFIG = {'default_value': None, 'placeholder_note': 'Implement when US-XXX completed'}
-```
+For handling missing dependencies, use adapter/placeholder patterns with logging.
+See `coder/rules/python_agent_instructions.md` for error handling principles (fail-fast for production code).
 
 ### BDD Step Definitions
+* Make sure step definitions are unique
+* Make sure step implementations are unique
+
 ```python
 # tests/bdd/steps/feature_steps.py
 from behave import given, when, then  # type: ignore
 from your_app.main import YourApp
 
 @given('the complete feature is initialized')  # type: ignore
-def step_impl(context):
+def step_complete_feature_is_initialized(context):
     context.app = YourApp()
     context.feature = context.app.get_feature()
 
 @when('user completes workflow spanning multiple stories')  # type: ignore
-def step_impl(context):
+def step_user_completes_workflow(context):
     context.result = context.feature.complete_workflow()
 
 @then('all user stories work together seamlessly')  # type: ignore
-def step_impl(context):
+def step_all_user_stories_work(context):
     assert context.result.all_stories_integrated == True
 ```
 
@@ -124,9 +105,9 @@ class TestFeatureComplete:
 - Implement complete feature as integrated system
 - Follow dependency order, validate integration at each step
 - Handle updates gracefully without breaking dependent code
-- Test comprehensively (unit, integration, BDD, end-to-end)
-- Follow Python code guidelines exactly
-- Document architecture and integration points
+- Test comprehensively using commands from CLAUDE.md
+- Follow Python guidelines from `coder/rules/python_agent_instructions.md`
+- Document per standards in `coder/rules/python_agent_instructions.md`
 
 **DO NOT:**
 - Implement stories in isolation or features beyond acceptance criteria
@@ -152,9 +133,10 @@ class TestFeatureComplete:
 **Success Criteria:**
 1. All stories marked **IMPLEMENTED**, outdated stories successfully updated
 2. Complete feature works end-to-end, all story interactions validated
-3. Comprehensive testing passes (unit, integration, BDD, feature tests)
-4. Code quality follows Python guidelines, documentation complete
-5. No breaking changes, feature ready for production
+3. All tests pass using commands from CLAUDE.md
+4. Code quality checks pass (linting, type checking) - see CLAUDE.md
+5. Documentation follows standards from `coder/rules/python_agent_instructions.md`
+6. No breaking changes, feature ready for production
 
 **Halt Conditions:**
 - Circular dependencies, incomplete feature specification, integration failures
@@ -162,7 +144,7 @@ class TestFeatureComplete:
 - Architecture conflicts preventing story integration
 
 **Output Requirements:**
-- Complete feature summary with architecture overview
+- Complete feature summary with architecture overview in comment in ticket, do not update the current ticket description
 - Implementation map (files to stories), test results (unit/integration/BDD/end-to-end)
 - Integration validation, feature validation status
 - File structure with all created/modified files

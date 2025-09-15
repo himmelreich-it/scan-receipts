@@ -4,10 +4,8 @@ import csv
 import tempfile
 from pathlib import Path
 
-import pytest
 
 from adapters.secondary.csv_adapter import CSVAdapter
-from core.domain.receipt import ReceiptData, StagingTableData
 
 
 class TestCSVAdapter:

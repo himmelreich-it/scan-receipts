@@ -26,26 +26,26 @@ def main() -> Never:
     except ValueError as e:
         rprint(Text(str(e), style="red"))
         sys.exit(1)
-    
+
     # Create adapters
     file_system = FileSystemAdapter()
     ai_extraction = AnthropicAdapter()
     csv = CSVAdapter()
     xlsx = XLSXAdapter()
-    
+
     # Create use cases
     process_receipt_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv)
     import_to_xlsx_use_case = ImportToXLSXUseCase(csv, xlsx, file_system)
     view_staging_use_case = ViewStagingUseCase(file_system, csv)
-    
+
     # Create and run TUI
     tui = TerminalUI(
         file_system,
         process_receipt_use_case,
         import_to_xlsx_use_case,
-        view_staging_use_case
+        view_staging_use_case,
     )
-    
+
     tui.run(config)
 
 

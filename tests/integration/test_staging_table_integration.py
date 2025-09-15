@@ -3,9 +3,8 @@
 import csv
 import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-import pytest
 
 from adapters.primary.tui.terminal_ui import TerminalUI
 from adapters.secondary.csv_adapter import CSVAdapter

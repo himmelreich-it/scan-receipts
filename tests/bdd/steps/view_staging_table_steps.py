@@ -129,22 +129,10 @@ def step_select_view_staging_table(context: Any) -> None:
     context.output = output_buffer.getvalue()
 
 
-@then('it should display "receipts.csv does not exist"')  # type: ignore
-def step_display_csv_not_exist(context: Any) -> None:
-    """Check that the correct message is displayed."""
-    assert "receipts.csv does not exist" in context.output
+# Removed specific step since generic step in tui_steps.py handles this case
 
 
-@then('it should display "receipts.csv is empty"')  # type: ignore
-def step_display_csv_empty(context: Any) -> None:
-    """Check that the empty message is displayed."""
-    assert "receipts.csv is empty" in context.output
-
-
-@then('it should display "Error reading staging table."')  # type: ignore
-def step_display_error_message(context: Any) -> None:
-    """Check that error message is displayed."""
-    assert "Error reading staging table." in context.output
+# Removed specific steps since generic step in tui_steps.py handles these cases
 
 
 @then("it should display a formatted table with headers")  # type: ignore
@@ -173,10 +161,7 @@ def step_table_contains_data(context: Any) -> None:
         assert row['Date'] in output
 
 
-@then('it should show "Total entries: 2"')  # type: ignore
-def step_show_total_entries_two(context: Any) -> None:
-    """Check that total entries count is displayed."""
-    assert "Total entries: 2" in context.output
+# Removed specific step since generic step in tui_steps.py handles this case
 
 
 @then("it should display a formatted table")  # type: ignore
@@ -191,8 +176,4 @@ def step_hash_truncated(context: Any) -> None:
     assert "abcdef12..." in context.output
 
 
-@then("return to the main menu")  # type: ignore
-def step_return_to_menu(context: Any) -> None:
-    """Check that execution returns (doesn't crash or hang)."""
-    # This is implicit - if we reach this step, the function returned
-    assert context.output is not None
+# Removed duplicate step - already defined in run_analysis_steps.py

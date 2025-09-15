@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest  # type: ignore[import-untyped]
 from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
-from scan_receipts.config import AppConfig
-from scan_receipts.folders import count_receipt_files, create_folders, get_staging_info
+from core.domain.configuration import AppConfig
+from adapters.secondary.file_system_adapter import FileSystemAdapter
 
 
 class TestTUIIntegration:
@@ -29,7 +29,8 @@ class TestTUIIntegration:
             
             mocker.patch.dict(os.environ, env_vars, clear=True)
             config = AppConfig.from_env(load_dotenv_file=False)
-            create_folders(config)
+            file_system = FileSystemAdapter()
+            file_system.create_folders(config)
                 
             assert config.incoming_folder.exists()
             assert config.scanned_folder.exists()
@@ -48,11 +49,13 @@ class TestTUIIntegration:
                 xlsx_output_file=Path(tmpdir) / "output.xlsx",
             )
             
-            create_folders(config)
+            file_system = FileSystemAdapter()
+            file_system.create_folders(config)
             
-            assert count_receipt_files(config.incoming_folder) == 0
-            assert count_receipt_files(config.failed_folder) == 0
-            assert get_staging_info(config.csv_staging_file) is None
+            file_system = FileSystemAdapter()
+            assert file_system.count_receipt_files(config.incoming_folder) == 0
+            assert file_system.count_receipt_files(config.failed_folder) == 0
+            assert file_system.get_staging_info(config.csv_staging_file) is None
     
     def test_startup_display_with_files_and_staging(self):
         """Test startup display with receipt files and staging data."""
@@ -66,7 +69,8 @@ class TestTUIIntegration:
                 xlsx_output_file=Path(tmpdir) / "output.xlsx",
             )
             
-            create_folders(config)
+            file_system = FileSystemAdapter()
+            file_system.create_folders(config)
             
             for i in range(15):
                 (config.incoming_folder / f"receipt{i}.pdf").touch()
@@ -80,10 +84,11 @@ class TestTUIIntegration:
                 for i in range(8):
                     writer.writerow([f"{100+i}.00", "19.00", f"Purchase {i}", "2025-01-15"])
             
-            assert count_receipt_files(config.incoming_folder) == 15
-            assert count_receipt_files(config.failed_folder) == 2
-            
-            staging_info = get_staging_info(config.csv_staging_file)
+            file_system = FileSystemAdapter()
+            assert file_system.count_receipt_files(config.incoming_folder) == 15
+            assert file_system.count_receipt_files(config.failed_folder) == 2
+
+            staging_info = file_system.get_staging_info(config.csv_staging_file)
             assert staging_info is not None
             assert staging_info.entry_count == 8
     
@@ -114,6 +119,7 @@ class TestTUIIntegration:
         )
         
         with pytest.raises(OSError) as exc_info:  # type: ignore[attr-defined]
-            create_folders(config)
+            file_system = FileSystemAdapter()
+            file_system.create_folders(config)
         
         assert "Failed to create folder" in str(exc_info.value)  # type: ignore[attr-defined]
