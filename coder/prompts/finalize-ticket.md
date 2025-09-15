@@ -19,5 +19,3 @@ All implementation and quality checks are complete. Now finalize the work:
      - Any notes for reviewers
 
 Please complete these final steps to finish the ticket implementation.
-
-Respond with message: IMPLEMENTATION FINALIZED

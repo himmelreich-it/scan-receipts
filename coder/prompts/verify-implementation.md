@@ -18,13 +18,19 @@ Please verify that all implementation tasks are complete:
    - [ ] Linting passes (ruff check)
    - [ ] Code is properly formatted (ruff format)
    - [ ] Type checking passes (npx pyright)
-   - [ ] No TODO comments left unaddressed
 
 4. **Documentation:**
    - [ ] All new code has appropriate docstrings
    - [ ] Complex logic has inline comments
    - [ ] README or other docs updated if needed
 
-Please check each item and report:
-- If everything is COMPLETE, respond with "IMPLEMENTATION COMPLETED"
-- If items are incomplete, list what remains to be done
+## Complete Remaining Tasks
+
+Based on the previous check, there are still tasks to complete. Please finish all remaining items:
+
+1. Fix any failing tests
+2. Resolve any linting or type checking errors
+3. Complete any missing functionality
+4. Add any missing documentation
+
+Focus on completing everything so the feature is fully ready for review.
