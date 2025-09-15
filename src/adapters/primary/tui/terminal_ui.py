@@ -46,6 +46,16 @@ class TerminalUI:
         Args:
             config: Application configuration.
         """
+        # Display configured folder and file paths
+        rprint("Configured Paths:")
+        rprint(f"Incoming: {config.incoming_folder.resolve()}")
+        rprint(f"Scanned: {config.scanned_folder.resolve()}")
+        rprint(f"Imported: {config.imported_folder.resolve()}")
+        rprint(f"Failed: {config.failed_folder.resolve()}")
+        rprint(f"XLSX: {config.xlsx_output_file.resolve()}")
+        rprint(f"CSV: {config.csv_staging_file.resolve()}")
+        rprint()
+
         input_count = self.file_system.count_receipt_files(config.incoming_folder)
         failed_count = self.file_system.count_receipt_files(config.failed_folder)
         staging_info = self.view_staging_use_case.execute(config)
