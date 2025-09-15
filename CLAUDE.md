@@ -39,7 +39,7 @@ When the user instructs "design and implement next feature", we walk the user th
 ## Github CLI
 - Tickets can be found in Github and the `gh` cli is available
 - Tickets can be created by `gh issue create --title "$title" --body "$body" --project "project_name"`
-- Tickets can be edited by `gh issue edit $number --title "$title" --body "$body" --project "project_name"`
+- Tickets can be edited by `gh issue edit $number --title "$title" --body "$body"`
 - Working on a ticket requires creating a branch for given ticket: `gh issue develop $number --checkout`
 - Once tickets are done, a pr is created: `gh pr create --title "$title" --body "$body" --project "project_name"`
 - Tickets need to be assigned to the project given:
