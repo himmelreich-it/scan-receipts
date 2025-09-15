@@ -1,12 +1,9 @@
 """Unit tests for FileSystemAdapter."""
 
 from pathlib import Path
-from unittest.mock import Mock
 
-import pytest
 
 from adapters.secondary.file_system_adapter import FileSystemAdapter
-from core.domain.configuration import AppConfig
 
 
 class TestFileSystemAdapter:

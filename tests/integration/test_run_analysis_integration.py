@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import pytest
 
 from adapters.secondary.csv_adapter import CSVAdapter
 from adapters.secondary.file_system_adapter import FileSystemAdapter

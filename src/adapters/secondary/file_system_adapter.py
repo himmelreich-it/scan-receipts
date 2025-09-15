@@ -94,7 +94,7 @@ class FileSystemAdapter(FileSystemPort):
         if not folder.exists():
             return []
 
-        supported_files = []
+        supported_files: List[Path] = []
         for file_path in folder.iterdir():
             if file_path.is_file():
                 ext = file_path.suffix.lower()

@@ -1,8 +1,8 @@
 """BDD step definitions for Run Analysis feature."""
 
-import os
 import tempfile
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 from behave import given, when, then  # type: ignore
@@ -18,7 +18,7 @@ from core.use_cases.view_staging import ViewStagingUseCase
 
 
 @given('the application environment is properly configured')  # type: ignore
-def step_app_environment_configured(context):
+def step_app_environment_configured(context: Any) -> None:
     """Set up proper application environment."""
     context.temp_dir = Path(tempfile.mkdtemp())
 
@@ -33,7 +33,7 @@ def step_app_environment_configured(context):
 
 
 @given('required folders exist')  # type: ignore
-def step_required_folders_exist(context):
+def step_required_folders_exist(context: Any) -> None:
     """Create required folder structure."""
     context.incoming_folder.mkdir(parents=True, exist_ok=True)
     context.scanned_folder.mkdir(parents=True, exist_ok=True)
@@ -42,7 +42,7 @@ def step_required_folders_exist(context):
 
 
 @given('no receipts.csv file exists')  # type: ignore
-def step_no_receipts_csv_exists(context):
+def step_no_receipts_csv_exists(context: Any) -> None:
     """Ensure receipts.csv doesn't exist."""
     if context.receipts_csv.exists():
         context.receipts_csv.unlink()

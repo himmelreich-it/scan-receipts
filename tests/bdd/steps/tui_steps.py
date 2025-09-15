@@ -50,7 +50,8 @@ def step_app_running(context: Any) -> None:
         csv_staging_file=Path(tmpdir) / "receipts.csv",
         xlsx_output_file=Path(tmpdir) / "output.xlsx",
     )
-    create_folders(config)
+    file_system = FileSystemAdapter()
+    file_system.create_folders(config)
     context.tmpdir = tmpdir
     context.config = config
 
@@ -98,7 +99,8 @@ def step_app_starts(context: Any) -> None:
     """Attempt to start the application."""
     try:
         config = AppConfig.from_env(load_dotenv_file=False)
-        create_folders(config)
+        file_system = FileSystemAdapter()
+        file_system.create_folders(config)
         context.config = config
         context.startup_success = True
     except ValueError as e:
@@ -112,22 +114,37 @@ def step_app_starts(context: Any) -> None:
 @when("the status is displayed")  # type: ignore
 def step_display_status(context: Any) -> None:
     """Display system status."""
-    context.input_count = count_receipt_files(context.config.incoming_folder)
-    context.failed_count = count_receipt_files(context.config.failed_folder)
-    context.staging_info = get_staging_info(context.config.csv_staging_file)
+    file_system = FileSystemAdapter()
+    context.input_count = file_system.count_receipt_files(context.config.incoming_folder)
+    context.failed_count = file_system.count_receipt_files(context.config.failed_folder)
+    context.staging_info = file_system.get_staging_info(context.config.csv_staging_file)
 
 
 @when("the user selects option {option}")  # type: ignore
 def step_select_option(context: Any, option: str) -> None:
     """Handle menu option selection."""
-    context.menu_result = handle_menu_choice(option)
+    # Create a mock TUI to test menu choice handling
+    from unittest.mock import Mock
+    mock_file_system = Mock()
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+    context.menu_result = tui.handle_menu_choice(option, context.config)
     context.selected_option = option
 
 
 @when('the user enters invalid input "{input_text}"')  # type: ignore
 def step_invalid_input(context: Any, input_text: str) -> None:
     """Handle invalid menu input."""
-    context.menu_result = handle_menu_choice(input_text)
+    # Create a mock TUI to test menu choice handling
+    from unittest.mock import Mock
+    mock_file_system = Mock()
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+    context.menu_result = tui.handle_menu_choice(input_text, context.config)
     context.invalid_input = input_text
 
 
@@ -135,7 +152,14 @@ def step_invalid_input(context: Any, input_text: str) -> None:
 def step_ctrl_c(context: Any) -> None:
     """Simulate Ctrl+C signal."""
     with mock.patch('sys.exit') as mock_exit:
-        signal_handler(signal.SIGINT, None)
+        # Create a mock TUI to test signal handling
+        from unittest.mock import Mock
+        mock_file_system = Mock()
+        mock_process_receipt = Mock()
+        mock_import_xlsx = Mock()
+        mock_view_staging = Mock()
+        tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+        tui.signal_handler(signal.SIGINT, None)
         context.exit_called = mock_exit.called
 
 

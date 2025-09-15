@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest  # type: ignore[import-untyped]
 from pytest_mock import MockerFixture  # type: ignore[import-untyped]
 
-from scan_receipts.config import AppConfig, REQUIRED_ENV_VARS
+from core.domain.configuration import AppConfig, REQUIRED_ENV_VARS
 
 
 class TestAppConfig:
