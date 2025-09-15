@@ -6,8 +6,8 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 **Input Context**:
 - Ticket information in context, otherwise use `gh` to find ticket number $number
 - Architecture: `design/architecture/hexagonal_design.md`
-- Follow Python coding standards from `design/rules/python_agent_instructions.md`
-- Follow the exact workflow outlined in the AI code agent instructions given here
+- Python coding standards: `coder/rules/python_agent_instructions.md`
+- Project commands and configuration: `CLAUDE.md`
 
 ## Core Workflow
 
@@ -35,54 +35,32 @@ Implement user stories from pre-analyzed documentation. All planning, dependency
 
 #### Test Categories:
 - **Unit**: Individual story components
-- **Integration**: Story interactions  
+- **Integration**: Story interactions
 - **Feature**: Complete workflows spanning multiple stories
 - **BDD**: End-to-end scenarios using `behave`
 - **Regression**: Ensure updates don't break existing functionality
 
 #### Validation Process:
-1. Run `npx pyright` and fix pylance errors (use `# type: ignore` for difficult warnings)
-2. Run `uv run ruff check src` and fix errors
-3. Run all tests (new, existing, BDD scenarios)
+1. Run type checking and fix errors (see CLAUDE.md for commands)
+2. Run linting and fix errors (see CLAUDE.md for commands)
+3. Run all tests using commands from CLAUDE.md
 4. **HALT** if tests fail after 3 correction attempts
 5. Re-run analyzers after test fixes
 
-#### Error Handling Protocol:
+#### Agent Error Recovery Protocol:
+**Note**: This is for the agent's development workflow, not for the generated code.
+Generated code should follow fail-fast principles from `coder/rules/python_agent_instructions.md`.
+
 1. **First Attempt**: Fix syntax/import errors
-2. **Second Attempt**: Review against acceptance criteria  
+2. **Second Attempt**: Review against acceptance criteria
 3. **Third Attempt**: Simplify to bare minimum
 4. **After Third Failure**: HALT with diagnostics
 
 ## Implementation Patterns
 
 ### External Dependencies & Placeholders
-```python
-# External system adapter
-def external_dependency_adapter(*args, **kwargs):
-    """ADAPTER: External dependency not available in current environment"""
-    import logging
-    logging.info(f"Using adapter for external dependency: {external_dependency_adapter.__name__}")
-    return realistic_test_data
-
-# Missing internal feature
-def missing_feature_placeholder(*args, **kwargs):
-    """PLACEHOLDER: Feature not yet implemented - User Story: [US-XXX]"""
-    import logging
-    logging.warning(f"UNIMPLEMENTED_DEPENDENCY: {missing_feature_placeholder.__name__}")
-    return None  # or appropriate default
-
-# Missing class
-class PlaceholderClass:
-    """PLACEHOLDER: Class not yet implemented - User Story: [US-XXX]"""
-    def __init__(self, *args, **kwargs):
-        logging.warning(f"Using placeholder for {self.__class__.__name__}")
-    def expected_method(self, *args, **kwargs):
-        logging.warning(f"Called unimplemented method: {self.expected_method.__name__}")
-        return None
-
-# Missing config
-PLACEHOLDER_CONFIG = {'default_value': None, 'placeholder_note': 'Implement when US-XXX completed'}
-```
+For handling missing dependencies, use adapter/placeholder patterns with logging.
+See `coder/rules/python_agent_instructions.md` for error handling principles (fail-fast for production code).
 
 ### BDD Step Definitions
 * Make sure step definitions are unique
@@ -127,9 +105,9 @@ class TestFeatureComplete:
 - Implement complete feature as integrated system
 - Follow dependency order, validate integration at each step
 - Handle updates gracefully without breaking dependent code
-- Test comprehensively (unit, integration, BDD, end-to-end)
-- Follow Python code guidelines exactly
-- Document architecture and integration points
+- Test comprehensively using commands from CLAUDE.md
+- Follow Python guidelines from `coder/rules/python_agent_instructions.md`
+- Document per standards in `coder/rules/python_agent_instructions.md`
 
 **DO NOT:**
 - Implement stories in isolation or features beyond acceptance criteria
@@ -155,10 +133,10 @@ class TestFeatureComplete:
 **Success Criteria:**
 1. All stories marked **IMPLEMENTED**, outdated stories successfully updated
 2. Complete feature works end-to-end, all story interactions validated
-3. Comprehensive testing passes (unit, integration, BDD, feature tests), **ALL TESTS MUST PASS, INCLUDING CLEANUP**
-4. Code quality follows Python guidelines, documentation complete
-5. No breaking changes, feature ready for production
-6. All linting checks pass for source and tests
+3. All tests pass using commands from CLAUDE.md
+4. Code quality checks pass (linting, type checking) - see CLAUDE.md
+5. Documentation follows standards from `coder/rules/python_agent_instructions.md`
+6. No breaking changes, feature ready for production
 
 **Halt Conditions:**
 - Circular dependencies, incomplete feature specification, integration failures
