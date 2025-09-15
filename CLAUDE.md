@@ -29,20 +29,12 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Install dependencies: `uv sync`
 - Add new dependencies: `uv add <package>`
 
-## Design and Implement Next Feature
-When the user instructs "design and implement next feature", we walk the user through the following process. See chapters in this file
-1. Design Next Feature
-2. Implement User Story (with the user stories file just created)
-3. Create Implementation Design Documentation (with the user stories file just created)
-4. Implement Feature (with the user stories file just created)
-5. Integrate Implemented Feature (just created feature)
-
 ## GitHub Operations
 
 ### Working with Issues
 - View issue details: `gh issue view $number`
 - Create issue: `gh issue create --title "$title" --body "$body" --project "scan-receipts"`
-- Edit issue: `gh issue edit $number --title "$title" --body "$body" --project "scan-receipts"`
+- Edit issue: `gh issue edit $number --title "$title" --body "$body"`
 - Start work on issue: `gh issue develop $number --checkout`
 - Add label to issue: `gh issue edit $number --add-label "implemented"`
 - Comment on issue: `gh issue comment $number --body "$comment"`
