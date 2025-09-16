@@ -25,6 +25,7 @@ class ImageProcessor(Protocol):
 - 4 spaces indentation, 79 char lines, snake_case/PascalCase
 - Import order: standard library → third-party → local (absolute paths)
 - Type hints for all parameters/returns, meaningful docstrings
+- Double quotes for strings, unless it needs escaping
 
 ## Package Structure
 ```
