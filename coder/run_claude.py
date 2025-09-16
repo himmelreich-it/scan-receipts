@@ -351,14 +351,14 @@ def handle_message(msg: Message) -> str:
                     # Extract command from Bash(command)
                     command = tool_name[5:-1]  # Remove "Bash(" and ")"
                     # Create allowance pattern
-                    suggested_allowances.append(f"Bash({command}:*)")
+                    suggested_allowances.append(f"Bash({command}:*)") # pyright: ignore[reportUnknownMemberType]
                 elif tool_name != "Unknown":
-                    suggested_allowances.append(f"{tool_name}(*)")
+                    suggested_allowances.append(f"{tool_name}(*)") # pyright: ignore[reportUnknownMemberType]
 
             if suggested_allowances:
                 logger.info("SUGGESTED ALLOWLIST ADDITIONS:")
                 logger.info("-" * 40)
-                for allowance in sorted(set(suggested_allowances)):
+                for allowance in sorted(set(suggested_allowances)): # pyright: ignore[reportUnknownVariableType, reportUnknownArgumentType]
                     logger.info(f"  - {allowance}")
                 logger.info("")
 
