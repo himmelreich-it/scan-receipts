@@ -2,7 +2,7 @@ import logging
 import asyncio
 import datetime
 import argparse
-from typing import Any
+from typing import Any, List, Dict
 import yaml
 
 from pathlib import Path
@@ -24,30 +24,127 @@ from claude_code_sdk import (
 # Logger instance
 logger = logging.getLogger(__name__)
 
+# Global list to track failed tools
+failed_tools: List[Dict[str, str]] = []
+
+def track_tool_failure(tool_name: str, tool_id: str, reason: str):
+    """Track a tool failure for any reason."""
+    failed_tools.append({
+        "tool_name": tool_name,
+        "tool_use_id": tool_id,
+        "error": reason[:200] + "..." if len(reason) > 200 else reason
+    })
+
 
 class UserFriendlyFormatter(logging.Formatter):
     """Custom formatter that only shows ERROR prefix for errors, and formats objects nicely."""
 
     def format(self, record: logging.LogRecord) -> str:
-        # Format objects/dicts as YAML
+        message = record.getMessage()
+
+        # Context-aware cleanup based on message type
+        message = self.clean_message_by_context(message)
+
+        # Format objects/dicts as YAML with proper indentation
         if hasattr(record, "args") and record.args:
             formatted_args: list[Any] = []
             for arg in record.args:
                 if isinstance(arg, (dict, list)):
-                    formatted_args.append(
-                        f"\n{yaml.dump(arg, default_flow_style=False).strip()}"
-                    )
+                    yaml_str = yaml.dump(arg, default_flow_style=False).strip()
+                    # Add proper indentation for nested content
+                    indented_yaml = '\n'.join('    ' + line for line in yaml_str.split('\n'))
+                    formatted_args.append(f"\n{indented_yaml}")
                 else:
                     formatted_args.append(str(arg))
             record.args = tuple(formatted_args)
+            message = record.getMessage()
+            # Clean the final message again after formatting
+            message = self.clean_message_by_context(message)
+
+        # Add proper indentation for tool-related messages
+        if message.startswith("    Tool"):
+            # Already properly indented
+            pass
+        elif "Input:" in message or "Content:" in message:
+            # Ensure these are properly indented under tool messages
+            lines = message.split('\n')
+            formatted_lines = []
+            for line in lines:
+                if line.strip():
+                    formatted_lines.append('    ' + line.strip())
+                else:
+                    formatted_lines.append('')
+            message = '\n'.join(formatted_lines)
 
         # Only show ERROR and WARNING prefixes
         if record.levelno >= logging.ERROR:
-            return f"ERROR - {record.getMessage()}"
+            return f"ERROR - {message}"
         elif record.levelno >= logging.WARNING:
-            return f"WARNING - {record.getMessage()}"
+            return f"WARNING - {message}"
         else:
-            return record.getMessage()
+            return message
+
+    def clean_message_by_context(self, message: str) -> str:
+        """Context-aware message cleaning based on content type."""
+
+        # Always remove these unicode artifacts
+        message = message.replace('\u2192', '').replace('\u21', '')
+
+        # For Tool Results - aggressive cleanup since these often contain escaped content
+        if "Tool Result -" in message:
+            message = self.unescape_tool_content(message)
+
+        # For Tool Use Input - moderate cleanup, preserve intentional structure
+        elif "Tool Use -" in message or "Input:" in message:
+            message = self.clean_tool_input(message)
+
+        # For Claude responses - minimal cleanup to preserve formatting
+        elif message.startswith("Claude:"):
+            message = self.clean_claude_response(message)
+
+        # For system/data messages - preserve structure but clean display
+        elif "System Message" in message or "Data:" in message:
+            message = self.clean_system_message(message)
+
+        return message
+
+    def unescape_tool_content(self, message: str) -> str:
+        """Aggressively clean tool result content for readability."""
+        # Remove line continuation backslashes
+        message = message.replace('\\\n', '\n')
+        message = message.replace('\\n', '\n')
+        message = message.replace('\\t', '    ')
+        message = message.replace('\\"', '"')
+        message = message.replace("\\'", "'")
+        message = message.replace('\\\\', '\\')
+
+        # Clean up numbered line prefixes like "     1→"
+        import re
+        message = re.sub(r'\s+\d+\u2192', '', message)
+        message = re.sub(r'\s+\d+→', '', message)
+
+        return message
+
+    def clean_tool_input(self, message: str) -> str:
+        """Moderate cleanup for tool inputs, preserve YAML/JSON structure."""
+        # Only clean obvious display artifacts
+        message = message.replace('\\\n', '\n')
+        message = message.replace('\\n', '\n')
+        message = message.replace('\\t', '    ')
+        return message
+
+    def clean_claude_response(self, message: str) -> str:
+        """Minimal cleanup for Claude responses to preserve intended formatting."""
+        # Only remove clear artifacts, preserve intentional escapes
+        message = message.replace('\\\n', '')  # Remove line continuations
+        return message
+
+    def clean_system_message(self, message: str) -> str:
+        """Clean system messages while preserving data structure."""
+        # Basic cleanup only
+        message = message.replace('\\n', '\n')
+        message = message.replace('\\t', '    ')
+        return message
 
 
 def configure_logging(ticket_number: str, mode: str) -> None:
@@ -86,8 +183,18 @@ async def handle_response(client: ClaudeSDKClient) -> str:
     """Handle and display messages from Claude SDK client."""
 
     responses: list[str] = []
-    async for msg in client.receive_response():
-        responses.append(handle_message(msg))
+    try:
+        async for msg in client.receive_response():
+            responses.append(handle_message(msg))
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Response handling error: {error_msg}")
+
+        # Track approval failures specifically
+        if "rejected" in error_msg.lower() or "approval" in error_msg.lower():
+            track_tool_failure("SDK", "unknown", f"Tool approval rejected: {error_msg}")
+
+        return f"Error: {error_msg}"
 
     return "\n".join(responses)
 
@@ -120,6 +227,10 @@ def handle_message(msg: Message) -> str:
                 logger.info(
                     f"    Tool Result - {error_status} (Tool Use ID: {block.tool_use_id})\nContent:\n{tool_content}"
                 )
+
+                # Track failed tools
+                if block.is_error:
+                    track_tool_failure("Unknown", block.tool_use_id, str(block.content))
             elif isinstance(block, ThinkingBlock):
                 logger.info(f"    Thinking: {block.thinking}")
 
@@ -161,6 +272,18 @@ def handle_message(msg: Message) -> str:
         else:
             logger.debug("Usage: N/A")
         logger.debug(f"Result: {msg.result}" if msg.result else "Result: N/A")
+
+        # Log failed tools summary
+        if failed_tools:
+            logger.info("=" * 60)
+            logger.info(f"FAILED TOOLS SUMMARY ({len(failed_tools)} failures)")
+            logger.info("=" * 60)
+            for i, failure in enumerate(failed_tools, 1):
+                tool_name = failure.get('tool_name', 'Unknown')
+                logger.info(f"{i}. Tool: {tool_name} (ID: {failure['tool_use_id']})")
+                logger.info(f"   Error: {failure['error']}")
+                logger.info("")
+
         return msg.result if msg.result else ""
 
     else:
@@ -191,11 +314,21 @@ async def main():
     configure_logging(args.ticket_number, args.mode)
 
     # Call Claude SDK
-    async with ClaudeSDKClient() as client:
-        prompt = f"/{args.mode} {args.ticket_number}"
-        await client.query(prompt=prompt)
+    try:
+        async with ClaudeSDKClient() as client:
+            prompt = f"/{args.mode} {args.ticket_number}"
+            await client.query(prompt=prompt)
 
-        await handle_response(client)
+            await handle_response(client)
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Client error: {error_msg}")
+
+        # Track permission/approval failures
+        if any(keyword in error_msg.lower() for keyword in ["rejected", "approval", "permission", "blocked"]):
+            track_tool_failure("Client", "N/A", f"Permission/approval error: {error_msg}")
+
+        raise
 
 
 if __name__ == "__main__":
