@@ -24,13 +24,36 @@ from claude_code_sdk import (
 # Logger instance
 logger = logging.getLogger(__name__)
 
-# Global list to track failed tools
+# Global tracking for tools
 failed_tools: List[Dict[str, str]] = []
+tool_use_registry: Dict[str, Dict[str, Any]] = {}
+
+def register_tool_use(tool_id: str, tool_name: str, tool_input: Dict[str, Any]):
+    """Register a tool use for later reference."""
+    tool_use_registry[tool_id] = {
+        "tool_name": tool_name,
+        "input": tool_input
+    }
 
 def track_tool_failure(tool_name: str, tool_id: str, reason: str):
     """Track a tool failure for any reason."""
+    # Try to get more details from registry
+    if tool_id in tool_use_registry:
+        registry_entry = tool_use_registry[tool_id]
+        tool_name = registry_entry["tool_name"]
+        tool_input = registry_entry["input"]
+
+        # For Bash commands, include the actual command
+        if tool_name == "Bash" and "command" in tool_input:
+            command = tool_input["command"]
+            tool_display = f"Bash({command})"
+        else:
+            tool_display = tool_name
+    else:
+        tool_display = tool_name
+
     failed_tools.append({
-        "tool_name": tool_name,
+        "tool_name": tool_display,
         "tool_use_id": tool_id,
         "error": reason[:200] + "..." if len(reason) > 200 else reason
     })
@@ -211,6 +234,9 @@ def handle_message(msg: Message) -> str:
                 logger.info(f"Claude: {block.text}")
                 texts.append(f"{prefix}{block.text}")
             elif isinstance(block, ToolUseBlock):
+                # Register this tool use for later reference
+                register_tool_use(block.id, block.name, block.input or {})
+
                 tool_input = (
                     yaml.dump(block.input, default_flow_style=False).strip()
                     if block.input
