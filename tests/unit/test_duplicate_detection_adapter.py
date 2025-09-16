@@ -105,7 +105,9 @@ class TestDuplicateDetectionAdapter:
 
         self.mock_file_system.calculate_file_hash.return_value = test_hash
 
-        result = self.adapter.check_duplicate(test_file, [existing_hash1, existing_hash2])
+        result = self.adapter.check_duplicate(
+            test_file, [existing_hash1, existing_hash2]
+        )
 
         assert result.is_duplicate
         assert result.duplicate_location == existing_file1  # First match
@@ -122,7 +124,9 @@ class TestDuplicateDetectionAdapter:
 
         self.mock_file_system.calculate_file_hash.return_value = test_hash
 
-        result = self.adapter.check_duplicate(test_file, [existing_hash1, existing_hash2])
+        result = self.adapter.check_duplicate(
+            test_file, [existing_hash1, existing_hash2]
+        )
 
         assert not result.is_duplicate
         assert result.hash_value == "abc123"

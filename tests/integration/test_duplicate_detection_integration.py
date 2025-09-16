@@ -25,7 +25,7 @@ class TestDuplicateDetectionIntegration:
             self.file_system,
             self.mock_ai_extraction,
             self.mock_csv,
-            self.duplicate_detection
+            self.duplicate_detection,
         )
 
     def test_duplicate_detection_with_real_files(self, tmp_path: Path):
@@ -137,7 +137,7 @@ class TestDuplicateDetectionIntegration:
             imported_folder=imported,
             failed_folder=failed,
             csv_staging_file=csv_file,
-            xlsx_output_file=tmp_path / "test.xlsx"
+            xlsx_output_file=tmp_path / "test.xlsx",
         )
 
         # Execute the use case
@@ -145,7 +145,9 @@ class TestDuplicateDetectionIntegration:
 
         # Should only call AI extraction for unique file
         # Note: AI extraction is mocked so we can check call count
-        assert self.mock_ai_extraction.extract_receipt_data.call_count == 0  # Still TODO in implementation
+        assert (
+            self.mock_ai_extraction.extract_receipt_data.call_count == 0
+        )  # Still TODO in implementation
 
     def test_get_existing_hashes_from_both_folders(self, tmp_path: Path):
         """Test getting hashes from both imported and scanned folders."""

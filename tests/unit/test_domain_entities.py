@@ -50,9 +50,7 @@ class TestDuplicateDetectionResult:
         test_file = tmp_path / "test.pdf"
 
         result = DuplicateDetectionResult(
-            file_path=test_file,
-            is_duplicate=False,
-            hash_value="abc123"
+            file_path=test_file, is_duplicate=False, hash_value="abc123"
         )
 
         assert result.file_path == test_file
@@ -71,7 +69,7 @@ class TestDuplicateDetectionResult:
             file_path=test_file,
             is_duplicate=True,
             duplicate_location=duplicate_file,
-            hash_value="abc123"
+            hash_value="abc123",
         )
 
         assert result.file_path == test_file
@@ -87,9 +85,7 @@ class TestDuplicateDetectionResult:
         error_msg = "Failed to calculate hash"
 
         result = DuplicateDetectionResult(
-            file_path=test_file,
-            is_duplicate=False,
-            error_message=error_msg
+            file_path=test_file, is_duplicate=False, error_message=error_msg
         )
 
         assert result.file_path == test_file
@@ -105,9 +101,7 @@ class TestDuplicateDetectionResult:
         duplicate_file = tmp_path / "imported" / "original.pdf"
 
         result = DuplicateDetectionResult(
-            file_path=test_file,
-            is_duplicate=True,
-            duplicate_location=duplicate_file
+            file_path=test_file, is_duplicate=True, duplicate_location=duplicate_file
         )
 
         assert result.location_name == "imported"
@@ -116,20 +110,14 @@ class TestDuplicateDetectionResult:
         """Test location_name property without duplicate location."""
         test_file = tmp_path / "test.pdf"
 
-        result = DuplicateDetectionResult(
-            file_path=test_file,
-            is_duplicate=False
-        )
+        result = DuplicateDetectionResult(file_path=test_file, is_duplicate=False)
 
         assert result.location_name == "unknown"
 
     def test_duplicate_detection_result_immutable(self, tmp_path: Path):
         """Test DuplicateDetectionResult is immutable (frozen dataclass)."""
         test_file = tmp_path / "test.pdf"
-        result = DuplicateDetectionResult(
-            file_path=test_file,
-            is_duplicate=False
-        )
+        result = DuplicateDetectionResult(file_path=test_file, is_duplicate=False)
 
         with pytest.raises(AttributeError):
             result.is_duplicate = True  # type: ignore

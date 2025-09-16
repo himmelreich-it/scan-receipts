@@ -16,7 +16,10 @@ class TestProcessReceiptUseCase:
         self.csv_mock = Mock()
         self.duplicate_detection_mock = Mock()
         self.use_case = ProcessReceiptUseCase(
-            self.file_system_mock, self.ai_extraction_mock, self.csv_mock, self.duplicate_detection_mock
+            self.file_system_mock,
+            self.ai_extraction_mock,
+            self.csv_mock,
+            self.duplicate_detection_mock,
         )
 
     def test_execute_no_files(self, tmp_path: Path):
@@ -43,11 +46,14 @@ class TestProcessReceiptUseCase:
         config_mock = Mock()
         config_mock.incoming_folder = tmp_path / "incoming"
         config_mock.scanned_folder = tmp_path / "scanned"
+        config_mock.imported_folder = tmp_path / "imported"
 
         # Mock file list
         test_files = [tmp_path / "receipt1.pdf", tmp_path / "receipt2.jpg"]
         self.file_system_mock.get_supported_files.return_value = test_files
         self.file_system_mock.remove_file_if_exists.return_value = True
+        # Mock file hashes to return empty lists instead of Mock objects
+        self.file_system_mock.get_file_hashes_from_folder.return_value = []
 
         self.use_case.execute(config_mock)
 
@@ -71,11 +77,14 @@ class TestProcessReceiptUseCase:
         config_mock = Mock()
         config_mock.incoming_folder = tmp_path / "incoming"
         config_mock.scanned_folder = tmp_path / "scanned"
+        config_mock.imported_folder = tmp_path / "imported"
 
         # Mock file list
         test_files = [tmp_path / "receipt1.pdf"]
         self.file_system_mock.get_supported_files.return_value = test_files
         self.file_system_mock.remove_file_if_exists.return_value = False
+        # Mock file hashes to return empty lists instead of Mock objects
+        self.file_system_mock.get_file_hashes_from_folder.return_value = []
 
         self.use_case.execute(config_mock)
 

@@ -71,7 +71,9 @@ class ProcessReceiptUseCase:
             )
 
             if duplicate_result.has_error:
-                rprint(f"  ❌ Hash calculation failed: {duplicate_result.error_message}")
+                rprint(
+                    f"  ❌ Hash calculation failed: {duplicate_result.error_message}"
+                )
                 error_count += 1
                 # Continue processing other files
                 continue
@@ -84,12 +86,12 @@ class ProcessReceiptUseCase:
                 continue
 
             # File is not a duplicate - process with AI
-            rprint(f"  🔍 Analyzing with AI...")
+            rprint("  🔍 Analyzing with AI...")
             # TODO: Implement AI analysis and CSV staging
             processed_count += 1
 
         # Show completion summary
-        rprint(f"\n📊 Processing complete:")
+        rprint("\n📊 Processing complete:")
         rprint(f"  • Processed: {processed_count}")
         rprint(f"  • Duplicates skipped: {duplicate_count}")
         rprint(f"  • Errors: {error_count}")
