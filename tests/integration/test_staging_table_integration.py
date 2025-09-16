@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
 
 from adapters.primary.tui.terminal_ui import TerminalUI
 from adapters.secondary.csv_adapter import CSVAdapter
@@ -38,7 +39,7 @@ class TestStagingTableIntegration:
             self.view_staging_use_case,
         )
 
-    def test_display_staging_table_file_not_exists(self, capsys):
+    def test_display_staging_table_file_not_exists(self, capsys: pytest.CaptureFixture[str]):
         """Test displaying staging table when CSV file doesn't exist."""
         with tempfile.TemporaryDirectory() as temp_dir:
             csv_path = Path(temp_dir) / "receipts.csv"
@@ -50,7 +51,7 @@ class TestStagingTableIntegration:
             captured = capsys.readouterr()
             assert "receipts.csv does not exist" in captured.out
 
-    def test_display_staging_table_empty_file(self, capsys):
+    def test_display_staging_table_empty_file(self, capsys: pytest.CaptureFixture[str]):
         """Test displaying staging table with empty CSV file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             csv_path = Path(f.name)
@@ -81,7 +82,7 @@ class TestStagingTableIntegration:
         finally:
             csv_path.unlink()
 
-    def test_display_staging_table_with_data(self, capsys):
+    def test_display_staging_table_with_data(self, capsys: pytest.CaptureFixture[str]):
         """Test displaying staging table with actual data."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             csv_path = Path(f.name)
@@ -152,7 +153,7 @@ class TestStagingTableIntegration:
         finally:
             csv_path.unlink()
 
-    def test_menu_choice_3_triggers_staging_table_display(self, capsys):
+    def test_menu_choice_3_triggers_staging_table_display(self, capsys: pytest.CaptureFixture[str]):
         """Test that menu choice 3 triggers staging table display."""
         with tempfile.TemporaryDirectory() as temp_dir:
             csv_path = Path(temp_dir) / "nonexistent.csv"
@@ -169,7 +170,7 @@ class TestStagingTableIntegration:
             captured = capsys.readouterr()
             assert "receipts.csv does not exist" in captured.out
 
-    def test_end_to_end_flow(self, capsys):
+    def test_end_to_end_flow(self, capsys: pytest.CaptureFixture[str]):
         """Test complete flow from CSV reading to table display."""
         # Create test CSV file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:

@@ -10,6 +10,7 @@ from behave import given, when, then  # type: ignore
 from adapters.secondary.file_system_adapter import FileSystemAdapter
 from adapters.secondary.anthropic_adapter import AnthropicAdapter
 from adapters.secondary.csv_adapter import CSVAdapter
+from adapters.secondary.duplicate_detection_adapter import DuplicateDetectionAdapter
 from adapters.primary.tui.terminal_ui import TerminalUI
 from core.domain.configuration import AppConfig
 from core.use_cases.process_receipt import ProcessReceiptUseCase
@@ -136,8 +137,9 @@ def step_app_displays_menu(context):
     file_system = FileSystemAdapter()
     ai_extraction = AnthropicAdapter()
     csv_adapter = CSVAdapter()
+    duplicate_detection = DuplicateDetectionAdapter(file_system)
 
-    process_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter)
+    process_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter, duplicate_detection)
     import_use_case = ImportToXLSXUseCase(csv_adapter, Mock(), file_system)
     view_use_case = ViewStagingUseCase(file_system, csv_adapter)
 
@@ -168,8 +170,9 @@ def step_user_selects_run_analysis(context):
     file_system = FileSystemAdapter()
     ai_extraction = AnthropicAdapter()
     csv_adapter = CSVAdapter()
+    duplicate_detection = DuplicateDetectionAdapter(file_system)
 
-    use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter)
+    use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter, duplicate_detection)
 
     # Capture output
     import io
