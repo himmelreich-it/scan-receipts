@@ -170,3 +170,4 @@ receipts.csv
 content/**
 coder/claude_coder.py
 quality-results.json
+data/**
