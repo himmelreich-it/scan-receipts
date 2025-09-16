@@ -8,7 +8,17 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Designing features and breaking down requirements into features or stories
 - Creating domain models and bounded contexts
 
-## Testing Commands
+## Quality Checks & Testing Commands
+- **Run all quality checks and tests**: `uv run nox -s quality`
+  - This runs all the following checks automatically:
+    - Run linting on source: `uv run ruff check src`
+    - Run linting on tests: `uv run ruff check tests`
+    - Run type checking: `npx pyright`
+    - Run unit tests: `uv run --env-file .env.testing pytest tests/unit/ -v`
+    - Run integration tests: `uv run --env-file .env.testing pytest tests/integration/ -v`
+    - Run BDD tests: `uv run --env-file .env.testing behave tests/bdd`
+
+## Individual Testing Commands
 - Run unit tests: `uv run --env-file .env.testing pytest tests/unit/`
 - Run integration tests: `uv run --env-file .env.testing pytest tests/integration/`
 - Run BDD tests: `uv run --env-file .env.testing behave tests/bdd`
@@ -16,7 +26,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Run with coverage: `uv run pytest --cov=src`
 - Do NOT run tests using `python` or `uv python` command directly, for testing, create and remove a file rather than passing python code to the command line.
 
-## Code Quality Commands
+## Individual Code Quality Commands
 - Run linting on source: `uv run ruff check src`
 - Run linting on tests: `uv run ruff check tests`
 - Run formatting: `uv run ruff format`
