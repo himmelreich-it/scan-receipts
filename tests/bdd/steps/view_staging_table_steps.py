@@ -99,6 +99,14 @@ def step_csv_file_with_data(context: Any) -> None:
     context.csv_path = csv_path
     context.config = Mock(spec=AppConfig)
     context.config.csv_staging_file = csv_path
+    # Preserve the table for later steps
+    context.csv_table = context.table
+
+
+@given("the receipts.csv file exists with data:")  # type: ignore
+def step_csv_file_with_data_table(context: Any) -> None:
+    """Create CSV file with data from the table with colon."""
+    step_csv_file_with_data(context)
 
 
 @given("the receipts.csv file exists but is corrupted")  # type: ignore
@@ -132,18 +140,20 @@ def step_select_view_staging_table(context: Any) -> None:
     mock_process_receipt = Mock()
     mock_import_xlsx = Mock()
 
-    # Create TUI
-    tui = TerminalUI(
-        file_system, mock_process_receipt, mock_import_xlsx, view_staging_use_case
-    )
-
-    # Capture output
+    # Create testable console
     import io
-    from contextlib import redirect_stdout
+    from rich.console import Console
 
     output_buffer = io.StringIO()
-    with redirect_stdout(output_buffer):
-        tui.display_staging_table(context.config)
+    test_console = Console(file=output_buffer, force_terminal=False, width=120)
+
+    # Create TUI with test console
+    tui = TerminalUI(
+        file_system, mock_process_receipt, mock_import_xlsx, view_staging_use_case, test_console
+    )
+
+    # Execute the method
+    tui.display_staging_table(context.config)
 
     context.output = output_buffer.getvalue()
 
@@ -167,13 +177,19 @@ def step_display_formatted_table(context: Any) -> None:
         assert header in output
 
 
+@then("it should display a formatted table with headers:")  # type: ignore
+def step_display_formatted_table_table(context: Any) -> None:
+    """Check that formatted table with headers is displayed from table."""
+    step_display_formatted_table(context)
+
+
 @then("the table should contain the receipt data")  # type: ignore
 def step_table_contains_data(context: Any) -> None:
     """Check that table contains the expected receipt data."""
     output = context.output
 
     # Check that all data from the Given table is present
-    for row in context.table:
+    for row in context.csv_table:
         assert row["Amount"] in output
         assert row["Description"] in output
         assert row["Currency"] in output

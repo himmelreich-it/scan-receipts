@@ -2,9 +2,10 @@
 
 import signal
 import sys
-from typing import Any, Never
+from typing import Any, Never, Optional
 
 from rich import print as rprint
+from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
@@ -25,11 +26,13 @@ class TerminalUI:
         process_receipt_use_case: ProcessReceiptUseCase,
         import_to_xlsx_use_case: ImportToXLSXUseCase,
         view_staging_use_case: ViewStagingUseCase,
+        console: Optional[Console] = None,
     ):
         self.file_system = file_system
         self.process_receipt_use_case = process_receipt_use_case
         self.import_to_xlsx_use_case = import_to_xlsx_use_case
         self.view_staging_use_case = view_staging_use_case
+        self.console = console or Console()
 
     def signal_handler(self, sig: int, frame: Any) -> None:
         """Handle Ctrl+C gracefully."""
@@ -99,21 +102,21 @@ class TerminalUI:
         staging_data = self.view_staging_use_case.get_full_table(config)
 
         if staging_data is None:
-            rprint(Text("Error reading staging table.", style="red"))
-            rprint()
-            rprint()
+            self.console.print(Text("Error reading staging table.", style="red"))
+            self.console.print()
+            self.console.print()
             return
 
         if not staging_data.exists:
-            rprint("receipts.csv does not exist")
-            rprint()
-            rprint()
+            self.console.print("receipts.csv does not exist")
+            self.console.print()
+            self.console.print()
             return
 
         if staging_data.is_empty:
-            rprint("receipts.csv is empty")
-            rprint()
-            rprint()
+            self.console.print("receipts.csv is empty")
+            self.console.print()
+            self.console.print()
             return
 
         # Create a rich table
@@ -144,8 +147,8 @@ class TerminalUI:
                 receipt.done_filename,
             )
 
-        rprint(table)
-        rprint(f"\nTotal entries: {len(staging_data.receipts)}")
+        self.console.print(table)
+        self.console.print(f"\nTotal entries: {len(staging_data.receipts)}")
 
     def handle_menu_choice(self, choice: str, config: AppConfig) -> bool:
         """Handle user menu selection.

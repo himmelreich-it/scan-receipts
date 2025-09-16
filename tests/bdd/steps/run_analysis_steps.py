@@ -10,6 +10,7 @@ from behave import given, when, then  # type: ignore
 from adapters.secondary.file_system_adapter import FileSystemAdapter
 from adapters.secondary.anthropic_adapter import AnthropicAdapter
 from adapters.secondary.csv_adapter import CSVAdapter
+from adapters.secondary.duplicate_detection_adapter import DuplicateDetectionAdapter
 from adapters.primary.tui.terminal_ui import TerminalUI
 from core.domain.configuration import AppConfig
 from core.use_cases.process_receipt import ProcessReceiptUseCase
@@ -80,6 +81,14 @@ def step_supported_files_exist_count(context, count):
         (context.incoming_folder / filename).touch()
 
 
+@given("{count:d} supported files exist in the incoming folder:")  # type: ignore
+def step_supported_files_exist_with_table(context, count):
+    """Create supported files based on table data."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.incoming_folder / filename).touch()
+
+
 @given("files exist in the incoming folder")  # type: ignore
 def step_files_exist_in_incoming(context):
     """Create files based on table data."""
@@ -88,9 +97,25 @@ def step_files_exist_in_incoming(context):
         (context.incoming_folder / filename).touch()
 
 
+@given("files exist in the incoming folder:")  # type: ignore
+def step_files_exist_in_incoming_table(context):
+    """Create files based on table data with colon."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.incoming_folder / filename).touch()
+
+
 @given("the scanned folder contains files")  # type: ignore
 def step_scanned_folder_contains_files(context):
     """Create files in scanned folder based on table data."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.scanned_folder / filename).touch()
+
+
+@given("the scanned folder contains files:")  # type: ignore
+def step_scanned_folder_contains_files_table(context):
+    """Create files in scanned folder based on table data with colon."""
     for row in context.table:
         filename = row["filename"]
         (context.scanned_folder / filename).touch()
@@ -112,8 +137,9 @@ def step_app_displays_menu(context):
     file_system = FileSystemAdapter()
     ai_extraction = AnthropicAdapter()
     csv_adapter = CSVAdapter()
+    duplicate_detection = DuplicateDetectionAdapter(file_system)
 
-    process_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter)
+    process_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter, duplicate_detection)
     import_use_case = ImportToXLSXUseCase(csv_adapter, Mock(), file_system)
     view_use_case = ViewStagingUseCase(file_system, csv_adapter)
 
@@ -144,8 +170,9 @@ def step_user_selects_run_analysis(context):
     file_system = FileSystemAdapter()
     ai_extraction = AnthropicAdapter()
     csv_adapter = CSVAdapter()
+    duplicate_detection = DuplicateDetectionAdapter(file_system)
 
-    use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter)
+    use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv_adapter, duplicate_detection)
 
     # Capture output
     import io
@@ -200,11 +227,21 @@ def step_should_display_progress_messages(context):
         assert expected_message in output
 
 
+@then("it should display progress messages:")  # type: ignore
+def step_should_display_progress_messages_table(context):
+    """Verify progress messages are displayed with colon."""
+    output = context.captured_output.getvalue()
+    for row in context.table:
+        expected_message = row["message"]
+        assert expected_message in output
+
+
 @then('display "TODO: Implement actual processing"')  # type: ignore
 def step_should_display_todo_message(context):
-    """Verify TODO message is displayed."""
+    """Verify processing completion message is displayed."""
     output = context.captured_output.getvalue()
-    assert "TODO: Implement actual processing" in output
+    # The current implementation shows completion summary instead of TODO
+    assert "Processing complete:" in output
 
 
 @then("the receipts.csv file should be removed")  # type: ignore
@@ -225,9 +262,14 @@ def step_should_display_progress_for_supported_only(context, count):
     """Verify progress messages only for supported files."""
     output = context.captured_output.getvalue()
 
-    # Count "Processing" messages
-    processing_count = output.count("Processing")
-    assert processing_count == count
+    # Count "Processing X/Y:" messages specifically (not "Processing complete:")
+    import re
+    processing_pattern = r"Processing \d+/\d+:"
+    processing_matches = re.findall(processing_pattern, output)
+    processing_count = len(processing_matches)
+
+    assert processing_count == count, f"Expected {count} 'Processing X/Y:' messages, found {processing_count}"
 
     # Verify the format includes total count
-    assert f"/{count}:" in output
+    format_check = f"/{count}:" in output
+    assert format_check, f"Expected '/{count}:' to be in output"

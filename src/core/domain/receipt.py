@@ -3,10 +3,46 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Final, List, Set
+from typing import Final, List, Optional, Set
 
 
 RECEIPT_EXTENSIONS: Final[Set[str]] = {".pdf", ".jpg", ".png", ".jpeg"}
+
+
+@dataclass(frozen=True)
+class FileHash:
+    """Represents a file hash for duplicate detection."""
+
+    file_path: Path
+    hash_value: str
+
+    def __post_init__(self) -> None:
+        """Validate hash value is not empty."""
+        if not self.hash_value.strip():
+            raise ValueError("Hash value cannot be empty")
+
+
+@dataclass(frozen=True)
+class DuplicateDetectionResult:
+    """Result of duplicate detection for a file."""
+
+    file_path: Path
+    is_duplicate: bool
+    duplicate_location: Optional[Path] = None
+    hash_value: Optional[str] = None
+    error_message: Optional[str] = None
+
+    @property
+    def has_error(self) -> bool:
+        """Check if detection encountered an error."""
+        return self.error_message is not None
+
+    @property
+    def location_name(self) -> str:
+        """Get human-readable location name for duplicate."""
+        if not self.duplicate_location:
+            return "unknown"
+        return self.duplicate_location.parent.name
 
 
 @dataclass(frozen=True)

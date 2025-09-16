@@ -9,6 +9,7 @@ from rich.text import Text
 from adapters.primary.tui.terminal_ui import TerminalUI
 from adapters.secondary.anthropic_adapter import AnthropicAdapter
 from adapters.secondary.csv_adapter import CSVAdapter
+from adapters.secondary.duplicate_detection_adapter import DuplicateDetectionAdapter
 from adapters.secondary.env_config_adapter import EnvConfigAdapter
 from adapters.secondary.file_system_adapter import FileSystemAdapter
 from adapters.secondary.xlsx_adapter import XLSXAdapter
@@ -32,9 +33,12 @@ def main() -> Never:
     ai_extraction = AnthropicAdapter()
     csv = CSVAdapter()
     xlsx = XLSXAdapter()
+    duplicate_detection = DuplicateDetectionAdapter(file_system)
 
     # Create use cases
-    process_receipt_use_case = ProcessReceiptUseCase(file_system, ai_extraction, csv)
+    process_receipt_use_case = ProcessReceiptUseCase(
+        file_system, ai_extraction, csv, duplicate_detection
+    )
     import_to_xlsx_use_case = ImportToXLSXUseCase(csv, xlsx, file_system)
     view_staging_use_case = ViewStagingUseCase(file_system, csv)
 
