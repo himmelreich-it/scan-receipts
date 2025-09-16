@@ -88,7 +88,7 @@ class UserFriendlyFormatter(logging.Formatter):
         """Context-aware message cleaning based on content type."""
 
         # Always remove these unicode artifacts
-        message = message.replace('\u2192', '').replace('\u21', '')
+        message = message.replace('\u2192', '').replace('\\u21', '')
 
         # For Tool Results - aggressive cleanup since these often contain escaped content
         if "Tool Result -" in message:
@@ -122,6 +122,8 @@ class UserFriendlyFormatter(logging.Formatter):
         import re
         message = re.sub(r'\s+\d+\u2192', '', message)
         message = re.sub(r'\s+\d+→', '', message)
+        # Also handle escaped versions
+        message = re.sub(r'\s+\d+\\u2192', '', message)
 
         return message
 
