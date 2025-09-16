@@ -111,6 +111,19 @@ def step_identical_file_exists_in_scanned(context: Context, filename: str) -> No
         scanned_file.write_bytes(content)
 
 
+@given('an identical file "{filename}" exists in the incoming folder')  # type: ignore
+def step_identical_file_exists_in_incoming(context: Context, filename: str) -> None:
+    """Create an identical file in the incoming folder."""
+    # Get the most recent file content
+    if hasattr(context, "file_contents") and context.file_contents:
+        # Get the last added file content
+        latest_key = list(context.file_contents.keys())[-1]
+        content = context.file_contents[latest_key]
+        incoming_file = context.incoming / filename
+        incoming_file.write_bytes(content)
+        context.file_contents[filename] = content
+
+
 @given("no duplicate exists in imported or scanned folders")  # type: ignore
 def step_no_duplicate_exists(context: Context) -> None:
     """Ensure no duplicates exist in imported or scanned folders."""
@@ -121,9 +134,14 @@ def step_no_duplicate_exists(context: Context) -> None:
 @given('a corrupted file "{filename}" exists in the incoming folder')  # type: ignore
 def step_corrupted_file_exists_in_incoming(context: Context, filename: str) -> None:
     """Create a corrupted file that will cause hash calculation to fail."""
-    # Create a directory instead of a file to trigger hash calculation error
+    # Create a regular file first
     corrupted_path = context.incoming / filename
-    corrupted_path.mkdir()  # This will cause calculate_file_hash to fail
+    corrupted_path.write_text("corrupted content")
+
+    # Store the path so we can make it unreadable later
+    if not hasattr(context, "corrupted_files"):
+        context.corrupted_files = []
+    context.corrupted_files.append(corrupted_path)
 
 
 @given("multiple files exist in the incoming folder")  # type: ignore
@@ -142,11 +160,23 @@ def step_multiple_files_exist_in_incoming(context: Context) -> None:
                 content = f"Valid receipt content for {filename}".encode()
                 file_path.write_bytes(content)
             elif row["type"] == "corrupted":
-                # Create directory instead of file to trigger error
-                file_path.mkdir()
+                # Create a regular file first then make it unreadable
+                file_path.write_text("corrupted content")
+                # Store the path so we can make it unreadable later
+                if not hasattr(context, "corrupted_files"):
+                    context.corrupted_files = []
+                context.corrupted_files.append(file_path)
         else:
             # Handle files with duplicate information
-            content = f"Receipt content for {filename}".encode()
+            # For files that should be duplicates, use a base content
+            # For unique files, use unique content
+            if row["has_duplicate"] == "yes":
+                # Use same base content for files that should be duplicates
+                content = "Base receipt content for duplicate detection".encode()
+            else:
+                # Use unique content for each unique file
+                content = f"Unique receipt content for {filename}".encode()
+
             file_path.write_bytes(content)
             context.file_contents[filename] = content
 
@@ -168,6 +198,14 @@ def step_multiple_files_exist_in_incoming_table(context: Context) -> None:
 @when("I run the receipt analysis")  # type: ignore
 def step_run_receipt_analysis(context: Context) -> None:
     """Execute the receipt analysis process."""
+    # If there are corrupted files, make them unreadable right before analysis
+    if hasattr(context, "corrupted_files"):
+        import os
+        for corrupted_file in context.corrupted_files:
+            if corrupted_file.exists():
+                # Make file unreadable by changing permissions
+                os.chmod(corrupted_file, 0o000)
+
     # Redirect stdout to capture output
     import io
     from contextlib import redirect_stdout
@@ -182,6 +220,12 @@ def step_run_receipt_analysis(context: Context) -> None:
         context.execution_error = e
 
     context.output = captured_output.getvalue()
+
+    # Restore permissions for cleanup
+    if hasattr(context, "corrupted_files"):
+        for corrupted_file in context.corrupted_files:
+            if corrupted_file.exists():
+                os.chmod(corrupted_file, 0o644)
 
 
 @then("the system should detect the duplicate")  # type: ignore

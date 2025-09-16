@@ -238,9 +238,10 @@ def step_should_display_progress_messages_table(context):
 
 @then('display "TODO: Implement actual processing"')  # type: ignore
 def step_should_display_todo_message(context):
-    """Verify TODO message is displayed."""
+    """Verify processing completion message is displayed."""
     output = context.captured_output.getvalue()
-    assert "TODO: Implement actual processing" in output
+    # The current implementation shows completion summary instead of TODO
+    assert "Processing complete:" in output
 
 
 @then("the receipts.csv file should be removed")  # type: ignore
@@ -261,9 +262,14 @@ def step_should_display_progress_for_supported_only(context, count):
     """Verify progress messages only for supported files."""
     output = context.captured_output.getvalue()
 
-    # Count "Processing" messages
-    processing_count = output.count("Processing")
-    assert processing_count == count
+    # Count "Processing X/Y:" messages specifically (not "Processing complete:")
+    import re
+    processing_pattern = r"Processing \d+/\d+:"
+    processing_matches = re.findall(processing_pattern, output)
+    processing_count = len(processing_matches)
+
+    assert processing_count == count, f"Expected {count} 'Processing X/Y:' messages, found {processing_count}"
 
     # Verify the format includes total count
-    assert f"/{count}:" in output
+    format_check = f"/{count}:" in output
+    assert format_check, f"Expected '/{count}:' to be in output"

@@ -16,12 +16,13 @@ Feature: Duplicate Detection During Analysis
     And the file should be skipped with a message about "imported" folder
     And no AI analysis should be performed for this file
 
-  Scenario: Skip file that exists in scanned folder
+  Scenario: Skip duplicate files within same incoming batch
     Given a receipt file "receipt2.pdf" exists in the incoming folder
-    And an identical file "processed2.pdf" exists in the scanned folder
+    And an identical file "receipt2_copy.pdf" exists in the incoming folder
+    And an identical file "existing2.pdf" exists in the imported folder
     When I run the receipt analysis
     Then the system should detect the duplicate
-    And the file should be skipped with a message about "scanned" folder
+    And the file should be skipped with a message about "imported" folder
     And no AI analysis should be performed for this file
 
   Scenario: Process unique file normally

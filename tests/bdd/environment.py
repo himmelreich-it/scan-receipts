@@ -39,6 +39,9 @@ def before_scenario(context: Any, scenario: Any) -> None:
         "file_contents": ("", 1, "", ""),
         "output": ("", 1, "", ""),
         "execution_error": ("", 1, "", ""),
+        # View staging table test attributes
+        "csv_path": ("", 1, "", ""),
+        "csv_table": ("", 1, "", ""),
     }
 
     # Initialize _origin to track attribute origins for behave context
@@ -76,6 +79,9 @@ def before_scenario(context: Any, scenario: Any) -> None:
         "file_contents": "USER",
         "output": "USER",
         "execution_error": "USER",
+        # View staging table test attributes
+        "csv_path": "USER",
+        "csv_table": "USER",
     }
 
 
@@ -113,5 +119,16 @@ def after_scenario(context: Any, scenario: Any) -> None:
             temp_dir_path = Path(context.temp_dir)
             if temp_dir_path.exists():
                 shutil.rmtree(temp_dir_path)
+    except Exception:
+        pass  # Ignore cleanup errors
+
+    # Clean up CSV files created for view staging table tests
+    try:
+        if hasattr(context, "csv_path") and context.csv_path:
+            from pathlib import Path
+
+            csv_path = Path(context.csv_path)
+            if csv_path.exists():
+                csv_path.unlink()
     except Exception:
         pass  # Ignore cleanup errors
