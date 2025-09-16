@@ -160,10 +160,14 @@ class TerminalUI:
         if choice == "1":
             self.process_receipt_use_case.execute(config)
             rprint("Analysis completed.")
+            rprint()
+            rprint()
             return True
         elif choice == "2":
             self.import_to_xlsx_use_case.execute(config)
             rprint("Import completed.")
+            rprint()
+            rprint()
             return True
         elif choice == "3":
             self.display_staging_table(config)
@@ -173,6 +177,8 @@ class TerminalUI:
             return False
         else:
             rprint(Text("Invalid choice. Please enter 1-4.", style="red"))
+            rprint()
+            rprint()
             return True
 
     def run(self, config: AppConfig) -> Never:

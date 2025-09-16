@@ -8,7 +8,6 @@ import yaml
 from pathlib import Path
 from claude_code_sdk import (
     AssistantMessage,
-    ClaudeCodeOptions,
     ClaudeSDKClient,
     ResultMessage,
     SystemMessage,
@@ -190,10 +189,6 @@ async def main():
 
     # Configure logging for this ticket
     configure_logging(args.ticket_number, args.mode)
-
-    # claude_options = ClaudeCodeOptions(
-    #     cwd=str(Path("../").resolve())
-    # )
 
     # Call Claude SDK
     async with ClaudeSDKClient() as client:
