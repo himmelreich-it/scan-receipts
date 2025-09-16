@@ -101,6 +101,12 @@ def step_csv_file_with_data(context: Any) -> None:
     context.config.csv_staging_file = csv_path
 
 
+@given("the receipts.csv file exists with data:")  # type: ignore
+def step_csv_file_with_data_table(context: Any) -> None:
+    """Create CSV file with data from the table with colon."""
+    step_csv_file_with_data(context)
+
+
 @given("the receipts.csv file exists but is corrupted")  # type: ignore
 def step_csv_file_corrupted(context: Any) -> None:
     """Create a corrupted CSV file."""
@@ -165,6 +171,12 @@ def step_display_formatted_table(context: Any) -> None:
     # Check for headers from the table
     for header in context.table.headings:
         assert header in output
+
+
+@then("it should display a formatted table with headers:")  # type: ignore
+def step_display_formatted_table_table(context: Any) -> None:
+    """Check that formatted table with headers is displayed from table."""
+    step_display_formatted_table(context)
 
 
 @then("the table should contain the receipt data")  # type: ignore

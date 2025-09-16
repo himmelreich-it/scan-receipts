@@ -57,13 +57,13 @@ def step_system_initialized_with_test_folders(context: Context) -> None:
 @given("the incoming folder contains some receipt files")  # type: ignore
 def step_incoming_folder_contains_receipt_files(context: Context) -> None:
     """Ensure incoming folder exists."""
-    context.incoming.mkdir(exist_ok=True)
+    context.incoming.mkdir(exist_ok=True)  # type: ignore[attr-defined]
 
 
 @given("the CSV staging file is cleared")  # type: ignore
 def step_csv_staging_file_cleared(context: Context) -> None:
     """Clear the CSV staging file."""
-    context.file_system.remove_file_if_exists(context.csv_file)
+    context.file_system.remove_file_if_exists(context.csv_file)  # type: ignore[attr-defined]
 
 
 @given('a receipt file "{filename}" exists in the incoming folder')  # type: ignore
@@ -159,6 +159,12 @@ def step_multiple_files_exist_in_incoming(context: Context) -> None:
                     duplicate_file.write_bytes(content)
 
 
+@given("multiple files exist in the incoming folder:")  # type: ignore
+def step_multiple_files_exist_in_incoming_table(context: Context) -> None:
+    """Create multiple files based on the table data with colon."""
+    step_multiple_files_exist_in_incoming(context)
+
+
 @when("I run the receipt analysis")  # type: ignore
 def step_run_receipt_analysis(context: Context) -> None:
     """Execute the receipt analysis process."""
@@ -181,7 +187,7 @@ def step_run_receipt_analysis(context: Context) -> None:
 @then("the system should detect the duplicate")  # type: ignore
 def step_system_should_detect_duplicate(context: Context) -> None:
     """Verify that duplicate was detected."""
-    assert "Duplicate detected" in context.output or "skipping" in context.output
+    assert "Duplicate detected" in context.output
 
 
 @then('the file should be skipped with a message about "{folder_name}" folder')  # type: ignore
@@ -252,3 +258,15 @@ def step_system_should_show_summary_with(context: Context) -> None:
         assert f"Processed: {processed}" in context.output
         assert f"Duplicates skipped: {duplicates_skipped}" in context.output
         assert f"Errors: {errors}" in context.output
+
+
+@then("the system should show a summary:")  # type: ignore
+def step_system_should_show_summary_table(context: Context) -> None:
+    """Verify processing summary is shown with expected counts from table."""
+    step_system_should_show_summary(context)
+
+
+@then("the system should show a summary with:")  # type: ignore
+def step_system_should_show_summary_with_table(context: Context) -> None:
+    """Verify processing summary with specific counts from table."""
+    step_system_should_show_summary_with(context)

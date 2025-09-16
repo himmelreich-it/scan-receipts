@@ -80,6 +80,14 @@ def step_supported_files_exist_count(context, count):
         (context.incoming_folder / filename).touch()
 
 
+@given("{count:d} supported files exist in the incoming folder:")  # type: ignore
+def step_supported_files_exist_with_table(context, count):
+    """Create supported files based on table data."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.incoming_folder / filename).touch()
+
+
 @given("files exist in the incoming folder")  # type: ignore
 def step_files_exist_in_incoming(context):
     """Create files based on table data."""
@@ -88,9 +96,25 @@ def step_files_exist_in_incoming(context):
         (context.incoming_folder / filename).touch()
 
 
+@given("files exist in the incoming folder:")  # type: ignore
+def step_files_exist_in_incoming_table(context):
+    """Create files based on table data with colon."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.incoming_folder / filename).touch()
+
+
 @given("the scanned folder contains files")  # type: ignore
 def step_scanned_folder_contains_files(context):
     """Create files in scanned folder based on table data."""
+    for row in context.table:
+        filename = row["filename"]
+        (context.scanned_folder / filename).touch()
+
+
+@given("the scanned folder contains files:")  # type: ignore
+def step_scanned_folder_contains_files_table(context):
+    """Create files in scanned folder based on table data with colon."""
     for row in context.table:
         filename = row["filename"]
         (context.scanned_folder / filename).touch()
@@ -194,6 +218,15 @@ def step_return_to_main_menu(context):
 @then("it should display progress messages")  # type: ignore
 def step_should_display_progress_messages(context):
     """Verify progress messages are displayed."""
+    output = context.captured_output.getvalue()
+    for row in context.table:
+        expected_message = row["message"]
+        assert expected_message in output
+
+
+@then("it should display progress messages:")  # type: ignore
+def step_should_display_progress_messages_table(context):
+    """Verify progress messages are displayed with colon."""
     output = context.captured_output.getvalue()
     for row in context.table:
         expected_message = row["message"]
