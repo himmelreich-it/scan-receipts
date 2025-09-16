@@ -71,10 +71,10 @@ class UserFriendlyFormatter(logging.Formatter):
             formatted_lines = []
             for line in lines:
                 if line.strip():
-                    formatted_lines.append('    ' + line.strip())
+                    formatted_lines.append('    ' + line.strip()) # pyright: ignore[reportUnknownMemberType]
                 else:
-                    formatted_lines.append('')
-            message = '\n'.join(formatted_lines)
+                    formatted_lines.append('') # pyright: ignore[reportUnknownMemberType]
+            message = '\n'.join(formatted_lines) # pyright: ignore[reportUnknownArgumentType]
 
         # Only show ERROR and WARNING prefixes
         if record.levelno >= logging.ERROR:
