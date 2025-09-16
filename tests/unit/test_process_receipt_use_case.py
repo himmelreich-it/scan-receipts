@@ -14,8 +14,9 @@ class TestProcessReceiptUseCase:
         self.file_system_mock = Mock()
         self.ai_extraction_mock = Mock()
         self.csv_mock = Mock()
+        self.duplicate_detection_mock = Mock()
         self.use_case = ProcessReceiptUseCase(
-            self.file_system_mock, self.ai_extraction_mock, self.csv_mock
+            self.file_system_mock, self.ai_extraction_mock, self.csv_mock, self.duplicate_detection_mock
         )
 
     def test_execute_no_files(self, tmp_path: Path):

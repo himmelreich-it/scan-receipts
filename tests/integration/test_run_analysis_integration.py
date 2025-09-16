@@ -6,6 +6,7 @@ from pathlib import Path
 from adapters.secondary.csv_adapter import CSVAdapter
 from adapters.secondary.file_system_adapter import FileSystemAdapter
 from adapters.secondary.anthropic_adapter import AnthropicAdapter
+from adapters.secondary.duplicate_detection_adapter import DuplicateDetectionAdapter
 from core.domain.configuration import AppConfig
 from core.use_cases.process_receipt import ProcessReceiptUseCase
 
@@ -18,8 +19,9 @@ class TestRunAnalysisIntegration:
         self.file_system = FileSystemAdapter()
         self.ai_extraction = AnthropicAdapter()
         self.csv = CSVAdapter()
+        self.duplicate_detection = DuplicateDetectionAdapter(self.file_system)
         self.use_case = ProcessReceiptUseCase(
-            self.file_system, self.ai_extraction, self.csv
+            self.file_system, self.ai_extraction, self.csv, self.duplicate_detection
         )
 
     def test_run_analysis_no_files(self, tmp_path: Path):

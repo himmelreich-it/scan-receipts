@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from core.domain.configuration import AppConfig
-from core.domain.receipt import StagingInfo
+from core.domain.receipt import FileHash, StagingInfo
 
 
 class FileSystemPort(ABC):
@@ -77,5 +77,29 @@ class FileSystemPort(ABC):
 
         Args:
             folder: Path to the folder to clear.
+        """
+        pass
+
+    @abstractmethod
+    def calculate_file_hash(self, file_path: Path) -> Optional[FileHash]:
+        """Calculate hash for a file.
+
+        Args:
+            file_path: Path to the file to hash.
+
+        Returns:
+            FileHash if successful, None if calculation failed.
+        """
+        pass
+
+    @abstractmethod
+    def get_file_hashes_from_folder(self, folder: Path) -> List[FileHash]:
+        """Get hashes for all supported files in a folder.
+
+        Args:
+            folder: Path to the folder to scan.
+
+        Returns:
+            List of FileHash objects for files that could be hashed.
         """
         pass

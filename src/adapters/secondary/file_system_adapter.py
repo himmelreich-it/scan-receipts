@@ -1,13 +1,17 @@
 """File system adapter implementation."""
 
 import csv
+import hashlib
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
 from core.domain.configuration import AppConfig
-from core.domain.receipt import RECEIPT_EXTENSIONS, StagingInfo
+from core.domain.receipt import RECEIPT_EXTENSIONS, FileHash, StagingInfo
 from ports.file_system import FileSystemPort
+
+logger = logging.getLogger(__name__)
 
 
 class FileSystemAdapter(FileSystemPort):
@@ -135,3 +139,50 @@ class FileSystemAdapter(FileSystemPort):
                     file_path.unlink()
                 except Exception:
                     pass
+
+    def calculate_file_hash(self, file_path: Path) -> Optional[FileHash]:
+        """Calculate hash for a file.
+
+        Args:
+            file_path: Path to the file to hash.
+
+        Returns:
+            FileHash if successful, None if calculation failed.
+        """
+        if not file_path.exists() or not file_path.is_file():
+            return None
+
+        try:
+            hash_md5 = hashlib.md5()
+            with open(file_path, "rb") as f:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    hash_md5.update(chunk)
+
+            hash_value = hash_md5.hexdigest()
+            return FileHash(file_path=file_path, hash_value=hash_value)
+        except Exception as e:
+            logger.warning(f"Failed to calculate hash for {file_path}: {e}")
+            return None
+
+    def get_file_hashes_from_folder(self, folder: Path) -> List[FileHash]:
+        """Get hashes for all supported files in a folder.
+
+        Args:
+            folder: Path to the folder to scan.
+
+        Returns:
+            List of FileHash objects for files that could be hashed.
+        """
+        if not folder.exists():
+            return []
+
+        file_hashes: List[FileHash] = []
+        for file_path in folder.iterdir():
+            if file_path.is_file():
+                ext = file_path.suffix.lower()
+                if ext in RECEIPT_EXTENSIONS:
+                    file_hash = self.calculate_file_hash(file_path)
+                    if file_hash:
+                        file_hashes.append(file_hash)
+
+        return file_hashes
