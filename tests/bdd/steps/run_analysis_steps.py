@@ -17,7 +17,7 @@ from core.use_cases.import_to_xlsx import ImportToXLSXUseCase
 from core.use_cases.view_staging import ViewStagingUseCase
 
 
-@given('the application environment is properly configured')  # type: ignore
+@given("the application environment is properly configured")  # type: ignore
 def step_app_environment_configured(context: Any) -> None:
     """Set up proper application environment."""
     context.temp_dir = Path(tempfile.mkdtemp())
@@ -32,7 +32,7 @@ def step_app_environment_configured(context: Any) -> None:
     context.xlsx_output = context.temp_dir / "output.xlsx"
 
 
-@given('required folders exist')  # type: ignore
+@given("required folders exist")  # type: ignore
 def step_required_folders_exist(context: Any) -> None:
     """Create required folder structure."""
     context.incoming_folder.mkdir(parents=True, exist_ok=True)
@@ -41,20 +41,20 @@ def step_required_folders_exist(context: Any) -> None:
     context.failed_folder.mkdir(parents=True, exist_ok=True)
 
 
-@given('no receipts.csv file exists')  # type: ignore
+@given("no receipts.csv file exists")  # type: ignore
 def step_no_receipts_csv_exists(context: Any) -> None:
     """Ensure receipts.csv doesn't exist."""
     if context.receipts_csv.exists():
         context.receipts_csv.unlink()
 
 
-@given('a receipts.csv file exists')  # type: ignore
+@given("a receipts.csv file exists")  # type: ignore
 def step_receipts_csv_exists(context):
     """Create an empty receipts.csv file."""
     context.receipts_csv.touch()
 
 
-@given('a receipts.csv file exists with data')  # type: ignore
+@given("a receipts.csv file exists with data")  # type: ignore
 def step_receipts_csv_exists_with_data(context):
     """Create a receipts.csv file with sample data."""
     context.receipts_csv.write_text(
@@ -63,7 +63,7 @@ def step_receipts_csv_exists_with_data(context):
     )
 
 
-@given('no supported files exist in the incoming folder')  # type: ignore
+@given("no supported files exist in the incoming folder")  # type: ignore
 def step_no_supported_files_exist(context):
     """Ensure no supported files in incoming folder."""
     # Clear the folder
@@ -72,31 +72,31 @@ def step_no_supported_files_exist(context):
             file.unlink()
 
 
-@given('{count:d} supported files exist in the incoming folder')  # type: ignore
+@given("{count:d} supported files exist in the incoming folder")  # type: ignore
 def step_supported_files_exist_count(context, count):
     """Create specified number of supported files."""
     for i in range(count):
-        filename = f"receipt{i+1}.pdf"
+        filename = f"receipt{i + 1}.pdf"
         (context.incoming_folder / filename).touch()
 
 
-@given('files exist in the incoming folder')  # type: ignore
+@given("files exist in the incoming folder")  # type: ignore
 def step_files_exist_in_incoming(context):
     """Create files based on table data."""
     for row in context.table:
-        filename = row['filename']
+        filename = row["filename"]
         (context.incoming_folder / filename).touch()
 
 
-@given('the scanned folder contains files')  # type: ignore
+@given("the scanned folder contains files")  # type: ignore
 def step_scanned_folder_contains_files(context):
     """Create files in scanned folder based on table data."""
     for row in context.table:
-        filename = row['filename']
+        filename = row["filename"]
         (context.scanned_folder / filename).touch()
 
 
-@when('the application displays the menu')  # type: ignore
+@when("the application displays the menu")  # type: ignore
 def step_app_displays_menu(context):
     """Capture menu display output."""
     config = AppConfig(
@@ -105,7 +105,7 @@ def step_app_displays_menu(context):
         imported_folder=context.imported_folder,
         failed_folder=context.failed_folder,
         csv_staging_file=context.receipts_csv,
-        xlsx_output_file=context.xlsx_output
+        xlsx_output_file=context.xlsx_output,
     )
 
     # Create TUI instance
@@ -137,7 +137,7 @@ def step_user_selects_run_analysis(context):
         imported_folder=context.imported_folder,
         failed_folder=context.failed_folder,
         csv_staging_file=context.receipts_csv,
-        xlsx_output_file=context.xlsx_output
+        xlsx_output_file=context.xlsx_output,
     )
 
     # Create use case and execute
@@ -184,19 +184,19 @@ def step_should_display_no_files_message(context, incoming):
     assert expected in output
 
 
-@then('return to the main menu')  # type: ignore
+@then("return to the main menu")  # type: ignore
 def step_return_to_main_menu(context):
     """Verify the operation returns (doesn't hang)."""
     # This is implied by the fact that the use case completes
     pass
 
 
-@then('it should display progress messages')  # type: ignore
+@then("it should display progress messages")  # type: ignore
 def step_should_display_progress_messages(context):
     """Verify progress messages are displayed."""
     output = context.captured_output.getvalue()
     for row in context.table:
-        expected_message = row['message']
+        expected_message = row["message"]
         assert expected_message in output
 
 
@@ -207,20 +207,20 @@ def step_should_display_todo_message(context):
     assert "TODO: Implement actual processing" in output
 
 
-@then('the receipts.csv file should be removed')  # type: ignore
+@then("the receipts.csv file should be removed")  # type: ignore
 def step_receipts_csv_should_be_removed(context):
     """Verify receipts.csv file was removed."""
     assert not context.receipts_csv.exists()
 
 
-@then('the scanned folder should be cleared')  # type: ignore
+@then("the scanned folder should be cleared")  # type: ignore
 def step_scanned_folder_should_be_cleared(context):
     """Verify scanned folder is empty."""
     files = list(context.scanned_folder.glob("*"))
     assert len(files) == 0
 
 
-@then('it should display progress messages for {count:d} supported files only')  # type: ignore
+@then("it should display progress messages for {count:d} supported files only")  # type: ignore
 def step_should_display_progress_for_supported_only(context, count):
     """Verify progress messages only for supported files."""
     output = context.captured_output.getvalue()

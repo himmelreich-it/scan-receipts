@@ -15,9 +15,7 @@ class TestProcessReceiptUseCase:
         self.ai_extraction_mock = Mock()
         self.csv_mock = Mock()
         self.use_case = ProcessReceiptUseCase(
-            self.file_system_mock,
-            self.ai_extraction_mock,
-            self.csv_mock
+            self.file_system_mock, self.ai_extraction_mock, self.csv_mock
         )
 
     def test_execute_no_files(self, tmp_path: Path):
@@ -46,10 +44,7 @@ class TestProcessReceiptUseCase:
         config_mock.scanned_folder = tmp_path / "scanned"
 
         # Mock file list
-        test_files = [
-            tmp_path / "receipt1.pdf",
-            tmp_path / "receipt2.jpg"
-        ]
+        test_files = [tmp_path / "receipt1.pdf", tmp_path / "receipt2.jpg"]
         self.file_system_mock.get_supported_files.return_value = test_files
         self.file_system_mock.remove_file_if_exists.return_value = True
 

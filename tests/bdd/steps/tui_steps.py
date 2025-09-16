@@ -56,6 +56,12 @@ def step_app_running(context: Any) -> None:
     context.config = config
 
 
+@given("the application is running with test configuration")  # type: ignore
+def step_app_running_with_test_config(context: Any) -> None:
+    """Set up a running application context with test configuration."""
+    step_app_running(context)
+
+
 @given("no receipt files exist")  # type: ignore
 def step_no_receipt_files(context: Any) -> None:
     """Ensure no receipt files exist."""
@@ -87,11 +93,11 @@ def step_failed_files(context: Any, count: int) -> None:
 @given("staging CSV contains {count:d} entries")  # type: ignore
 def step_staging_csv_entries(context: Any, count: int) -> None:
     """Create staging CSV with specified number of entries."""
-    with open(context.config.csv_staging_file, 'w') as f:
+    with open(context.config.csv_staging_file, "w") as f:
         writer = csv.writer(f)
         writer.writerow(["Amount", "Tax", "Description", "Date"])
         for i in range(count):
-            writer.writerow([f"{100+i}.00", "19.00", f"Purchase {i}", "2025-01-15"])
+            writer.writerow([f"{100 + i}.00", "19.00", f"Purchase {i}", "2025-01-15"])
 
 
 @when("the application starts")  # type: ignore
@@ -115,7 +121,9 @@ def step_app_starts(context: Any) -> None:
 def step_display_status(context: Any) -> None:
     """Display system status."""
     file_system = FileSystemAdapter()
-    context.input_count = file_system.count_receipt_files(context.config.incoming_folder)
+    context.input_count = file_system.count_receipt_files(
+        context.config.incoming_folder
+    )
     context.failed_count = file_system.count_receipt_files(context.config.failed_folder)
     context.staging_info = file_system.get_staging_info(context.config.csv_staging_file)
 
@@ -125,11 +133,14 @@ def step_select_option(context: Any, option: str) -> None:
     """Handle menu option selection."""
     # Create a mock TUI to test menu choice handling
     from unittest.mock import Mock
+
     mock_file_system = Mock()
     mock_process_receipt = Mock()
     mock_import_xlsx = Mock()
     mock_view_staging = Mock()
-    tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
     context.menu_result = tui.handle_menu_choice(option, context.config)
     context.selected_option = option
 
@@ -139,11 +150,14 @@ def step_invalid_input(context: Any, input_text: str) -> None:
     """Handle invalid menu input."""
     # Create a mock TUI to test menu choice handling
     from unittest.mock import Mock
+
     mock_file_system = Mock()
     mock_process_receipt = Mock()
     mock_import_xlsx = Mock()
     mock_view_staging = Mock()
-    tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
     context.menu_result = tui.handle_menu_choice(input_text, context.config)
     context.invalid_input = input_text
 
@@ -151,14 +165,17 @@ def step_invalid_input(context: Any, input_text: str) -> None:
 @when("the user presses Ctrl+C")  # type: ignore
 def step_ctrl_c(context: Any) -> None:
     """Simulate Ctrl+C signal."""
-    with mock.patch('sys.exit') as mock_exit:
+    with mock.patch("sys.exit") as mock_exit:
         # Create a mock TUI to test signal handling
         from unittest.mock import Mock
+
         mock_file_system = Mock()
         mock_process_receipt = Mock()
         mock_import_xlsx = Mock()
         mock_view_staging = Mock()
-        tui = TerminalUI(mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging)
+        tui = TerminalUI(
+            mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+        )
         tui.signal_handler(signal.SIGINT, None)
         context.exit_called = mock_exit.called
 
@@ -230,7 +247,7 @@ def step_show_staging(context: Any, count: str) -> None:
 @then('it should display "{message}"')  # type: ignore
 def step_display_message(context: Any, message: str) -> None:
     """Verify message is displayed."""
-    if hasattr(context, 'selected_option') and context.selected_option:
+    if hasattr(context, "selected_option") and context.selected_option:
         if context.selected_option in ["1", "2", "3"]:
             assert context.menu_result is True
         elif context.selected_option == "4":
@@ -265,3 +282,163 @@ def step_reprompt(context: Any) -> None:
 def step_exit_cleanly(context: Any) -> None:
     """Verify clean exit."""
     assert context.exit_called
+
+
+@then("it should show configured folder paths")  # type: ignore
+def step_show_configured_paths(context: Any) -> None:
+    """Verify configured folder paths are displayed."""
+    # This will be verified by checking that the display_status method
+    # includes the path information in its output
+    from unittest.mock import Mock
+    from adapters.primary.tui.terminal_ui import TerminalUI
+
+    mock_file_system = Mock()
+    mock_file_system.count_receipt_files.return_value = 0
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    mock_view_staging.execute.return_value = None
+
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
+
+    # We capture the output by mocking rprint
+    with mock.patch("adapters.primary.tui.terminal_ui.rprint") as mock_rprint:
+        tui.display_status(context.config)
+
+        # Check that the paths were displayed
+        calls = mock_rprint.call_args_list
+        call_strings = [str(call) for call in calls]
+
+        # Verify that "Configured Paths:" header is shown
+        assert any("Configured Paths:" in str(call) for call in call_strings)
+
+        # Verify that path labels are shown
+        assert any("Incoming:" in str(call) for call in call_strings)
+        assert any("Scanned:" in str(call) for call in call_strings)
+        assert any("Imported:" in str(call) for call in call_strings)
+        assert any("Failed:" in str(call) for call in call_strings)
+        assert any("XLSX:" in str(call) for call in call_strings)
+        assert any("CSV:" in str(call) for call in call_strings)
+
+
+@then("it should show all 6 configured paths as absolute paths")  # type: ignore
+def step_show_all_paths_absolute(context: Any) -> None:
+    """Verify all 6 configured paths are shown as absolute paths."""
+    from unittest.mock import Mock
+    from adapters.primary.tui.terminal_ui import TerminalUI
+
+    mock_file_system = Mock()
+    mock_file_system.count_receipt_files.return_value = 0
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    mock_view_staging.execute.return_value = None
+
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
+
+    # We capture the output by mocking rprint
+    with mock.patch("adapters.primary.tui.terminal_ui.rprint") as mock_rprint:
+        tui.display_status(context.config)
+
+        calls = mock_rprint.call_args_list
+        call_strings = [str(call) for call in calls]
+
+        # Check that absolute paths are displayed for all 6 configured items
+        expected_paths = [
+            context.config.incoming_folder.resolve(),
+            context.config.scanned_folder.resolve(),
+            context.config.imported_folder.resolve(),
+            context.config.failed_folder.resolve(),
+            context.config.xlsx_output_file.resolve(),
+            context.config.csv_staging_file.resolve(),
+        ]
+
+        for expected_path in expected_paths:
+            assert any(str(expected_path) in str(call) for call in call_strings), (
+                f"Path {expected_path} not found in output"
+            )
+
+
+@then("paths should have short labels")  # type: ignore
+def step_paths_have_short_labels(context: Any) -> None:
+    """Verify paths are displayed with short labels."""
+    from unittest.mock import Mock
+    from adapters.primary.tui.terminal_ui import TerminalUI
+
+    mock_file_system = Mock()
+    mock_file_system.count_receipt_files.return_value = 0
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    mock_view_staging.execute.return_value = None
+
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
+
+    # We capture the output by mocking rprint
+    with mock.patch("adapters.primary.tui.terminal_ui.rprint") as mock_rprint:
+        tui.display_status(context.config)
+
+        calls = mock_rprint.call_args_list
+        call_strings = [str(call) for call in calls]
+
+        # Verify short labels are used
+        expected_labels = [
+            "Incoming:",
+            "Scanned:",
+            "Imported:",
+            "Failed:",
+            "XLSX:",
+            "CSV:",
+        ]
+        for label in expected_labels:
+            assert any(label in str(call) for call in call_strings), (
+                f"Label {label} not found in output"
+            )
+
+
+@then("paths should be displayed above file counts")  # type: ignore
+def step_paths_displayed_above_file_counts(context: Any) -> None:
+    """Verify paths are displayed above file counts."""
+    from unittest.mock import Mock
+    from adapters.primary.tui.terminal_ui import TerminalUI
+
+    mock_file_system = Mock()
+    mock_file_system.count_receipt_files.return_value = 0
+    mock_process_receipt = Mock()
+    mock_import_xlsx = Mock()
+    mock_view_staging = Mock()
+    mock_view_staging.execute.return_value = None
+
+    tui = TerminalUI(
+        mock_file_system, mock_process_receipt, mock_import_xlsx, mock_view_staging
+    )
+
+    # We capture the output by mocking rprint
+    with mock.patch("adapters.primary.tui.terminal_ui.rprint") as mock_rprint:
+        tui.display_status(context.config)
+
+        calls = mock_rprint.call_args_list
+        call_strings = [str(call) for call in calls]
+
+        # Find the index of the "Configured Paths:" header and "Input Folder:" line
+        config_paths_index = None
+        input_folder_index = None
+
+        for i, call_str in enumerate(call_strings):
+            if "Configured Paths:" in call_str:
+                config_paths_index = i
+            if "Input Folder:" in call_str:
+                input_folder_index = i
+
+        # Verify that paths header appears before file counts
+        assert config_paths_index is not None, "Configured Paths header not found"
+        assert input_folder_index is not None, "Input Folder line not found"
+        assert config_paths_index < input_folder_index, (
+            "Paths should be displayed above file counts"
+        )
