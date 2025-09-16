@@ -23,6 +23,7 @@ def before_scenario(context: Any, scenario: Any) -> None:
         "tags": ("", 1, "", ""),  # Required by behave runner
         "text": ("", 1, "", ""),  # Required by behave runner
         "table": ("", 1, "", ""),  # Required by behave runner
+        "feature": ("", 1, "", ""),  # Required by behave runner
     }
 
     # Initialize _origin to track attribute origins for behave context
@@ -44,6 +45,7 @@ def before_scenario(context: Any, scenario: Any) -> None:
         "tags": "BEHAVE",  # Required by behave runner
         "text": "BEHAVE",  # Required by behave runner
         "table": "BEHAVE",  # Required by behave runner
+        "feature": "BEHAVE",  # Required by behave runner
     }
 
 

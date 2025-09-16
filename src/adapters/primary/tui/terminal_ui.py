@@ -100,14 +100,20 @@ class TerminalUI:
 
         if staging_data is None:
             rprint(Text("Error reading staging table.", style="red"))
+            rprint()
+            rprint()
             return
 
         if not staging_data.exists:
             rprint("receipts.csv does not exist")
+            rprint()
+            rprint()
             return
 
         if staging_data.is_empty:
             rprint("receipts.csv is empty")
+            rprint()
+            rprint()
             return
 
         # Create a rich table
