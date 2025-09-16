@@ -50,6 +50,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Check status: `git status`
 - Stage changes: `git add .`
 - Commit with message: `git commit -m "feat: description (#$number)"`
+- Make sure tickets and PRs are associated with the project
 
 ### Project Configuration
 - project_number: 2

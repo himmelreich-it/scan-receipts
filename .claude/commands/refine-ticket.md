@@ -1,7 +1,9 @@
 The user wants to refine a ticket with number $ARGUMENTS. If no number is given, ask which ticket number should be refined.
 
-- Use Github CLI to interact with the ticket
-- Read `design/product_requirements.md` for context
-- Be aware of the architectural principles in `design/architecture/hexagonal_design.md`, you are not asked to do architecture, but architecture is based on this
-- Use `design/prompts/refine_ticket_prompt.md` to start an interactive session
-- Do **NOT** update the ticket without confirmation, ask questions, propose a refined ticket and get confirmation before editing
+- Use subagent ticket-refiner to refine the ticket with the given ticket number
+- The ticket-refiner agent will handle all aspects of ticket refinement including:
+  - Retrieving ticket information via GitHub CLI
+  - Reading `design/product_requirements.md` for context
+  - Considering architectural principles from `design/architecture/hexagonal_design.md`
+  - Using `coder/prompts/refine_ticket_prompt.md` for guidance
+  - Interactive refinement process, ask questions, confirm choices with user before updates
