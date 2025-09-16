@@ -19,9 +19,7 @@ class TestRunAnalysisIntegration:
         self.ai_extraction = AnthropicAdapter()
         self.csv = CSVAdapter()
         self.use_case = ProcessReceiptUseCase(
-            self.file_system,
-            self.ai_extraction,
-            self.csv
+            self.file_system, self.ai_extraction, self.csv
         )
 
     def test_run_analysis_no_files(self, tmp_path: Path):
@@ -63,7 +61,9 @@ class TestRunAnalysisIntegration:
 
         # Verify incoming files still exist (not moved yet in this implementation)
         incoming_files = list(config.incoming_folder.glob("*"))
-        supported_files = [f for f in incoming_files if f.suffix.lower() in ['.pdf', '.jpg', '.png']]
+        supported_files = [
+            f for f in incoming_files if f.suffix.lower() in [".pdf", ".jpg", ".png"]
+        ]
         assert len(supported_files) == 3
 
     def test_run_analysis_rerun_scenario(self, tmp_path: Path):
@@ -74,7 +74,9 @@ class TestRunAnalysisIntegration:
         (config.incoming_folder / "receipt.pdf").touch()
 
         # Create existing receipts.csv (re-run scenario)
-        config.csv_staging_file.write_text("Amount,Tax,TaxPercentage,Description,Currency,Date,Confidence,Hash,DoneFilename\n")
+        config.csv_staging_file.write_text(
+            "Amount,Tax,TaxPercentage,Description,Currency,Date,Confidence,Hash,DoneFilename\n"
+        )
 
         # Create files in scanned folder from previous run
         (config.scanned_folder / "previous_receipt.jpg").touch()
@@ -110,5 +112,5 @@ class TestRunAnalysisIntegration:
             imported_folder=imported,
             failed_folder=failed,
             csv_staging_file=tmp_path / "receipts.csv",
-            xlsx_output_file=tmp_path / "output.xlsx"
+            xlsx_output_file=tmp_path / "output.xlsx",
         )

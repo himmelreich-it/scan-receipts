@@ -2,9 +2,10 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "allow": [
-      "Bash(uv run --env-file .env.testing pytest:*)",
-      "Bash(uv run --env-file .env.testing behave:*)",
-      "Bash(uv run ruff:*)",
+      "Bash(python:*)",
+      "Bash(uv run:*:*)",
+      "Bash(uv add:*:*)",
+      "Bash(uv remove:*:*)",
       "Bash(ls:*)",
       "Bash(npx pyright:*)",
       "Bash(gh issue create:*)",
@@ -15,17 +16,17 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr comment:*)",
+      "Bash(gh pr checkout:*)",
+      "Bash(gh pr diff:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(mkdir:*)",
       "Bash(mv:*)",
       "Bash(touch:*)",
-      "Bash(tree:*)"
-    ],
-    "ask": [
-        "Bash(rm :*)",
-        "Bash(rmdir :*)"
+      "Bash(tree:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)"
     ],
     "deny": [
       "Bash(curl:*)",

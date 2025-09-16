@@ -20,7 +20,8 @@ Feature: TUI Interface with System Status and Menu
     And no receipt files exist
     And no staging CSV exists
     When the status is displayed
-    Then it should show "Input Folder: 0 files"
+    Then it should show configured folder paths
+    And show "Input Folder: 0 files"
     And show "Failed Folder: 0 files"
     And show "Staging: No staging data"
 
@@ -30,7 +31,8 @@ Feature: TUI Interface with System Status and Menu
     And 2 files exist in the failed folder
     And staging CSV contains 8 entries
     When the status is displayed
-    Then it should show "Input Folder: 15 files"
+    Then it should show configured folder paths
+    And show "Input Folder: 15 files"
     And show "Failed Folder: 2 files"
     And show staging file with "8 entries"
 
@@ -66,3 +68,10 @@ Feature: TUI Interface with System Status and Menu
     When the user presses Ctrl+C
     Then it should display "Goodbye"
     And exit cleanly
+
+  Scenario: Display configured folder paths on startup
+    Given the application is running with test configuration
+    When the status is displayed
+    Then it should show all 6 configured paths as absolute paths
+    And paths should have short labels
+    And paths should be displayed above file counts

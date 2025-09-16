@@ -46,6 +46,16 @@ class TerminalUI:
         Args:
             config: Application configuration.
         """
+        # Display configured folder and file paths
+        rprint("Configured Paths:")
+        rprint(f"Incoming: {config.incoming_folder.resolve()}")
+        rprint(f"Scanned: {config.scanned_folder.resolve()}")
+        rprint(f"Imported: {config.imported_folder.resolve()}")
+        rprint(f"Failed: {config.failed_folder.resolve()}")
+        rprint(f"XLSX: {config.xlsx_output_file.resolve()}")
+        rprint(f"CSV: {config.csv_staging_file.resolve()}")
+        rprint()
+
         input_count = self.file_system.count_receipt_files(config.incoming_folder)
         failed_count = self.file_system.count_receipt_files(config.failed_folder)
         staging_info = self.view_staging_use_case.execute(config)
@@ -90,14 +100,20 @@ class TerminalUI:
 
         if staging_data is None:
             rprint(Text("Error reading staging table.", style="red"))
+            rprint()
+            rprint()
             return
 
         if not staging_data.exists:
             rprint("receipts.csv does not exist")
+            rprint()
+            rprint()
             return
 
         if staging_data.is_empty:
             rprint("receipts.csv is empty")
+            rprint()
+            rprint()
             return
 
         # Create a rich table
@@ -144,10 +160,14 @@ class TerminalUI:
         if choice == "1":
             self.process_receipt_use_case.execute(config)
             rprint("Analysis completed.")
+            rprint()
+            rprint()
             return True
         elif choice == "2":
             self.import_to_xlsx_use_case.execute(config)
             rprint("Import completed.")
+            rprint()
+            rprint()
             return True
         elif choice == "3":
             self.display_staging_table(config)
@@ -157,6 +177,8 @@ class TerminalUI:
             return False
         else:
             rprint(Text("Invalid choice. Please enter 1-4.", style="red"))
+            rprint()
+            rprint()
             return True
 
     def run(self, config: AppConfig) -> Never:

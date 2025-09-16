@@ -22,3 +22,8 @@ dependencies = [
     "claude-code-sdk>=0.0.22",
     "shortuuid>=1.0.13",
 ]
+
+[dependency-groups]
+dev = [
+    "pyyaml>=6.0.2",
+]
