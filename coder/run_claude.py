@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 # Global tracking for tools
 failed_tools: List[Dict[str, str]] = []
+permission_errors: List[Dict[str, str]] = []
 tool_use_registry: Dict[str, Dict[str, Any]] = {}
 
 
@@ -51,13 +52,22 @@ def track_tool_failure(tool_name: str, tool_id: str, reason: str):
     else:
         tool_display = tool_name
 
-    failed_tools.append(
-        {
-            "tool_name": tool_display,
-            "tool_use_id": tool_id,
-            "error": reason[:200] + "..." if len(reason) > 200 else reason,
-        }
+    # Categorize the failure
+    is_permission_error = any(
+        keyword in reason.lower()
+        for keyword in ["requires approval", "rejected", "permission", "blocked", "not allowed"]
     )
+
+    failure_entry = {
+        "tool_name": tool_display,
+        "tool_use_id": tool_id,
+        "error": reason[:200] + "..." if len(reason) > 200 else reason,
+    }
+
+    if is_permission_error:
+        permission_errors.append(failure_entry)
+    else:
+        failed_tools.append(failure_entry)
 
 
 class UserFriendlyFormatter(logging.Formatter):
@@ -306,14 +316,50 @@ def handle_message(msg: Message) -> str:
         logger.debug(f"Result: {msg.result}" if msg.result else "Result: N/A")
 
         # Log failed tools summary
+        if failed_tools or permission_errors:
+            logger.info("=" * 80)
+            logger.info("TOOL EXECUTION SUMMARY")
+            logger.info("=" * 80)
+
+        # Show actual failures (bugs, errors, etc.)
         if failed_tools:
-            logger.info("=" * 60)
             logger.info(f"FAILED TOOLS SUMMARY ({len(failed_tools)} failures)")
-            logger.info("=" * 60)
+            logger.info("-" * 40)
             for i, failure in enumerate(failed_tools, 1):
                 tool_name = failure.get("tool_name", "Unknown")
                 logger.info(f"{i}. Tool: {tool_name} (ID: {failure['tool_use_id']})")
                 logger.info(f"   Error: {failure['error']}")
+                logger.info("")
+
+        # Show permission/approval errors separately
+        if permission_errors:
+            logger.info(f"TOOL PERMISSION ERRORS ({len(permission_errors)} blocked)")
+            logger.info("-" * 40)
+            logger.info("These tools need to be added to your allowlist:")
+            logger.info("")
+            for i, failure in enumerate(permission_errors, 1):
+                tool_name = failure.get("tool_name", "Unknown")
+                logger.info(f"{i}. Tool: {tool_name} (ID: {failure['tool_use_id']})")
+                logger.info(f"   Reason: {failure['error']}")
+                logger.info("")
+
+            # Generate suggested allowlist entries
+            suggested_allowances = []
+            for failure in permission_errors:
+                tool_name = failure.get("tool_name", "Unknown")
+                if tool_name.startswith("Bash(") and tool_name.endswith(")"):
+                    # Extract command from Bash(command)
+                    command = tool_name[5:-1]  # Remove "Bash(" and ")"
+                    # Create allowance pattern
+                    suggested_allowances.append(f"Bash({command}:*)")
+                elif tool_name != "Unknown":
+                    suggested_allowances.append(f"{tool_name}(*)")
+
+            if suggested_allowances:
+                logger.info("SUGGESTED ALLOWLIST ADDITIONS:")
+                logger.info("-" * 40)
+                for allowance in sorted(set(suggested_allowances)):
+                    logger.info(f"  - {allowance}")
                 logger.info("")
 
         return msg.result if msg.result else ""
