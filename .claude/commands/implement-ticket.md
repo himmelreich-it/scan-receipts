@@ -4,7 +4,7 @@ The user would like the agent to implement github ticket given in $ARGUMENTS:
 - Use subagent git-project-navigator to prepare git before implementation, use the instructions in `coder/prompts/prepare-git.md`
 - Use subagent advanced-software-engineer to implement the ticket, use the instructions in `coder/prompts/implement.md`
 - Use subagent advanced-software-engineer to check and finalize your implementation, use instructions in `coder/prompts/verify-implementation.md`
-- Use subagent git-project-navigator to wrap-up the ticket for review
+- Use subagent git-project-navigator to wrap-up the ticket for review using instruction in `coder/prompts/finalize-ticket.md`
 
 
 
