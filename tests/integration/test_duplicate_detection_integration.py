@@ -146,8 +146,8 @@ class TestDuplicateDetectionIntegration:
         # Should only call AI extraction for unique file
         # Note: AI extraction is mocked so we can check call count
         assert (
-            self.mock_ai_extraction.extract_receipt_data.call_count == 0
-        )  # Still TODO in implementation
+            self.mock_ai_extraction.extract_receipt_data.call_count == 1
+        )  # Should be called once for the unique file
 
     def test_get_existing_hashes_from_both_folders(self, tmp_path: Path):
         """Test getting hashes from both imported and scanned folders."""

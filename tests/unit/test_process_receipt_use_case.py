@@ -48,19 +48,23 @@ class TestProcessReceiptUseCase:
         config_mock.scanned_folder = tmp_path / "scanned"
         config_mock.imported_folder = tmp_path / "imported"
 
-        # Mock file list
+        # Mock file list for incoming folder
         test_files = [tmp_path / "receipt1.pdf", tmp_path / "receipt2.jpg"]
-        self.file_system_mock.get_supported_files.return_value = test_files
+        # Mock failed files as empty list
+        self.file_system_mock.get_supported_files.side_effect = [test_files, []]
         self.file_system_mock.remove_file_if_exists.return_value = True
         # Mock file hashes to return empty lists instead of Mock objects
         self.file_system_mock.get_file_hashes_from_folder.return_value = []
 
         self.use_case.execute(config_mock)
 
-        # Verify file system calls
-        self.file_system_mock.get_supported_files.assert_called_once_with(
-            config_mock.incoming_folder
-        )
+        # Verify file system calls - should be called twice (incoming and failed folders)
+        assert self.file_system_mock.get_supported_files.call_count == 2
+        # First call should be with incoming folder
+        calls = self.file_system_mock.get_supported_files.call_args_list
+        assert calls[0][0][0] == config_mock.incoming_folder
+        # Second call should be with failed folder to check for failed files
+        assert calls[1][0][0] == config_mock.failed_folder
 
         # Should clear receipts.csv
         self.file_system_mock.remove_file_if_exists.assert_called_once_with(
@@ -79,9 +83,9 @@ class TestProcessReceiptUseCase:
         config_mock.scanned_folder = tmp_path / "scanned"
         config_mock.imported_folder = tmp_path / "imported"
 
-        # Mock file list
+        # Mock file list for incoming folder and empty failed files
         test_files = [tmp_path / "receipt1.pdf"]
-        self.file_system_mock.get_supported_files.return_value = test_files
+        self.file_system_mock.get_supported_files.side_effect = [test_files, []]
         self.file_system_mock.remove_file_if_exists.return_value = False
         # Mock file hashes to return empty lists instead of Mock objects
         self.file_system_mock.get_file_hashes_from_folder.return_value = []

@@ -176,7 +176,7 @@ class TestReceiptAnalysisIntegration:
         successful_receipt = self.incoming_dir / "good_receipt.jpg"
         failed_receipt = self.incoming_dir / "bad_receipt.png"
         duplicate_receipt = self.incoming_dir / "duplicate.pdf"
-        existing_duplicate = self.scanned_dir / "existing.pdf"
+        existing_duplicate = self.imported_dir / "existing.pdf"
 
         successful_receipt.write_bytes(b"good image")
         failed_receipt.write_bytes(b"bad image")
