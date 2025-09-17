@@ -87,14 +87,71 @@ class ProcessReceiptUseCase:
 
             # File is not a duplicate - process with AI
             rprint("  🔍 Analyzing with AI...")
-            # TODO: Implement AI analysis and CSV staging
-            processed_count += 1
+
+            try:
+                # Extract data using AI
+                receipt_data = self.ai_extraction.extract_receipt_data(str(file_path))
+
+                # Get file hash for CSV
+                file_hash_obj = self.file_system.calculate_file_hash(file_path)
+                if not file_hash_obj:
+                    raise ValueError("Failed to calculate file hash")
+
+                # Append to CSV
+                self.csv.append_receipt_data(
+                    config.csv_staging_file,
+                    receipt_data,
+                    file_hash_obj.hash_value,
+                    file_path.name
+                )
+
+                # Copy to scanned folder
+                self.file_system.copy_file_to_folder(file_path, config.scanned_folder)
+
+                # Display success
+                amount = receipt_data.get("amount", "")
+                currency = receipt_data.get("currency", "")
+                description = receipt_data.get("description", "")
+                confidence = receipt_data.get("confidence", "")
+
+                rprint(f"  ✅ Success: {amount} {currency} - {description} ({confidence}% confidence)")
+                processed_count += 1
+
+            except Exception as e:
+                # Handle extraction failure
+                error_msg = str(e)
+                rprint(f"  ❌ Failed: {error_msg}")
+
+                # Copy to failed folder and write error log
+                try:
+                    self.file_system.copy_file_to_folder(file_path, config.failed_folder)
+                    self.file_system.write_error_log(config.failed_folder, file_path.name, error_msg)
+                except Exception as copy_error:
+                    logger.error(f"Failed to handle error for {file_path.name}: {copy_error}")
+
+                error_count += 1
 
         # Show completion summary
         rprint("\n📊 Processing complete:")
         rprint(f"  • Processed: {processed_count}")
         rprint(f"  • Duplicates skipped: {duplicate_count}")
         rprint(f"  • Errors: {error_count}")
+
+        # Show CSV contents if any receipts were processed
+        if processed_count > 0:
+            staging_data = self.csv.read_staging_table(config.csv_staging_file)
+            if staging_data and not staging_data.is_empty:
+                rprint(f"\n📄 CSV contents ({len(staging_data.receipts)} entries):")
+                for receipt in staging_data.receipts:
+                    rprint(f"  • {receipt.amount} {receipt.currency} - {receipt.description}")
+
+        # Show failed items if any
+        failed_files = self.file_system.get_supported_files(config.failed_folder)
+        if failed_files:
+            rprint(f"\n❌ Failed files ({len(failed_files)}):")
+            for failed_file in failed_files:
+                rprint(f"  • {failed_file.name}")
+
         logger.info(
             f"Receipt analysis completed - processed: {processed_count}, "
             f"duplicates: {duplicate_count}, errors: {error_count}"

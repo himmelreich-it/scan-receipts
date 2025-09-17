@@ -3,12 +3,25 @@
 import csv
 import logging
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from core.domain.receipt import ReceiptData, StagingTableData
 from ports.csv import CSVPort
 
 logger = logging.getLogger(__name__)
+
+# CSV headers matching ReceiptData structure
+CSV_HEADERS = [
+    "Amount",
+    "Tax",
+    "TaxPercentage",
+    "Description",
+    "Currency",
+    "Date",
+    "Confidence",
+    "Hash",
+    "DoneFilename",
+]
 
 
 class CSVAdapter(CSVPort):
@@ -77,3 +90,51 @@ class CSVAdapter(CSVPort):
             data: Data to write.
         """
         logger.warning("PLACEHOLDER: CSV write_staging_data not yet implemented")
+
+    def append_receipt_data(
+        self, csv_path: Path, receipt_data: Dict[str, str], file_hash: str, filename: str
+    ) -> None:
+        """Append receipt data to CSV file.
+
+        Args:
+            csv_path: Path to CSV file.
+            receipt_data: Extracted receipt data containing amount, tax, etc.
+            file_hash: Hash of the processed file.
+            filename: Name of the processed file.
+        """
+        try:
+            # Check if file exists to determine if we need headers
+            file_exists = csv_path.exists()
+
+            # Prepare row data
+            row_data = {
+                "Amount": receipt_data.get("amount", ""),
+                "Tax": receipt_data.get("tax", ""),
+                "TaxPercentage": receipt_data.get("tax_percentage", ""),
+                "Description": receipt_data.get("description", ""),
+                "Currency": receipt_data.get("currency", ""),
+                "Date": receipt_data.get("date", ""),
+                "Confidence": receipt_data.get("confidence", ""),
+                "Hash": file_hash,
+                "DoneFilename": filename,
+            }
+
+            # Ensure parent directory exists
+            csv_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Append to CSV file
+            with open(csv_path, "a", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
+
+                # Write headers if file is new
+                if not file_exists:
+                    writer.writeheader()
+
+                # Write row data
+                writer.writerow(row_data)
+
+            logger.info(f"Appended receipt data to CSV: {filename}")
+
+        except Exception as e:
+            logger.error(f"Error appending to CSV file: {e}")
+            raise ValueError(f"Failed to write to CSV: {e}")

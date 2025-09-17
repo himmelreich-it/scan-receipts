@@ -103,3 +103,30 @@ class FileSystemPort(ABC):
             List of FileHash objects for files that could be hashed.
         """
         pass
+
+    @abstractmethod
+    def copy_file_to_folder(self, source_file: Path, destination_folder: Path) -> Path:
+        """Copy a file to a destination folder.
+
+        Args:
+            source_file: Path to the source file.
+            destination_folder: Path to the destination folder.
+
+        Returns:
+            Path to the copied file.
+
+        Raises:
+            OSError: If copy operation fails.
+        """
+        pass
+
+    @abstractmethod
+    def write_error_log(self, failed_folder: Path, filename: str, error_message: str) -> None:
+        """Write error log for failed file processing.
+
+        Args:
+            failed_folder: Path to the failed folder.
+            filename: Name of the failed file.
+            error_message: Error message to log.
+        """
+        pass

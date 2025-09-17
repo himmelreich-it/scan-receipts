@@ -1,7 +1,8 @@
 """Integration tests for Run Analysis feature."""
 
+import os
 from pathlib import Path
-
+from unittest.mock import Mock, patch
 
 from adapters.secondary.csv_adapter import CSVAdapter
 from adapters.secondary.file_system_adapter import FileSystemAdapter
@@ -17,7 +18,10 @@ class TestRunAnalysisIntegration:
     def setup_method(self):
         """Set up test fixtures."""
         self.file_system = FileSystemAdapter()
-        self.ai_extraction = AnthropicAdapter()
+
+        # Mock the Anthropic adapter to avoid needing API key
+        self.ai_extraction = Mock(spec=AnthropicAdapter)
+
         self.csv = CSVAdapter()
         self.duplicate_detection = DuplicateDetectionAdapter(self.file_system)
         self.use_case = ProcessReceiptUseCase(

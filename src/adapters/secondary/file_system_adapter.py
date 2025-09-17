@@ -186,3 +186,65 @@ class FileSystemAdapter(FileSystemPort):
                         file_hashes.append(file_hash)
 
         return file_hashes
+
+    def copy_file_to_folder(self, source_file: Path, destination_folder: Path) -> Path:
+        """Copy a file to a destination folder.
+
+        Args:
+            source_file: Path to the source file.
+            destination_folder: Path to the destination folder.
+
+        Returns:
+            Path to the copied file.
+
+        Raises:
+            OSError: If copy operation fails.
+        """
+        import shutil
+
+        if not source_file.exists():
+            raise OSError(f"Source file does not exist: {source_file}")
+
+        # Ensure destination folder exists
+        destination_folder.mkdir(parents=True, exist_ok=True)
+
+        # Determine destination file path
+        destination_file = destination_folder / source_file.name
+
+        try:
+            # Copy the file
+            shutil.copy2(source_file, destination_file)
+            logger.info(f"Copied {source_file.name} to {destination_folder.name}")
+            return destination_file
+        except Exception as e:
+            logger.error(f"Failed to copy {source_file.name}: {e}")
+            raise OSError(f"Failed to copy file: {e}")
+
+    def write_error_log(self, failed_folder: Path, filename: str, error_message: str) -> None:
+        """Write error log for failed file processing.
+
+        Args:
+            failed_folder: Path to the failed folder.
+            filename: Name of the failed file.
+            error_message: Error message to log.
+        """
+        try:
+            # Ensure failed folder exists
+            failed_folder.mkdir(parents=True, exist_ok=True)
+
+            # Create error log file path
+            log_filename = f"{Path(filename).stem}_error.txt"
+            log_file_path = failed_folder / log_filename
+
+            # Write error message to log file
+            with open(log_file_path, "w", encoding="utf-8") as f:
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                f.write(f"Error processing file: {filename}\n")
+                f.write(f"Timestamp: {timestamp}\n")
+                f.write(f"Error: {error_message}\n")
+
+            logger.info(f"Created error log: {log_filename}")
+
+        except Exception as e:
+            logger.error(f"Failed to write error log for {filename}: {e}")
