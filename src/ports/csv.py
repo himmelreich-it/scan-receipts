@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from core.domain.receipt import StagingTableData
 
@@ -33,14 +33,14 @@ class CSVPort(ABC):
         pass
 
     @abstractmethod
-    def read_staging_table(self, csv_path: Path) -> Optional[StagingTableData]:
+    def read_staging_table(self, csv_path: Path) -> StagingTableData:
         """Read complete staging table data from CSV.
 
         Args:
             csv_path: Path to CSV file.
 
         Returns:
-            StagingTableData if file exists, None otherwise.
+            StagingTableData with empty data if file doesn't exist.
         """
         pass
 

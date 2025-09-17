@@ -28,13 +28,13 @@ class ViewStagingUseCase:
         """
         return self.file_system.get_staging_info(config.csv_staging_file)
 
-    def get_full_table(self, config: AppConfig) -> Optional[StagingTableData]:
+    def get_full_table(self, config: AppConfig) -> StagingTableData:
         """Get full staging table data.
 
         Args:
             config: Application configuration.
 
         Returns:
-            StagingTableData with all receipt records, or None if error occurs.
+            StagingTableData with all receipt records, empty if file doesn't exist.
         """
         return self.csv_adapter.read_staging_table(config.csv_staging_file)
