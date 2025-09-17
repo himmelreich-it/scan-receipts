@@ -6,6 +6,8 @@
       "Bash(uv run:*)",
       "Bash(uv add:*)",
       "Bash(uv remove:*)",
+      "Bash(uv run --env-file .env.testing behave tests/bdd --verbose:*)",
+      "Bash(uv run nox -s quality:*)",
       "Bash(ls:*)",
       "Bash(npx pyright:*)",
       "Bash(gh issue create:*)",
