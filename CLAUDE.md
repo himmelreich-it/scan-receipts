@@ -60,6 +60,7 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - Check status: `git status`
 - Stage changes: `git add .`
 - Commit with message: `git commit -m "feat: description (#$number)"`
+- Use `gh api` to retrieve all PR comments (including inline)
 - Make sure tickets and PRs are associated with the project
 
 ### Project Configuration
