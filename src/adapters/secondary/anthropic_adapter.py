@@ -101,29 +101,8 @@ class AnthropicAdapter(AIExtractionPort):
         # Determine media type
         media_type = "image/jpeg" if file_path.suffix.lower() in {".jpg", ".jpeg"} else "image/png"
 
-        # Call Claude API
-        response = self.client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=1000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": media_type,
-                                "data": image_base64,
-                            },
-                        },
-                        {"type": "text", "text": CLAUDE_RECEIPT_PROMPT},
-                    ],
-                }
-            ],
-        )
-
-        return self._parse_response(response, file_path)
+        # Call Claude API with the base64 image
+        return self._call_claude_api(image_base64, media_type, file_path)
 
     def _extract_from_pdf(self, file_path: Path) -> Dict[str, Any]:
         """Extract data from PDF file by converting to image.
@@ -154,6 +133,20 @@ class AnthropicAdapter(AIExtractionPort):
         image_data = buffer.getvalue()
         image_base64 = base64.b64encode(image_data).decode("utf-8")
 
+        # Call Claude API with the converted image
+        return self._call_claude_api(image_base64, "image/png", file_path)
+
+    def _call_claude_api(self, image_base64: str, media_type: str, file_path: Path) -> Dict[str, Any]:
+        """Call Claude API to analyze receipt image.
+
+        Args:
+            image_base64: Base64 encoded image data.
+            media_type: MIME type of the image.
+            file_path: Original file path for context.
+
+        Returns:
+            Extracted receipt data.
+        """
         # Call Claude API
         response = self.client.messages.create(
             model="claude-3-5-sonnet-20241022",
@@ -163,14 +156,14 @@ class AnthropicAdapter(AIExtractionPort):
                     "role": "user",
                     "content": [
                         {
-                            "type": "image",
+                            "type": "image",  # type: ignore
                             "source": {
                                 "type": "base64",
-                                "media_type": "image/png",
+                                "media_type": media_type,
                                 "data": image_base64,
                             },
                         },
-                        {"type": "text", "text": CLAUDE_RECEIPT_PROMPT},
+                        {"type": "text", "text": CLAUDE_RECEIPT_PROMPT},  # type: ignore
                     ],
                 }
             ],

@@ -10,18 +10,21 @@ from ports.csv import CSVPort
 
 logger = logging.getLogger(__name__)
 
-# CSV headers matching ReceiptData structure
-CSV_HEADERS = [
-    "Amount",
-    "Tax",
-    "TaxPercentage",
-    "Description",
-    "Currency",
-    "Date",
-    "Confidence",
-    "Hash",
-    "DoneFilename",
-]
+# CSV field mappings - centralized to prevent typos and ensure consistency
+CSV_FIELD_MAPPINGS = {
+    "amount": "Amount",
+    "tax": "Tax",
+    "tax_percentage": "TaxPercentage",
+    "description": "Description",
+    "currency": "Currency",
+    "date": "Date",
+    "confidence": "Confidence",
+    "hash": "Hash",
+    "done_filename": "DoneFilename",
+}
+
+# CSV headers in order
+CSV_HEADERS = list(CSV_FIELD_MAPPINGS.values())
 
 
 class CSVAdapter(CSVPort):
@@ -63,15 +66,15 @@ class CSVAdapter(CSVPort):
 
                     for row in reader:
                         receipt = ReceiptData(
-                            amount=row.get("Amount", ""),
-                            tax=row.get("Tax", ""),
-                            tax_percentage=row.get("TaxPercentage", ""),
-                            description=row.get("Description", ""),
-                            currency=row.get("Currency", ""),
-                            date=row.get("Date", ""),
-                            confidence=row.get("Confidence", ""),
-                            hash=row.get("Hash", ""),
-                            done_filename=row.get("DoneFilename", ""),
+                            amount=row.get(CSV_FIELD_MAPPINGS["amount"], ""),
+                            tax=row.get(CSV_FIELD_MAPPINGS["tax"], ""),
+                            tax_percentage=row.get(CSV_FIELD_MAPPINGS["tax_percentage"], ""),
+                            description=row.get(CSV_FIELD_MAPPINGS["description"], ""),
+                            currency=row.get(CSV_FIELD_MAPPINGS["currency"], ""),
+                            date=row.get(CSV_FIELD_MAPPINGS["date"], ""),
+                            confidence=row.get(CSV_FIELD_MAPPINGS["confidence"], ""),
+                            hash=row.get(CSV_FIELD_MAPPINGS["hash"], ""),
+                            done_filename=row.get(CSV_FIELD_MAPPINGS["done_filename"], ""),
                         )
                         receipts.append(receipt)
 
@@ -106,17 +109,17 @@ class CSVAdapter(CSVPort):
             # Check if file exists to determine if we need headers
             file_exists = csv_path.exists()
 
-            # Prepare row data
+            # Prepare row data using centralized field mappings
             row_data = {
-                "Amount": receipt_data.get("amount", ""),
-                "Tax": receipt_data.get("tax", ""),
-                "TaxPercentage": receipt_data.get("tax_percentage", ""),
-                "Description": receipt_data.get("description", ""),
-                "Currency": receipt_data.get("currency", ""),
-                "Date": receipt_data.get("date", ""),
-                "Confidence": receipt_data.get("confidence", ""),
-                "Hash": file_hash,
-                "DoneFilename": filename,
+                CSV_FIELD_MAPPINGS["amount"]: receipt_data.get("amount", ""),
+                CSV_FIELD_MAPPINGS["tax"]: receipt_data.get("tax", ""),
+                CSV_FIELD_MAPPINGS["tax_percentage"]: receipt_data.get("tax_percentage", ""),
+                CSV_FIELD_MAPPINGS["description"]: receipt_data.get("description", ""),
+                CSV_FIELD_MAPPINGS["currency"]: receipt_data.get("currency", ""),
+                CSV_FIELD_MAPPINGS["date"]: receipt_data.get("date", ""),
+                CSV_FIELD_MAPPINGS["confidence"]: receipt_data.get("confidence", ""),
+                CSV_FIELD_MAPPINGS["hash"]: file_hash,
+                CSV_FIELD_MAPPINGS["done_filename"]: filename,
             }
 
             # Ensure parent directory exists
