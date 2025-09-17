@@ -20,6 +20,7 @@
       "Bash(gh pr diff:*)",
       "Bash(gh pr checks:*)",
       "Bash(gh repo sync:*)",
+      "Bash(gh api repos/himmelreich-it/scan-receipts/pulls:*)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
       "Bash(git add:*)",

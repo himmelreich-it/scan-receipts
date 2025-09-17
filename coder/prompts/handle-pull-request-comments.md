@@ -57,7 +57,7 @@ Considered alternatives: [brief summary]
 ```
 
 ### Testing & Quality
-- Run `npx pyright` and `uv run ruff check src` 
+- Check quality after work is done
 - Execute all relevant tests
 - Validate no regressions introduced
 - **HALT** if tests fail after 3 attempts
