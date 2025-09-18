@@ -1,0 +1,10 @@
+{
+    "stubPath": "./stubs",
+    "typeCheckingMode": "strict",
+    "pythonVersion": "3.13",
+    "pythonPath": ".venv/bin/python",
+    "include": ["src", "tests", "stubs"],
+    "exclude": ["tests/bdd/steps/*"],
+    "reportMissingImports": "error",
+    "reportMissingTypeStubs": "warning"
+}

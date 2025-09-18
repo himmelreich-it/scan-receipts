@@ -1,0 +1,1 @@
+"""Primary adapters for user interfaces."""

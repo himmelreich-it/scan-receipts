@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(python:*)",
+      "Bash(uv run:*)",
+      "Bash(uv add:*)",
+      "Bash(uv remove:*)",
+      "Bash(uv run --env-file .env.testing behave tests/bdd --verbose:*)",
+      "Bash(uv run nox -s quality:*)",
+      "Bash(ls:*)",
+      "Bash(npx pyright:*)",
+      "Bash(gh issue create:*)",
+      "Bash(gh issue view:*)",
+      "Bash(gh issue edit:*)",
+      "Bash(gh issue develop:*)",
+      "Bash(gh issue comment:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh pr checkout:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh repo sync:*)",
+      "Bash(gh api repos/himmelreich-it/scan-receipts/pulls:*)",
+      "Bash(git checkout:*)",
+      "Bash(git commit:*)",
+      "Bash(git add:*)",
+      "Bash(git pull:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(head:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(tree:*)",
+      "Bash(rm:*)",
+      "Bash(rmdir:*)"
+    ],
+    "deny": [
+      "Bash(curl:*)",
+      "Read(./.env)",
+      "Read(./.env.testing)",
+      "Read(./.env.production)"
+    ]
+  }
+}
