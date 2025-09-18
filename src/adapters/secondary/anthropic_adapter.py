@@ -11,6 +11,7 @@ import anthropic
 
 from ports.ai_extraction import AIExtractionPort
 
+
 # Claude prompt template for receipt analysis - accessible for easy modification
 CLAUDE_RECEIPT_PROMPT = """
 Analyze this receipt image and extract the following information in JSON format:
@@ -27,11 +28,13 @@ Analyze this receipt image and extract the following information in JSON format:
 
 Rules:
 - Always return valid JSON
-- Use empty strings for optional fields if not found
-- Amount, currency, date, and confidence are required
-- If description not found, use filename without extension
-- Extract actual values from receipt, don't make them up
-- Confidence should reflect how certain you are about the extraction
+* Extract the total amount including tax
+* If tax is separately listed, extract it; otherwise use 0
+* Use standard 3-letter currency codes
+* Format date as dd-MM-YYYY (e.g., 15-03-2024 for the 15th of March 2024)
+* Provide confidence score based on image quality and text clarity
+* For description, prefer business name over generic terms, otherwise use filename
+* When multiple dates exist on receipt, purchase date takes priority over printed date
 """
 
 logger = logging.getLogger(__name__)
@@ -163,7 +166,7 @@ class AnthropicAdapter(AIExtractionPort):
                                 "data": image_base64,
                             },
                         },
-                        {"type": "text", "text": CLAUDE_RECEIPT_PROMPT},  # type: ignore
+                        {"type": "text", "text": CLAUDE_RECEIPT_PROMPT},
                     ],
                 }
             ],
