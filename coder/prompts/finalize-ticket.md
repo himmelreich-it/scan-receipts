@@ -17,5 +17,6 @@ All implementation and quality checks are complete. Now finalize the work:
      - Summary of changes
      - Testing performed
      - Any notes for reviewers
+   - Make sure the ticket is assigned to the project
 
 Refer to CLAUDE.md section "GitHub Operations" for all command details.

@@ -101,12 +101,6 @@ class TerminalUI:
         """
         staging_data = self.view_staging_use_case.get_full_table(config)
 
-        if staging_data is None:
-            self.console.print(Text("Error reading staging table.", style="red"))
-            self.console.print()
-            self.console.print()
-            return
-
         if not staging_data.exists:
             self.console.print("receipts.csv does not exist")
             self.console.print()

@@ -11,6 +11,7 @@ import anthropic
 
 from ports.ai_extraction import AIExtractionPort
 
+
 # Claude prompt template for receipt analysis - accessible for easy modification
 CLAUDE_RECEIPT_PROMPT = """
 Analyze this receipt image and extract the following information in JSON format:
@@ -27,11 +28,13 @@ Analyze this receipt image and extract the following information in JSON format:
 
 Rules:
 - Always return valid JSON
-- Use empty strings for optional fields if not found
-- Amount, currency, date, and confidence are required
-- If description not found, use filename without extension
-- Extract actual values from receipt, don't make them up
-- Confidence should reflect how certain you are about the extraction
+* Extract the total amount including tax
+* If tax is separately listed, extract it; otherwise use 0
+* Use standard 3-letter currency codes
+* Format date as dd-MM-YYYY (e.g., 15-03-2024 for the 15th of March 2024)
+* Provide confidence score based on image quality and text clarity
+* For description, prefer business name over generic terms, otherwise use filename
+* When multiple dates exist on receipt, purchase date takes priority over printed date
 """
 
 logger = logging.getLogger(__name__)
@@ -101,8 +104,8 @@ class AnthropicAdapter(AIExtractionPort):
         # Determine media type
         media_type = "image/jpeg" if file_path.suffix.lower() in {".jpg", ".jpeg"} else "image/png"
 
-        # Call Claude API with image data
-        return self._call_claude_with_image(image_base64, media_type, file_path)
+        # Call Claude API with the base64 image
+        return self._call_claude_api(image_base64, media_type, file_path)
 
     def _extract_from_pdf(self, file_path: Path) -> Dict[str, Any]:
         """Extract data from PDF file by converting to image.
@@ -133,20 +136,21 @@ class AnthropicAdapter(AIExtractionPort):
         image_data = buffer.getvalue()
         image_base64 = base64.b64encode(image_data).decode("utf-8")
 
-        # Call Claude API with converted image data
-        return self._call_claude_with_image(image_base64, "image/png", file_path)
+        # Call Claude API with the converted image
+        return self._call_claude_api(image_base64, "image/png", file_path)
 
-    def _call_claude_with_image(self, image_base64: str, media_type: str, file_path: Path) -> Dict[str, Any]:
-        """Call Claude API with image data.
+    def _call_claude_api(self, image_base64: str, media_type: str, file_path: Path) -> Dict[str, Any]:
+        """Call Claude API to analyze receipt image.
 
         Args:
             image_base64: Base64 encoded image data.
-            media_type: MIME type of the image (e.g., "image/png", "image/jpeg").
-            file_path: Original file path for error handling.
+            media_type: MIME type of the image.
+            file_path: Original file path for context.
 
         Returns:
             Extracted receipt data.
         """
+        # Call Claude API
         response = self.client.messages.create(
             model="claude-3-5-sonnet-20241022",
             max_tokens=1000,
@@ -155,10 +159,10 @@ class AnthropicAdapter(AIExtractionPort):
                     "role": "user",
                     "content": [
                         {
-                            "type": "image",
+                            "type": "image",  # type: ignore
                             "source": {
                                 "type": "base64",
-                                "media_type": media_type,  # type: ignore
+                                "media_type": media_type,
                                 "data": image_base64,
                             },
                         },
