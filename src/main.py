@@ -39,7 +39,7 @@ def main() -> Never:
     process_receipt_use_case = ProcessReceiptUseCase(
         file_system, ai_extraction, csv, duplicate_detection
     )
-    import_to_xlsx_use_case = ImportToXLSXUseCase(csv, xlsx, file_system)
+    import_to_xlsx_use_case = ImportToXLSXUseCase(csv, xlsx, file_system, duplicate_detection)
     view_staging_use_case = ViewStagingUseCase(file_system, csv)
 
     # Create and run TUI

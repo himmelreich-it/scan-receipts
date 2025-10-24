@@ -187,12 +187,15 @@ class FileSystemAdapter(FileSystemPort):
 
         return file_hashes
 
-    def copy_file_to_folder(self, source_file: Path, destination_folder: Path) -> Path:
+    def copy_file_to_folder(
+        self, source_file: Path, destination_folder: Path, target_filename: Optional[str] = None
+    ) -> Path:
         """Copy a file to a destination folder.
 
         Args:
             source_file: Path to the source file.
             destination_folder: Path to the destination folder.
+            target_filename: Optional target filename. If not provided, uses original filename.
 
         Returns:
             Path to the copied file.
@@ -209,12 +212,13 @@ class FileSystemAdapter(FileSystemPort):
         destination_folder.mkdir(parents=True, exist_ok=True)
 
         # Determine destination file path
-        destination_file = destination_folder / source_file.name
+        filename = target_filename if target_filename else source_file.name
+        destination_file = destination_folder / filename
 
         try:
             # Copy the file
             shutil.copy2(source_file, destination_file)
-            logger.info(f"Copied {source_file.name} to {destination_folder.name}")
+            logger.info(f"Copied {source_file.name} to {destination_folder.name}/{filename}")
             return destination_file
         except Exception as e:
             logger.error(f"Failed to copy {source_file.name}: {e}")
@@ -238,7 +242,6 @@ class FileSystemAdapter(FileSystemPort):
 
             # Write error message to log file
             with open(log_file_path, "w", encoding="utf-8") as f:
-                from datetime import datetime
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 f.write(f"Error processing file: {filename}\n")
                 f.write(f"Timestamp: {timestamp}\n")
@@ -248,3 +251,81 @@ class FileSystemAdapter(FileSystemPort):
 
         except Exception as e:
             logger.error(f"Failed to write error log for {filename}: {e}")
+
+    def create_backup_file(self, file_path: Path) -> Optional[Path]:
+        """Create a numbered backup of a file.
+
+        Creates backup with incremental numbering: file.1.ext, file.2.ext, etc.
+        Finds the next available number if backups already exist.
+
+        Args:
+            file_path: Path to the file to backup.
+
+        Returns:
+            Path to the backup file if successful, None if file doesn't exist.
+
+        Raises:
+            OSError: If backup creation fails.
+        """
+        import shutil
+
+        if not file_path.exists():
+            return None
+
+        # Get file parts
+        parent = file_path.parent
+        stem = file_path.stem
+        suffix = file_path.suffix
+
+        # Find next available backup number
+        backup_number = 1
+        while True:
+            backup_path = parent / f"{stem}.{backup_number}{suffix}"
+            if not backup_path.exists():
+                break
+            backup_number += 1
+
+        try:
+            # Create backup
+            shutil.copy2(file_path, backup_path)
+            logger.info(f"Created backup: {backup_path.name}")
+            return backup_path
+        except Exception as e:
+            logger.error(f"Failed to create backup of {file_path.name}: {e}")
+            raise OSError(f"Failed to create backup: {e}")
+
+    def move_file_to_folder(
+        self, source_file: Path, destination_folder: Path, target_filename: str
+    ) -> Path:
+        """Move a file to a destination folder with a new name.
+
+        Args:
+            source_file: Path to the source file.
+            destination_folder: Path to the destination folder.
+            target_filename: Target filename for the moved file.
+
+        Returns:
+            Path to the moved file.
+
+        Raises:
+            OSError: If move operation fails.
+        """
+        import shutil
+
+        if not source_file.exists():
+            raise OSError(f"Source file does not exist: {source_file}")
+
+        # Ensure destination folder exists
+        destination_folder.mkdir(parents=True, exist_ok=True)
+
+        # Determine destination file path
+        destination_file = destination_folder / target_filename
+
+        try:
+            # Move the file
+            shutil.move(str(source_file), str(destination_file))
+            logger.info(f"Moved {source_file.name} to {destination_folder.name}/{target_filename}")
+            return destination_file
+        except Exception as e:
+            logger.error(f"Failed to move {source_file.name}: {e}")
+            raise OSError(f"Failed to move file: {e}")

@@ -7,6 +7,7 @@ from rich import print as rprint
 
 from core.domain.configuration import AppConfig
 from core.domain.receipt import FileHash
+from core.utils.filename import generate_unique_scanned_filename
 from ports.ai_extraction import AIExtractionPort
 from ports.csv import CSVPort
 from ports.duplicate_detection import DuplicateDetectionPort
@@ -97,21 +98,31 @@ class ProcessReceiptUseCase:
                 if not file_hash_obj:
                     raise ValueError("Failed to calculate file hash")
 
-                # Append to CSV
+                # Generate unique filename for scanned folder (avoiding conflicts)
+                date_str = receipt_data.get("date", "")
+                description = receipt_data.get("description", "")
+                extension = file_path.suffix
+
+                scanned_filename = generate_unique_scanned_filename(
+                    date_str, description, extension, config.scanned_folder
+                )
+
+                # Append to CSV with the new filename
                 self.csv.append_receipt_data(
                     config.csv_staging_file,
                     receipt_data,
                     file_hash_obj.hash_value,
-                    file_path.name
+                    scanned_filename
                 )
 
-                # Copy to scanned folder
-                self.file_system.copy_file_to_folder(file_path, config.scanned_folder)
+                # Copy to scanned folder with new filename
+                self.file_system.copy_file_to_folder(
+                    file_path, config.scanned_folder, target_filename=scanned_filename
+                )
 
                 # Display success
                 amount = receipt_data.get("amount", "")
                 currency = receipt_data.get("currency", "")
-                description = receipt_data.get("description", "")
                 confidence = receipt_data.get("confidence", "")
 
                 rprint(f"  ✅ Success: {amount} {currency} - {description} ({confidence}% confidence)")

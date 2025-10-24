@@ -67,3 +67,22 @@ Please refer to `design/rules/hexagonal_architecture_guide.md` for architectural
 - project_number: 2
 - project_name: scan-receipts
 - main branch: main
+
+## Jupyter notebooks and Interactive Python
+- Keep separate pieces of functionality in separate blocks so we can run apart
+- For configuration, parameters, hardcoded lists: keep them in a cell at the top so we can easily change then
+- Keep imports at the top of the notebook in a cell so they are easily visible and available to the whole notebook
+- Use `display(df)` for pandas dataframes
+- (Jupyter) Each block should have a markdown header:
+  ```markdown
+  ### {short title}
+  {concise description of what the block does}
+  ```
+- Verify if the information you need is already made available in a cell above, do not load data you already have in another variable
+- Do NOT create any tests for notebooks and interactive python files
+- Notebooks are not production code, do not try and catch exceptions, unless it is useful for the full process:
+  - We do not need to test whether files exist if the cell will not function without it
+  - We can put things in try/catch when the cell can continue without it
+- Do NOT invent print statements without being asked to do so, summaries are part of the design/instruction
+- For output, use Pandas (Dataframes) if possible, we want to levarage VS Code UI and extensions
+- Refactor common utilities into *.py files and import them instead of duplicating code

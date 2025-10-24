@@ -189,7 +189,7 @@ Amount, Tax, TaxPercentage, Description, Currency, Date, Confidence, Hash, DoneF
 - **Column Mapping**:
   - **A**: Numbering (sequential)
   - **B**: Purchase Date (format: d-MMM-yy, e.g., 22-Mar-25)
-  - **C**: Description
+  - **F**: Description
   - **J**: Total amount
   - **K**: VAT Amount
   - **S**: Notes (currency info for non-EUR: "USD 150.00")

@@ -105,12 +105,15 @@ class FileSystemPort(ABC):
         pass
 
     @abstractmethod
-    def copy_file_to_folder(self, source_file: Path, destination_folder: Path) -> Path:
+    def copy_file_to_folder(
+        self, source_file: Path, destination_folder: Path, target_filename: Optional[str] = None
+    ) -> Path:
         """Copy a file to a destination folder.
 
         Args:
             source_file: Path to the source file.
             destination_folder: Path to the destination folder.
+            target_filename: Optional target filename. If not provided, uses original filename.
 
         Returns:
             Path to the copied file.
@@ -128,5 +131,42 @@ class FileSystemPort(ABC):
             failed_folder: Path to the failed folder.
             filename: Name of the failed file.
             error_message: Error message to log.
+        """
+        pass
+
+    @abstractmethod
+    def create_backup_file(self, file_path: Path) -> Optional[Path]:
+        """Create a numbered backup of a file.
+
+        Creates backup with incremental numbering: file.1.ext, file.2.ext, etc.
+        Finds the next available number if backups already exist.
+
+        Args:
+            file_path: Path to the file to backup.
+
+        Returns:
+            Path to the backup file if successful, None if file doesn't exist.
+
+        Raises:
+            OSError: If backup creation fails.
+        """
+        pass
+
+    @abstractmethod
+    def move_file_to_folder(
+        self, source_file: Path, destination_folder: Path, target_filename: str
+    ) -> Path:
+        """Move a file to a destination folder with a new name.
+
+        Args:
+            source_file: Path to the source file.
+            destination_folder: Path to the destination folder.
+            target_filename: Target filename for the moved file.
+
+        Returns:
+            Path to the moved file.
+
+        Raises:
+            OSError: If move operation fails.
         """
         pass
